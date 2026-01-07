@@ -153,7 +153,7 @@ export const Calculator: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
       {/* --- Inputs Column --- */}
-      <div className="lg:col-span-7 space-y-8">
+      <div className="lg:col-span-7 space-y-8 flex flex-col">
         <Card title="Detalhes do Projeto">
           <Input label="Nome do Projeto" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
           <div className="grid grid-cols-2 gap-4">
@@ -178,7 +178,7 @@ export const Calculator: React.FC = () => {
           </div>
         </Card>
 
-        <Card title="Valores de Negócio">
+        <Card title="Valores de Negócio" className="flex-1">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Input label="Mão de Obra (Hrs)" type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(Number(e.target.value))} />
             <Input label="Mão de Obra (Min)" type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(Number(e.target.value))} />
@@ -204,7 +204,7 @@ export const Calculator: React.FC = () => {
 
       {/* --- Results Column --- */}
       <div className="lg:col-span-5 flex flex-col gap-6">
-        <div className="flex-1 space-y-6">
+        <div className="space-y-6">
           {/* Main Price Card */}
           <div className="bg-gradient-to-br from-blue-600 to-indigo-800 border border-blue-500 rounded-3xl p-6 shadow-2xl shadow-indigo-500/30 relative overflow-hidden text-white transition-transform hover:scale-[1.02]">
             <div className="absolute top-0 right-0 p-4 opacity-10 text-white translate-x-1/4 -translate-y-1/4">
@@ -270,11 +270,19 @@ export const Calculator: React.FC = () => {
           </Card>
         </div>
 
-        {/* Action Button anchored to bottom of column */}
-        <Button onClick={saveProject} className="w-full py-4 text-lg shadow-2xl shadow-blue-500/20 mt-auto" disabled={saving}>
-          {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} className="drop-shadow-sm" />} 
-          {saving ? 'Salvando...' : 'Salvar Orçamento'}
-        </Button>
+        {/* Action Button that fills the remaining gap */}
+        <div className="flex-1 flex min-h-[100px]">
+          <Button 
+            onClick={saveProject} 
+            className="w-full h-full text-lg shadow-2xl shadow-blue-500/20" 
+            disabled={saving}
+          >
+            <div className="flex flex-col items-center gap-2">
+              {saving ? <Loader2 className="animate-spin" size={28} /> : <Save size={28} className="drop-shadow-sm" />} 
+              <span>{saving ? 'Salvando...' : 'Salvar Orçamento'}</span>
+            </div>
+          </Button>
+        </div>
       </div>
     </div>
   );
