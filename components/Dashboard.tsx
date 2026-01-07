@@ -39,86 +39,121 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="flex items-center gap-4 border-l-4 border-l-blue-500 bg-white">
-           <div className="p-3 bg-blue-50 rounded-full text-blue-600"><TrendingUp /></div>
-           <div>
-             <p className="text-gray-500 text-sm">Receita Total</p>
-             <p className="text-2xl font-bold text-gray-900">{settings.currencySymbol}{totalRevenue.toFixed(2)}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="flex items-center gap-5 bg-white group hover:-translate-y-1 transition-transform">
+           <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 shadow-xl shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+             <TrendingUp size={24} className="drop-shadow-md" />
+           </div>
+           <div className="flex-1">
+             <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Receita Total</p>
+             <p className="text-2xl font-black text-gray-800 tracking-tighter">
+               {settings.currencySymbol}{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+             </p>
            </div>
         </Card>
-        <Card className="flex items-center gap-4 border-l-4 border-l-emerald-500 bg-white">
-           <div className="p-3 bg-emerald-50 rounded-full text-emerald-600"><DollarSign /></div>
-           <div>
-             <p className="text-gray-500 text-sm">Lucro Total</p>
-             <p className="text-2xl font-bold text-gray-900">{settings.currencySymbol}{totalProfit.toFixed(2)}</p>
+        <Card className="flex items-center gap-5 bg-white group hover:-translate-y-1 transition-transform">
+           <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-xl shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
+             <DollarSign size={24} className="drop-shadow-md" />
+           </div>
+           <div className="flex-1">
+             <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Lucro Total</p>
+             <p className="text-2xl font-black text-gray-800 tracking-tighter">
+               {settings.currencySymbol}{totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+             </p>
            </div>
         </Card>
-        <Card className="flex items-center gap-4 border-l-4 border-l-indigo-500 bg-white">
-           <div className="p-3 bg-indigo-50 rounded-full text-indigo-600"><Box /></div>
-           <div>
-             <p className="text-gray-500 text-sm">Orçamentos Gerados</p>
-             <p className="text-2xl font-bold text-gray-900">{totalPrints}</p>
+        <Card className="flex items-center gap-5 bg-white group hover:-translate-y-1 transition-transform">
+           <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shadow-xl shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+             <Box size={24} className="drop-shadow-md" />
+           </div>
+           <div className="flex-1">
+             <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Orçamentos</p>
+             <p className="text-2xl font-black text-gray-800 tracking-tighter">{totalPrints}</p>
            </div>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Desempenho Recente" className="h-80">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card title="Desempenho Recente" className="h-96 flex flex-col">
           {projects.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" stroke="#64748b" tick={{fontSize: 12}} />
-                <YAxis stroke="#64748b" tick={{fontSize: 12}} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#111827', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                  cursor={{stroke: '#94a3b8', strokeWidth: 1}}
-                  formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`]}
-                />
-                <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                
-                <Line 
-                  type="monotone" 
-                  dataKey="cost" 
-                  name="Gasto" 
-                  stroke="#ef4444" 
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#ef4444', strokeWidth: 0 }}
-                  activeDot={{ r: 6, stroke: '#1e293b', strokeWidth: 2 }}
-                />
+            <div className="flex-1 min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#94a3b8" 
+                    tick={{fontSize: 10, fontWeight: 700}} 
+                    axisLine={false}
+                    tickLine={false}
+                    dy={10}
+                  />
+                  <YAxis 
+                    stroke="#94a3b8" 
+                    tick={{fontSize: 10, fontWeight: 700}} 
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#fff', border: 'none', color: '#111827', borderRadius: '16px', boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.15)', fontSize: '12px', fontWeight: 'bold' }}
+                    cursor={{stroke: '#cbd5e1', strokeWidth: 1}}
+                    formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`]}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    align="center" 
+                    iconType="circle"
+                    iconSize={8}
+                    wrapperStyle={{ paddingTop: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                  />
+                  
+                  <Line 
+                    type="monotone" 
+                    dataKey="cost" 
+                    name="Gasto" 
+                    stroke="#ef4444" 
+                    strokeWidth={3}
+                    dot={{ r: 5, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 7, stroke: '#fff', strokeWidth: 3, shadow: '0 10px 15px rgba(239, 68, 68, 0.4)' }}
+                  />
 
-                <Line 
-                  type="monotone" 
-                  dataKey="profit" 
-                  name="Lucro" 
-                  stroke="#10b981" 
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }}
-                  activeDot={{ r: 6, stroke: '#1e293b', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+                  <Line 
+                    type="monotone" 
+                    dataKey="profit" 
+                    name="Lucro" 
+                    stroke="#10b981" 
+                    strokeWidth={3}
+                    dot={{ r: 5, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 7, stroke: '#fff', strokeWidth: 3, shadow: '0 10px 15px rgba(16, 185, 129, 0.4)' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
-              <p>Sem dados ainda.</p>
+              <p className="font-medium">Sem dados ainda.</p>
             </div>
           )}
         </Card>
 
-        <Card title="Últimos Orçamentos" className="h-80 overflow-y-auto">
+        <Card title="Últimos Orçamentos" className="h-96 overflow-y-auto custom-scrollbar">
            {projects.length === 0 ? (
-             <p className="text-gray-400 text-center mt-10">Nenhum histórico encontrado.</p>
+             <p className="text-gray-400 text-center mt-10 font-medium">Nenhum histórico encontrado.</p>
            ) : (
-             <div className="space-y-3">
-               {projects.slice(0, 5).map(p => (
-                 <div key={p.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
-                    <div>
-                      <p className="font-medium text-gray-900">{p.name}</p>
-                      <p className="text-xs text-gray-500">{new Date(p.date).toLocaleDateString()}</p>
+             <div className="space-y-4">
+               {projects.slice(0, 6).map(p => (
+                 <div key={p.id} className="flex justify-between items-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-0.5 transition-all cursor-default group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-blue-600 group-hover:shadow-md transition-shadow">
+                        <Box size={18} className="drop-shadow-sm" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-800 text-sm">{p.name}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mt-0.5">{new Date(p.date).toLocaleDateString()}</p>
+                      </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-emerald-600">{settings.currencySymbol}{p.result.finalPrice.toFixed(2)}</p>
+                      <p className="font-black text-emerald-600 text-sm">{settings.currencySymbol}{p.result.finalPrice.toFixed(2)}</p>
                     </div>
                  </div>
                ))}

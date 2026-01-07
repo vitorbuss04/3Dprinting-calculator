@@ -151,9 +151,9 @@ export const Calculator: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* --- Inputs Column --- */}
-      <div className="lg:col-span-7 space-y-6">
+      <div className="lg:col-span-7 space-y-8">
         <Card title="Detalhes do Projeto">
           <Input label="Nome do Projeto" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
           <div className="grid grid-cols-2 gap-4">
@@ -185,9 +185,9 @@ export const Calculator: React.FC = () => {
             <Input label="Valor Hora" type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(Number(e.target.value))} subLabel={settings.currencySymbol} />
           </div>
           <div className="mt-4">
-             <div className="flex justify-between mb-1">
-                <label className="text-sm font-medium text-gray-700">Margem de Lucro (Markup)</label>
-                <span className="text-sm font-bold text-blue-600">{markup}%</span>
+             <div className="flex justify-between mb-2">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Margem de Lucro (Markup)</label>
+                <span className="text-sm font-black text-blue-600">{markup}%</span>
              </div>
              <input
                type="range"
@@ -196,43 +196,43 @@ export const Calculator: React.FC = () => {
                step="5"
                value={markup}
                onChange={(e) => setMarkup(Number(e.target.value))}
-               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+               className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
              />
           </div>
         </Card>
 
-        <Button onClick={saveProject} className="w-full py-4 text-lg shadow-lg" disabled={saving}>
+        <Button onClick={saveProject} className="w-full py-4 text-lg shadow-2xl shadow-blue-500/20" disabled={saving}>
           {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />} 
-          {saving ? 'Salvando...' : 'Salvar Orçamento no Histórico'}
+          {saving ? 'Salvando...' : 'Salvar Orçamento'}
         </Button>
       </div>
 
       {/* --- Results Column --- */}
-      <div className="lg:col-span-5 space-y-4">
+      <div className="lg:col-span-5 space-y-6">
         {/* Main Price Card */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-500 rounded-xl p-6 shadow-lg relative overflow-hidden text-white">
-          <div className="absolute top-0 right-0 p-4 opacity-10 text-white">
-            <CalcIcon size={120} />
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-800 border border-blue-500 rounded-3xl p-8 shadow-2xl shadow-indigo-500/30 relative overflow-hidden text-white transition-transform hover:scale-[1.02]">
+          <div className="absolute top-0 right-0 p-4 opacity-10 text-white translate-x-1/4 -translate-y-1/4">
+            <CalcIcon size={200} />
           </div>
-          <h3 className="text-blue-100 font-medium mb-1">Preço de Venda Sugerido</h3>
-          <div className="text-4xl font-bold mb-2">
+          <h3 className="text-blue-100 font-bold uppercase tracking-widest text-xs mb-2">Preço de Venda Sugerido</h3>
+          <div className="text-5xl font-black mb-4">
             {settings.currencySymbol} {result.finalPrice.toFixed(2)}
           </div>
-          <div className="flex gap-4 text-sm mt-4">
+          <div className="grid grid-cols-2 gap-6 mt-8 pt-6 border-t border-white/10">
             <div>
-               <span className="block text-blue-200">Custo Total</span>
-               <span className="font-mono text-red-200">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
+               <span className="block text-blue-100/70 text-[10px] font-bold uppercase tracking-wider mb-1">Custo Produção</span>
+               <span className="font-mono text-xl font-bold">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
             </div>
             <div>
-               <span className="block text-blue-200">Lucro Est.</span>
-               <span className="font-mono text-emerald-200">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
+               <span className="block text-blue-100/70 text-[10px] font-bold uppercase tracking-wider mb-1">Lucro Líquido</span>
+               <span className="font-mono text-xl font-bold text-emerald-300">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
         {/* Breakdown */}
-        <Card title="Composição de Custos" className="h-[400px] flex flex-col">
-          <div className="flex-1 min-h-0">
+        <Card title="Composição de Custos" className="flex flex-col">
+          <div className="h-64 mb-6">
              <ResponsiveContainer width="100%" height="100%">
                <PieChart>
                  <Pie
@@ -240,8 +240,8 @@ export const Calculator: React.FC = () => {
                    cx="50%"
                    cy="50%"
                    innerRadius={60}
-                   outerRadius={80}
-                   paddingAngle={5}
+                   outerRadius={90}
+                   paddingAngle={8}
                    dataKey="value"
                  >
                    {chartData.map((entry, index) => (
@@ -249,24 +249,24 @@ export const Calculator: React.FC = () => {
                    ))}
                  </Pie>
                  <Tooltip
-                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#111827' }}
+                    contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', color: '#111827' }}
                     formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`, 'Custo']}
                  />
                </PieChart>
              </ResponsiveContainer>
           </div>
-          <div className="space-y-2 mt-4 text-sm">
-             <div className="flex justify-between items-center p-2 rounded bg-gray-50 border border-gray-100">
-               <span className="flex items-center gap-2 text-gray-700"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> Material (+ Falha)</span>
-               <span className="font-mono text-gray-900">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
+          <div className="space-y-3">
+             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
+               <span className="flex items-center gap-3 text-sm font-bold text-gray-600 tracking-tight"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform"></div> Insumos</span>
+               <span className="font-mono font-bold text-gray-900">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
              </div>
-             <div className="flex justify-between items-center p-2 rounded bg-gray-50 border border-gray-100">
-               <span className="flex items-center gap-2 text-gray-700"><div className="w-3 h-3 rounded-full bg-amber-500"></div> Máquina (Energia/Depr)</span>
-               <span className="font-mono text-gray-900">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
+             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
+               <span className="flex items-center gap-3 text-sm font-bold text-gray-600 tracking-tight"><div className="w-2.5 h-2.5 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></div> Operacional Máquina</span>
+               <span className="font-mono font-bold text-gray-900">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
              </div>
-             <div className="flex justify-between items-center p-2 rounded bg-gray-50 border border-gray-100">
-               <span className="flex items-center gap-2 text-gray-700"><div className="w-3 h-3 rounded-full bg-blue-500"></div> Mão de Obra</span>
-               <span className="font-mono text-gray-900">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
+             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
+               <span className="flex items-center gap-3 text-sm font-bold text-gray-600 tracking-tight"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 group-hover:scale-125 transition-transform"></div> Mão de Obra</span>
+               <span className="font-mono font-bold text-gray-900">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
              </div>
           </div>
         </Card>

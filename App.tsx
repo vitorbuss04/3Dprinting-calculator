@@ -78,7 +78,7 @@ const App: React.FC = () => {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-md shadow-blue-200">3D</div>
+          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-lg shadow-blue-500/40 transform hover:scale-105 transition-transform">3D</div>
           <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
         </div>
 
@@ -95,11 +95,11 @@ const App: React.FC = () => {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
                   isActive 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' 
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-400/40 scale-[1.02]' 
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <Icon size={18} />
+                <Icon size={18} className={isActive ? 'drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]' : 'drop-shadow-sm'} />
                 <span className="font-medium text-sm">{item.label}</span>
               </button>
             );
@@ -107,14 +107,14 @@ const App: React.FC = () => {
         </nav>
         
         <div className="p-4 border-t border-gray-100 space-y-3">
-          <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-500 border border-gray-100">
+          <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 border border-gray-100 shadow-inner">
               <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
           </div>
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
           >
-             <LogOut size={18} />
+             <LogOut size={18} className="drop-shadow-sm" />
              <span className="font-medium text-sm">Sair</span>
           </button>
         </div>
@@ -140,7 +140,7 @@ const App: React.FC = () => {
                <p className="text-xs font-medium text-gray-900">{session.user.email?.split('@')[0]}</p>
                <p className="text-[10px] text-gray-400">{session.user.email}</p>
              </div>
-             <div className="w-8 h-8 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-500 font-bold text-xs">
+             <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 font-bold text-xs transform hover:scale-110 transition-transform">
                {session.user.email?.charAt(0).toUpperCase()}
              </div>
            </div>

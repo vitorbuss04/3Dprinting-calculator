@@ -40,65 +40,62 @@ export const Auth: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="bg-blue-600 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-200">
-             <span className="text-3xl font-bold text-white">3D</span>
+        <div className="text-center mb-10">
+          <div className="bg-blue-600 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-400/50 transform hover:scale-110 transition-transform">
+             <span className="text-4xl font-black text-white drop-shadow-lg">3D</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">PrintCalc Manager</h1>
-          <p className="text-gray-500 mt-2">Gerencie sua farm de impressão com inteligência.</p>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tighter">PrintCalc Manager</h1>
+          <p className="text-gray-400 font-medium mt-2">Gestão inteligente para sua farm 3D.</p>
         </div>
 
-        <Card className="bg-white border-gray-200 shadow-xl shadow-gray-200/50">
-          <form onSubmit={handleAuth} className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
-              {isSignUp ? 'Criar Conta' : 'Acessar Conta'}
+        <Card className="bg-white shadow-2xl shadow-gray-300/60 p-8">
+          <form onSubmit={handleAuth} className="space-y-6">
+            <h2 className="text-2xl font-black text-gray-800 mb-2 text-center tracking-tight">
+              {isSignUp ? 'Criar Conta' : 'Boas-vindas!'}
             </h2>
             
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg">
+              <div className="bg-red-50 border border-red-100 text-red-600 text-xs font-bold p-4 rounded-2xl flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
                 {error}
               </div>
             )}
 
-            <div className="space-y-4">
-              <div className="relative">
-                <Mail className="absolute left-3 top-9 text-gray-400" size={18} />
-                <Input 
-                  label="Email" 
-                  type="email" 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)} 
-                  className="pl-10"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Input 
+                label="Email" 
+                type="email" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                icon={<Mail size={18} className="drop-shadow-sm" />}
+                placeholder="seu@email.com"
+                required
+              />
               
-              <div className="relative">
-                <Lock className="absolute left-3 top-9 text-gray-400" size={18} />
-                <Input 
-                  label="Senha" 
-                  type="password" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  className="pl-10"
-                  required
-                  minLength={6}
-                />
-              </div>
+              <Input 
+                label="Senha" 
+                type="password" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                icon={<Lock size={18} className="drop-shadow-sm" />}
+                placeholder="Sua senha secreta"
+                required
+                minLength={6}
+              />
             </div>
 
-            <Button type="submit" className="w-full mt-6 py-3 shadow-md" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? <UserPlus size={18} /> : <LogIn size={18} />)}
-              {isSignUp ? 'Cadastrar' : 'Entrar'}
+            <Button type="submit" className="w-full mt-2 py-4 shadow-2xl shadow-blue-500/30" disabled={loading}>
+              {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? <UserPlus size={20} className="drop-shadow-sm" /> : <LogIn size={20} className="drop-shadow-sm" />)}
+              {isSignUp ? 'Criar minha conta' : 'Entrar no Dashboard'}
             </Button>
           </form>
 
-          <div className="mt-6 text-center border-t border-gray-100 pt-4">
+          <div className="mt-8 text-center border-t border-gray-50 pt-6">
             <button
               onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
-              className="text-sm text-gray-500 hover:text-blue-600 hover:underline transition-colors"
+              className="text-xs font-bold text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest"
             >
-              {isSignUp ? 'Já tem uma conta? Faça Login' : 'Não tem conta? Cadastre-se'}
+              {isSignUp ? 'Já possui acesso? Clique aqui' : 'Novo por aqui? Cadastre-se'}
             </button>
           </div>
         </Card>

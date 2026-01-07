@@ -2,8 +2,8 @@ import React from 'react';
 
 // --- Card ---
 export const Card: React.FC<{ children: React.ReactNode; className?: string; title?: string }> = ({ children, className = '', title }) => (
-  <div className={`bg-white border border-gray-200 rounded-xl p-5 shadow-sm ${className}`}>
-    {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
+  <div className={`bg-white border border-gray-100 rounded-2xl p-6 shadow-xl shadow-gray-200/50 transition-all duration-300 ${className}`}>
+    {title && <h3 className="text-lg font-bold text-gray-800 mb-5 tracking-tight">{title}</h3>}
     {children}
   </div>
 );
@@ -12,18 +12,26 @@ export const Card: React.FC<{ children: React.ReactNode; className?: string; tit
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   subLabel?: string;
+  icon?: React.ReactNode;
 }
 
-export const Input: React.FC<InputProps> = ({ label, subLabel, className = '', ...props }) => (
-  <div className="flex flex-col gap-1 mb-3">
-    <label className="text-sm font-medium text-gray-700">
+export const Input: React.FC<InputProps> = ({ label, subLabel, icon, className = '', ...props }) => (
+  <div className="flex flex-col gap-1.5 mb-4 group">
+    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1 group-focus-within:text-blue-600 transition-colors">
       {label}
-      {subLabel && <span className="text-xs text-gray-500 ml-1">({subLabel})</span>}
+      {subLabel && <span className="text-[10px] lowercase font-medium ml-1">({subLabel})</span>}
     </label>
-    <input
-      className={`bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-400 ${className}`}
-      {...props}
-    />
+    <div className="relative flex items-center">
+      {icon && (
+        <div className="absolute left-4 text-gray-400 group-focus-within:text-blue-500 transition-colors pointer-events-none z-10 flex items-center justify-center">
+          {icon}
+        </div>
+      )}
+      <input
+        className={`w-full bg-gray-50/50 border border-gray-200 text-gray-900 rounded-xl py-2.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white outline-none transition-all placeholder-gray-400 text-sm ${icon ? 'pl-12 pr-4' : 'px-4'} ${className}`}
+        {...props}
+      />
+    </div>
   </div>
 );
 
@@ -34,10 +42,10 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select: React.FC<SelectProps> = ({ label, options, className = '', ...props }) => (
-  <div className="flex flex-col gap-1 mb-3">
-    <label className="text-sm font-medium text-gray-700">{label}</label>
+  <div className="flex flex-col gap-1.5 mb-4">
+    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{label}</label>
     <select
-      className={`bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none ${className}`}
+      className={`bg-gray-50/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white outline-none transition-all text-sm appearance-none ${className}`}
       {...props}
     >
       {options.map((opt) => (
@@ -55,12 +63,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className = '', ...props }) => {
-  const baseStyle = "px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2";
+  const baseStyle = "px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:scale-100";
   const variants = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-sm",
-    secondary: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm",
-    danger: "bg-red-600 hover:bg-red-700 text-white shadow-sm",
-    ghost: "bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-200",
+    primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 hover:shadow-blue-300",
+    secondary: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 hover:shadow-emerald-300",
+    danger: "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-100 hover:shadow-red-200",
+    ghost: "bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 shadow-sm",
   };
 
   return (
