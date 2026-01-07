@@ -39,18 +39,18 @@ export const History: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Histórico de Orçamentos</h2>
+      <h2 className="text-2xl font-bold text-gray-900">Histórico de Orçamentos</h2>
       {projects.length === 0 ? (
-        <div className="text-center text-slate-400 py-20 bg-slate-800 rounded-xl border border-slate-700">
+        <div className="text-center text-gray-500 py-20 bg-white rounded-xl border border-gray-200">
           Nenhum projeto salvo ainda. Vá para a Calculadora para criar um.
         </div>
       ) : (
         <div className="grid gap-4">
           {projects.map((project) => (
-            <div key={project.id} className="bg-slate-800 border border-slate-700 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div key={project.id} className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition-all">
               <div>
-                <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-                <div className="text-sm text-slate-400 flex gap-4 mt-1">
+                <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+                <div className="text-sm text-gray-500 flex gap-4 mt-1">
                   <span>{new Date(project.date).toLocaleDateString()}</span>
                   <span>|</span>
                   <span>{project.printTimeHours}h {project.printTimeMinutes}m</span>
@@ -61,16 +61,16 @@ export const History: React.FC = () => {
               
               <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                 <div className="text-right">
-                   <p className="text-xs text-slate-400">Custo</p>
-                   <p className="text-slate-200 font-mono">{settings.currencySymbol}{project.result.totalProductionCost.toFixed(2)}</p>
+                   <p className="text-xs text-gray-500">Custo</p>
+                   <p className="text-gray-900 font-mono font-medium">{settings.currencySymbol}{project.result.totalProductionCost.toFixed(2)}</p>
                 </div>
                 <div className="text-right">
-                   <p className="text-xs text-slate-400">Preço</p>
-                   <p className="text-xl text-emerald-400 font-bold font-mono">{settings.currencySymbol}{project.result.finalPrice.toFixed(2)}</p>
+                   <p className="text-xs text-gray-500">Preço</p>
+                   <p className="text-xl text-emerald-600 font-bold font-mono">{settings.currencySymbol}{project.result.finalPrice.toFixed(2)}</p>
                 </div>
                 <button 
                   onClick={() => deleteProject(project.id)}
-                  className="p-2 text-slate-500 hover:text-red-500 hover:bg-slate-700 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <Trash2 size={20} />
                 </button>

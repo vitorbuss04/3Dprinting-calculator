@@ -50,18 +50,18 @@ export const Comparator: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-indigo-600 rounded-lg">
-          <ArrowRightLeft size={24} className="text-white" />
+        <div className="p-3 bg-indigo-100 rounded-lg">
+          <ArrowRightLeft size={24} className="text-indigo-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">Comparador de Máquinas</h2>
-          <p className="text-slate-400">É mais barato imprimir lento numa máquina barata ou rápido numa máquina cara?</p>
+          <h2 className="text-2xl font-bold text-gray-900">Comparador de Máquinas</h2>
+          <p className="text-gray-500">É mais barato imprimir lento numa máquina barata ou rápido numa máquina cara?</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Machine A */}
-        <Card title="Cenário A" className="border-l-4 border-l-blue-500">
+        <Card title="Cenário A" className="border-l-4 border-l-blue-500 bg-white">
            <Select
               label="Selecionar Impressora"
               options={printers.map(p => ({ value: p.id, label: p.name }))}
@@ -74,14 +74,14 @@ export const Comparator: React.FC = () => {
               value={hoursA}
               onChange={(e) => setHoursA(Number(e.target.value))}
            />
-           <div className="mt-8 pt-4 border-t border-slate-700">
-              <p className="text-slate-400 text-sm">Custo Operacional</p>
-              <p className="text-3xl font-bold text-blue-400">{settings.currencySymbol} {costA.toFixed(2)}</p>
+           <div className="mt-8 pt-4 border-t border-gray-100">
+              <p className="text-gray-500 text-sm">Custo Operacional</p>
+              <p className="text-3xl font-bold text-blue-600">{settings.currencySymbol} {costA.toFixed(2)}</p>
            </div>
         </Card>
 
         {/* Machine B */}
-        <Card title="Cenário B" className="border-l-4 border-l-purple-500">
+        <Card title="Cenário B" className="border-l-4 border-l-purple-500 bg-white">
            <Select
               label="Selecionar Impressora"
               options={printers.map(p => ({ value: p.id, label: p.name }))}
@@ -94,24 +94,24 @@ export const Comparator: React.FC = () => {
               value={hoursB}
               onChange={(e) => setHoursB(Number(e.target.value))}
            />
-           <div className="mt-8 pt-4 border-t border-slate-700">
-              <p className="text-slate-400 text-sm">Custo Operacional</p>
-              <p className="text-3xl font-bold text-purple-400">{settings.currencySymbol} {costB.toFixed(2)}</p>
+           <div className="mt-8 pt-4 border-t border-gray-100">
+              <p className="text-gray-500 text-sm">Custo Operacional</p>
+              <p className="text-3xl font-bold text-purple-600">{settings.currencySymbol} {costB.toFixed(2)}</p>
            </div>
         </Card>
       </div>
 
       {/* Verdict */}
-      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
-         <h3 className="text-slate-400 mb-2 uppercase tracking-wide text-sm font-bold">Veredito</h3>
+      <div className="bg-white p-6 rounded-xl border border-gray-200 text-center shadow-sm">
+         <h3 className="text-gray-500 mb-2 uppercase tracking-wide text-sm font-bold">Veredito</h3>
          {Math.abs(costA - costB) < 0.05 ? (
-           <p className="text-xl text-white">Os custos são praticamente iguais.</p>
+           <p className="text-xl text-gray-900">Os custos são praticamente iguais.</p>
          ) : (
            <div>
-             <p className="text-2xl text-white">
-               O Cenário <span className={costA < costB ? "text-blue-400 font-bold" : "text-purple-400 font-bold"}>
+             <p className="text-2xl text-gray-900">
+               O Cenário <span className={costA < costB ? "text-blue-600 font-bold" : "text-purple-600 font-bold"}>
                  {costA < costB ? "A" : "B"}
-               </span> é mais barato por <span className="text-emerald-400 font-bold">{settings.currencySymbol} {Math.abs(costA - costB).toFixed(2)}</span>
+               </span> é mais barato por <span className="text-emerald-600 font-bold">{settings.currencySymbol} {Math.abs(costA - costB).toFixed(2)}</span>
              </p>
            </div>
          )}

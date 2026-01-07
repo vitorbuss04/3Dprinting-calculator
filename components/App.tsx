@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, Menu, ArrowRightLeft, LogOut } from 'lucide-react';
-import { ViewState } from './types';
-import { Dashboard } from './components/Dashboard';
-import { AssetsManager } from './components/AssetsManager';
-import { Calculator } from './components/Calculator';
-import { Comparator } from './components/Comparator';
-import { History } from './components/History';
-import { Auth } from './components/Auth';
-import { supabase } from './services/supabaseClient';
+import { ViewState } from '../types';
+import { Dashboard } from './Dashboard';
+import { AssetsManager } from './AssetsManager';
+import { Calculator } from './Calculator';
+import { Comparator } from './Comparator';
+import { History } from './History';
+import { Auth } from './Auth';
+import { supabase } from '../services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
 const App: React.FC = () => {
@@ -63,11 +63,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden font-sans">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/10 z-20 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/20 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -78,11 +78,11 @@ const App: React.FC = () => {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-md shadow-blue-200">3D</div>
+          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-sm">3D</div>
           <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
         </div>
 
-        <nav className="p-4 space-y-1 flex-1">
+        <nav className="p-4 space-y-2 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -93,29 +93,29 @@ const App: React.FC = () => {
                   setCurrentView(item.id as ViewState);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                   isActive 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' 
+                    ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100' 
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <Icon size={18} />
-                <span className="font-medium text-sm">{item.label}</span>
+                <Icon size={20} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
+                <span className="font-medium">{item.label}</span>
               </button>
             );
           })}
         </nav>
         
-        <div className="p-4 border-t border-gray-100 space-y-3">
-          <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-500 border border-gray-100">
-              <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
+        <div className="p-4 border-t border-gray-100 space-y-4">
+          <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700 border border-blue-100">
+              <p>Dica: Mantenha seus custos de energia atualizados nas configurações.</p>
           </div>
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
-             <LogOut size={18} />
-             <span className="font-medium text-sm">Sair</span>
+             <LogOut size={20} />
+             <span className="font-medium">Sair</span>
           </button>
         </div>
       </aside>
@@ -123,7 +123,7 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
+        <header className="h-16 bg-white/80 backdrop-blur-sm border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
            <div className="flex items-center gap-4">
               <button 
                 className="md:hidden text-gray-500 hover:text-gray-900"
@@ -131,23 +131,17 @@ const App: React.FC = () => {
               >
                 <Menu size={24} />
               </button>
-              <h1 className="text-lg font-bold text-gray-800 capitalize">
+              <h1 className="text-lg md:text-xl font-semibold text-gray-800 capitalize">
                 {navItems.find(i => i.id === currentView)?.label}
               </h1>
            </div>
-           <div className="flex items-center gap-4">
-             <div className="text-right hidden sm:block">
-               <p className="text-xs font-medium text-gray-900">{session.user.email?.split('@')[0]}</p>
-               <p className="text-[10px] text-gray-400">{session.user.email}</p>
-             </div>
-             <div className="w-8 h-8 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-500 font-bold text-xs">
-               {session.user.email?.charAt(0).toUpperCase()}
-             </div>
+           <div className="text-sm text-gray-500 hidden md:block">
+             {session.user.email}
            </div>
         </header>
 
         {/* Scrollable Area */}
-        <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50/50">
+        <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50">
           <div className="max-w-6xl mx-auto">
              {renderContent()}
           </div>

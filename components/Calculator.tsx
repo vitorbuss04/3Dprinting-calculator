@@ -144,8 +144,8 @@ export const Calculator: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <AlertTriangle className="text-yellow-500 mb-4" size={48} />
-        <h2 className="text-xl font-bold mb-2">Nenhum Ativo Encontrado</h2>
-        <p className="text-slate-400">Por favor, adicione pelo menos uma Impressora e um Material na aba "Meus Ativos" para usar a calculadora.</p>
+        <h2 className="text-xl font-bold mb-2 text-gray-900">Nenhum Ativo Encontrado</h2>
+        <p className="text-gray-500">Por favor, adicione pelo menos uma Impressora e um Material na aba "Meus Ativos" para usar a calculadora.</p>
       </div>
     );
   }
@@ -186,8 +186,8 @@ export const Calculator: React.FC = () => {
           </div>
           <div className="mt-4">
              <div className="flex justify-between mb-1">
-                <label className="text-sm font-medium text-slate-300">Margem de Lucro (Markup)</label>
-                <span className="text-sm font-bold text-blue-400">{markup}%</span>
+                <label className="text-sm font-medium text-gray-700">Margem de Lucro (Markup)</label>
+                <span className="text-sm font-bold text-blue-600">{markup}%</span>
              </div>
              <input
                type="range"
@@ -196,12 +196,12 @@ export const Calculator: React.FC = () => {
                step="5"
                value={markup}
                onChange={(e) => setMarkup(Number(e.target.value))}
-               className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
              />
           </div>
         </Card>
 
-        <Button onClick={saveProject} className="w-full py-4 text-lg" disabled={saving}>
+        <Button onClick={saveProject} className="w-full py-4 text-lg shadow-lg" disabled={saving}>
           {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />} 
           {saving ? 'Salvando...' : 'Salvar Orçamento no Histórico'}
         </Button>
@@ -210,22 +210,22 @@ export const Calculator: React.FC = () => {
       {/* --- Results Column --- */}
       <div className="lg:col-span-5 space-y-4">
         {/* Main Price Card */}
-        <div className="bg-gradient-to-br from-blue-900 to-slate-900 border border-blue-700 rounded-xl p-6 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-500 rounded-xl p-6 shadow-lg relative overflow-hidden text-white">
+          <div className="absolute top-0 right-0 p-4 opacity-10 text-white">
             <CalcIcon size={120} />
           </div>
-          <h3 className="text-slate-300 font-medium mb-1">Preço de Venda Sugerido</h3>
-          <div className="text-4xl font-bold text-white mb-2">
+          <h3 className="text-blue-100 font-medium mb-1">Preço de Venda Sugerido</h3>
+          <div className="text-4xl font-bold mb-2">
             {settings.currencySymbol} {result.finalPrice.toFixed(2)}
           </div>
           <div className="flex gap-4 text-sm mt-4">
             <div>
-               <span className="block text-slate-400">Custo Total</span>
-               <span className="font-mono text-red-300">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
+               <span className="block text-blue-200">Custo Total</span>
+               <span className="font-mono text-red-200">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
             </div>
             <div>
-               <span className="block text-slate-400">Lucro Est.</span>
-               <span className="font-mono text-emerald-400">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
+               <span className="block text-blue-200">Lucro Est.</span>
+               <span className="font-mono text-emerald-200">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -249,24 +249,24 @@ export const Calculator: React.FC = () => {
                    ))}
                  </Pie>
                  <Tooltip
-                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#111827' }}
                     formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`, 'Custo']}
                  />
                </PieChart>
              </ResponsiveContainer>
           </div>
           <div className="space-y-2 mt-4 text-sm">
-             <div className="flex justify-between items-center p-2 rounded bg-slate-900/50">
-               <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> Material (+ Falha)</span>
-               <span className="font-mono">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
+             <div className="flex justify-between items-center p-2 rounded bg-gray-50 border border-gray-100">
+               <span className="flex items-center gap-2 text-gray-700"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> Material (+ Falha)</span>
+               <span className="font-mono text-gray-900">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
              </div>
-             <div className="flex justify-between items-center p-2 rounded bg-slate-900/50">
-               <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div> Máquina (Energia/Depr)</span>
-               <span className="font-mono">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
+             <div className="flex justify-between items-center p-2 rounded bg-gray-50 border border-gray-100">
+               <span className="flex items-center gap-2 text-gray-700"><div className="w-3 h-3 rounded-full bg-amber-500"></div> Máquina (Energia/Depr)</span>
+               <span className="font-mono text-gray-900">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
              </div>
-             <div className="flex justify-between items-center p-2 rounded bg-slate-900/50">
-               <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div> Mão de Obra</span>
-               <span className="font-mono">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
+             <div className="flex justify-between items-center p-2 rounded bg-gray-50 border border-gray-100">
+               <span className="flex items-center gap-2 text-gray-700"><div className="w-3 h-3 rounded-full bg-blue-500"></div> Mão de Obra</span>
+               <span className="font-mono text-gray-900">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
              </div>
           </div>
         </Card>
