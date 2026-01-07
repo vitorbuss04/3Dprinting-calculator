@@ -2,7 +2,7 @@ export interface Printer {
   id: string;
   name: string;
   acquisitionCost: number; // R$
-  lifespanHours: number; // Life expectancy in hours
+  lifespanHours: number; // Expectativa de vida em horas
   powerConsumption: number; // Watts
   maintenanceCostPerHour: number; // R$/h
 }
@@ -12,17 +12,17 @@ export enum MaterialType {
   ABS = 'ABS',
   PETG = 'PETG',
   TPU = 'TPU',
-  RESIN = 'Resin',
-  OTHER = 'Other'
+  RESIN = 'Resina',
+  OTHER = 'Outros'
 }
 
 export interface Material {
   id: string;
   type: MaterialType;
-  name: string; // Brand/Color
+  name: string; // Marca/Cor
   spoolPrice: number; // R$
-  spoolWeight: number; // grams
-  currentStock?: number; // grams
+  spoolWeight: number; // gramas
+  currentStock?: number; // gramas
 }
 
 export interface GlobalSettings {
@@ -36,7 +36,7 @@ export interface CalculationResult {
   materialCost: number;
   maintenanceCost: number;
   laborCost: number;
-  machineTotalCost: number; // Depreciation + Maintenance + Energy
+  machineTotalCost: number; // Depreciação + Manutenção + Energia
   totalProductionCost: number;
   finalPrice: number;
   profit: number;
@@ -50,12 +50,12 @@ export interface Project {
   materialId: string;
   printTimeHours: number;
   printTimeMinutes: number;
-  modelWeight: number; // grams
-  failureRate: number; // percentage (0-100)
+  modelWeight: number; // gramas
+  failureRate: number; // porcentagem (0-100)
   laborTimeHours: number;
   laborTimeMinutes: number;
   laborHourlyRate: number;
-  markup: number; // percentage (0-100+)
+  markup: number; // porcentagem (0-100+)
   result: CalculationResult;
 }
 

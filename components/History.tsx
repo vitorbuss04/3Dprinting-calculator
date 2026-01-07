@@ -13,7 +13,7 @@ export const History: React.FC = () => {
   }, []);
 
   const deleteProject = (id: string) => {
-    if(confirm('Are you sure you want to delete this quote?')) {
+    if(confirm('Tem certeza que deseja excluir este orçamento?')) {
       const updated = projects.filter(p => p.id !== id);
       setProjects(updated);
       StorageService.saveProjects(updated);
@@ -22,10 +22,10 @@ export const History: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Quote History</h2>
+      <h2 className="text-2xl font-bold text-white">Histórico de Orçamentos</h2>
       {projects.length === 0 ? (
         <div className="text-center text-slate-400 py-20 bg-slate-800 rounded-xl border border-slate-700">
-          No saved projects yet. Go to Calculator to create one.
+          Nenhum projeto salvo ainda. Vá para a Calculadora para criar um.
         </div>
       ) : (
         <div className="grid gap-4">
@@ -44,11 +44,11 @@ export const History: React.FC = () => {
               
               <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                 <div className="text-right">
-                   <p className="text-xs text-slate-400">Cost</p>
+                   <p className="text-xs text-slate-400">Custo</p>
                    <p className="text-slate-200 font-mono">{settings.currencySymbol}{project.result.totalProductionCost.toFixed(2)}</p>
                 </div>
                 <div className="text-right">
-                   <p className="text-xs text-slate-400">Price</p>
+                   <p className="text-xs text-slate-400">Preço</p>
                    <p className="text-xl text-emerald-400 font-bold font-mono">{settings.currencySymbol}{project.result.finalPrice.toFixed(2)}</p>
                 </div>
                 <button 

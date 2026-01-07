@@ -31,28 +31,28 @@ export const Dashboard: React.FC = () => {
         <Card className="flex items-center gap-4 border-l-4 border-l-blue-500">
            <div className="p-3 bg-blue-500/10 rounded-full text-blue-500"><TrendingUp /></div>
            <div>
-             <p className="text-slate-400 text-sm">Total Revenue</p>
+             <p className="text-slate-400 text-sm">Receita Total</p>
              <p className="text-2xl font-bold text-white">{settings.currencySymbol}{totalRevenue.toFixed(2)}</p>
            </div>
         </Card>
         <Card className="flex items-center gap-4 border-l-4 border-l-emerald-500">
            <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-500"><DollarSign /></div>
            <div>
-             <p className="text-slate-400 text-sm">Total Profit</p>
+             <p className="text-slate-400 text-sm">Lucro Total</p>
              <p className="text-2xl font-bold text-white">{settings.currencySymbol}{totalProfit.toFixed(2)}</p>
            </div>
         </Card>
         <Card className="flex items-center gap-4 border-l-4 border-l-indigo-500">
            <div className="p-3 bg-indigo-500/10 rounded-full text-indigo-500"><Box /></div>
            <div>
-             <p className="text-slate-400 text-sm">Quotes Generated</p>
+             <p className="text-slate-400 text-sm">Orçamentos Gerados</p>
              <p className="text-2xl font-bold text-white">{totalPrints}</p>
            </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Recent Performance" className="h-80">
+        <Card title="Desempenho Recente" className="h-80">
           {projects.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -62,6 +62,10 @@ export const Dashboard: React.FC = () => {
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#fff' }}
                   cursor={{fill: '#334155', opacity: 0.4}}
+                  formatter={(value: number, name: string) => [
+                    `${settings.currencySymbol} ${value.toFixed(2)}`, 
+                    name === 'Cost' ? 'Custo' : name === 'Profit' ? 'Lucro' : name
+                  ]}
                 />
                 <Bar dataKey="cost" stackId="a" fill="#f59e0b" name="Cost" />
                 <Bar dataKey="profit" stackId="a" fill="#10b981" name="Profit" />
@@ -69,14 +73,14 @@ export const Dashboard: React.FC = () => {
             </ResponsiveContainer>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-slate-500">
-              <p>No data yet. Start calculating!</p>
+              <p>Sem dados ainda. Comece a calcular!</p>
             </div>
           )}
         </Card>
 
-        <Card title="Latest Quotes" className="h-80 overflow-y-auto">
+        <Card title="Últimos Orçamentos" className="h-80 overflow-y-auto">
            {projects.length === 0 ? (
-             <p className="text-slate-500 text-center mt-10">No history found.</p>
+             <p className="text-slate-500 text-center mt-10">Nenhum histórico encontrado.</p>
            ) : (
              <div className="space-y-3">
                {projects.slice(0, 5).map(p => (

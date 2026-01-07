@@ -43,48 +43,48 @@ export const Comparator: React.FC = () => {
           <ArrowRightLeft size={24} className="text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">Machine Comparator</h2>
-          <p className="text-slate-400">Is it cheaper to print slow on a cheap machine, or fast on an expensive one?</p>
+          <h2 className="text-2xl font-bold text-white">Comparador de Máquinas</h2>
+          <p className="text-slate-400">É mais barato imprimir lento numa máquina barata ou rápido numa máquina cara?</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Machine A */}
-        <Card title="Scenario A" className="border-l-4 border-l-blue-500">
+        <Card title="Cenário A" className="border-l-4 border-l-blue-500">
            <Select
-              label="Select Printer"
+              label="Selecionar Impressora"
               options={printers.map(p => ({ value: p.id, label: p.name }))}
               value={printerAId}
               onChange={(e) => setPrinterAId(e.target.value)}
            />
            <Input
-              label="Estimated Print Time (Hours)"
+              label="Tempo de Impressão Estimado (Horas)"
               type="number"
               value={hoursA}
               onChange={(e) => setHoursA(Number(e.target.value))}
            />
            <div className="mt-8 pt-4 border-t border-slate-700">
-              <p className="text-slate-400 text-sm">Operational Cost</p>
+              <p className="text-slate-400 text-sm">Custo Operacional</p>
               <p className="text-3xl font-bold text-blue-400">{settings.currencySymbol} {costA.toFixed(2)}</p>
            </div>
         </Card>
 
         {/* Machine B */}
-        <Card title="Scenario B" className="border-l-4 border-l-purple-500">
+        <Card title="Cenário B" className="border-l-4 border-l-purple-500">
            <Select
-              label="Select Printer"
+              label="Selecionar Impressora"
               options={printers.map(p => ({ value: p.id, label: p.name }))}
               value={printerBId}
               onChange={(e) => setPrinterBId(e.target.value)}
            />
            <Input
-              label="Estimated Print Time (Hours)"
+              label="Tempo de Impressão Estimado (Horas)"
               type="number"
               value={hoursB}
               onChange={(e) => setHoursB(Number(e.target.value))}
            />
            <div className="mt-8 pt-4 border-t border-slate-700">
-              <p className="text-slate-400 text-sm">Operational Cost</p>
+              <p className="text-slate-400 text-sm">Custo Operacional</p>
               <p className="text-3xl font-bold text-purple-400">{settings.currencySymbol} {costB.toFixed(2)}</p>
            </div>
         </Card>
@@ -92,15 +92,15 @@ export const Comparator: React.FC = () => {
 
       {/* Verdict */}
       <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 text-center">
-         <h3 className="text-slate-400 mb-2 uppercase tracking-wide text-sm font-bold">Verdict</h3>
+         <h3 className="text-slate-400 mb-2 uppercase tracking-wide text-sm font-bold">Veredito</h3>
          {Math.abs(costA - costB) < 0.05 ? (
-           <p className="text-xl text-white">Costs are effectively the same.</p>
+           <p className="text-xl text-white">Os custos são praticamente iguais.</p>
          ) : (
            <div>
              <p className="text-2xl text-white">
-               Scenario <span className={costA < costB ? "text-blue-400 font-bold" : "text-purple-400 font-bold"}>
+               O Cenário <span className={costA < costB ? "text-blue-400 font-bold" : "text-purple-400 font-bold"}>
                  {costA < costB ? "A" : "B"}
-               </span> is cheaper by <span className="text-emerald-400 font-bold">{settings.currencySymbol} {Math.abs(costA - costB).toFixed(2)}</span>
+               </span> é mais barato por <span className="text-emerald-400 font-bold">{settings.currencySymbol} {Math.abs(costA - costB).toFixed(2)}</span>
              </p>
            </div>
          )}

@@ -13,10 +13,10 @@ const App: React.FC = () => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'calculator', label: 'Calculator', icon: CalcIcon },
-    { id: 'assets', label: 'My Assets', icon: Printer },
-    { id: 'comparator', label: 'Comparator', icon: ArrowRightLeft },
-    { id: 'history', label: 'History', icon: HistoryIcon },
+    { id: 'calculator', label: 'Calculadora', icon: CalcIcon },
+    { id: 'assets', label: 'Meus Ativos', icon: Printer },
+    { id: 'comparator', label: 'Comparador', icon: ArrowRightLeft },
+    { id: 'history', label: 'Histórico', icon: HistoryIcon },
   ];
 
   const renderContent = () => {
@@ -76,7 +76,7 @@ const App: React.FC = () => {
         
         <div className="absolute bottom-4 left-4 right-4">
            <div className="bg-slate-900 rounded-lg p-3 text-xs text-slate-500 border border-slate-700">
-              <p>Pro Tip: Add your assets first to enable accurate calculations.</p>
+              <p>Dica: Adicione seus ativos primeiro para permitir cálculos precisos.</p>
            </div>
         </div>
       </aside>
@@ -93,7 +93,7 @@ const App: React.FC = () => {
                 <Menu size={24} />
               </button>
               <h1 className="text-lg md:text-xl font-semibold text-slate-200 capitalize">
-                {currentView}
+                {navItems.find(i => i.id === currentView)?.label}
               </h1>
            </div>
         </header>
