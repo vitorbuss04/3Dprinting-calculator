@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { StorageService } from '../services/storage';
 import { Project, GlobalSettings } from '../types';
 import { Card } from './UIComponents';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { History, TrendingUp, DollarSign, Box, Loader2 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { TrendingUp, DollarSign, Box, Loader2 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -28,7 +28,7 @@ export const Dashboard: React.FC = () => {
   const totalProfit = projects.reduce((acc, curr) => acc + curr.result.profit, 0);
   const totalPrints = projects.length;
 
-  // Prepare Chart Data (Last 5 projects)
+  // Prepare Chart Data (Last 5 projects) - Reversed to show chronological order (oldest -> newest)
   const chartData = projects.slice(0, 5).map(p => ({
     name: p.name.length > 10 ? p.name.substring(0, 10) + '...' : p.name,
     cost: p.result.totalProductionCost,
@@ -64,24 +64,45 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Desempenho Recente" className="h-80">
+        <Card title="Desempenho Recente (Gasto vs Lucro)" className="h-80">
           {projects.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <XAxis dataKey="name" stroke="#94a3b8" tick={{fontSize: 12}} />
+                <YAxis stroke="#94a3b8" tick={{fontSize: 12}} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#fff' }}
-                  cursor={{fill: '#334155', opacity: 0.4}}
+                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                  cursor={{stroke: '#475569', strokeWidth: 1}}
                   formatter={(value: number, name: string) => [
                     `${settings.currencySymbol} ${value.toFixed(2)}`, 
-                    name === 'Cost' ? 'Custo' : name === 'Profit' ? 'Lucro' : name
+                    name // The name prop from the Line component handles the label
                   ]}
                 />
-                <Bar dataKey="cost" stackId="a" fill="#f59e0b" name="Cost" />
-                <Bar dataKey="profit" stackId="a" fill="#10b981" name="Profit" />
-              </BarChart>
+                <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                
+                {/* Linha de Gasto (Vermelho/Laranja) */}
+                <Line 
+                  type="monotone" 
+                  dataKey="cost" 
+                  name="Gasto" 
+                  stroke="#ef4444" 
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#ef4444', strokeWidth: 0 }}
+                  activeDot={{ r: 6, stroke: '#1e293b', strokeWidth: 2 }}
+                />
+
+                {/* Linha de Lucro (Verde) */}
+                <Line 
+                  type="monotone" 
+                  dataKey="profit" 
+                  name="Lucro" 
+                  stroke="#10b981" 
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }}
+                  activeDot={{ r: 6, stroke: '#1e293b', strokeWidth: 2 }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-slate-500">
