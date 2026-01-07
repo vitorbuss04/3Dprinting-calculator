@@ -151,7 +151,7 @@ export const Calculator: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
       {/* --- Inputs Column --- */}
       <div className="lg:col-span-7 space-y-8">
         <Card title="Detalhes do Projeto">
@@ -200,78 +200,81 @@ export const Calculator: React.FC = () => {
              />
           </div>
         </Card>
-
-        <Button onClick={saveProject} className="w-full py-4 text-lg shadow-2xl shadow-blue-500/20" disabled={saving}>
-          {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} className="drop-shadow-sm" />} 
-          {saving ? 'Salvando...' : 'Salvar Orçamento'}
-        </Button>
       </div>
 
       {/* --- Results Column --- */}
-      <div className="lg:col-span-5 space-y-6">
-        {/* Main Price Card */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-800 border border-blue-500 rounded-3xl p-6 shadow-2xl shadow-indigo-500/30 relative overflow-hidden text-white transition-transform hover:scale-[1.02]">
-          <div className="absolute top-0 right-0 p-4 opacity-10 text-white translate-x-1/4 -translate-y-1/4">
-            <CalcIcon size={200} />
-          </div>
-          <h3 className="text-blue-100 font-bold uppercase tracking-widest text-[10px] mb-2 drop-shadow-sm">Preço de Venda Sugerido</h3>
-          <div className="text-4xl font-black mb-4 drop-shadow-md">
-            {settings.currencySymbol} {result.finalPrice.toFixed(2)}
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/10">
-            <div>
-               <span className="block text-blue-100/70 text-[9px] font-bold uppercase tracking-wider mb-1">Custo Produção</span>
-               <span className="font-mono text-lg font-bold">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
+      <div className="lg:col-span-5 flex flex-col gap-6">
+        <div className="flex-1 space-y-6">
+          {/* Main Price Card */}
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-800 border border-blue-500 rounded-3xl p-6 shadow-2xl shadow-indigo-500/30 relative overflow-hidden text-white transition-transform hover:scale-[1.02]">
+            <div className="absolute top-0 right-0 p-4 opacity-10 text-white translate-x-1/4 -translate-y-1/4">
+              <CalcIcon size={200} />
             </div>
-            <div>
-               <span className="block text-blue-100/70 text-[9px] font-bold uppercase tracking-wider mb-1">Lucro Líquido</span>
-               <span className="font-mono text-lg font-bold text-emerald-300">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
+            <h3 className="text-blue-100 font-bold uppercase tracking-widest text-[10px] mb-2 drop-shadow-sm">Preço de Venda Sugerido</h3>
+            <div className="text-4xl font-black mb-4 drop-shadow-md">
+              {settings.currencySymbol} {result.finalPrice.toFixed(2)}
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/10">
+              <div>
+                 <span className="block text-blue-100/70 text-[9px] font-bold uppercase tracking-wider mb-1">Custo Produção</span>
+                 <span className="font-mono text-lg font-bold">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
+              </div>
+              <div>
+                 <span className="block text-blue-100/70 text-[9px] font-bold uppercase tracking-wider mb-1">Lucro Líquido</span>
+                 <span className="font-mono text-lg font-bold text-emerald-300">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
+              </div>
             </div>
           </div>
+
+          {/* Breakdown */}
+          <Card title="Composição de Custos" className="flex flex-col">
+            {chartData.length > 0 && (
+              <div className="h-48 mb-4">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <PieChart>
+                     <Pie
+                       data={chartData}
+                       cx="50%"
+                       cy="50%"
+                       innerRadius={50}
+                       outerRadius={75}
+                       paddingAngle={8}
+                       dataKey="value"
+                     >
+                       {chartData.map((entry, index) => (
+                         <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                       ))}
+                     </Pie>
+                     <Tooltip
+                        contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', color: '#111827', fontSize: '11px', fontWeight: 'bold' }}
+                        formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`, 'Custo']}
+                     />
+                   </PieChart>
+                 </ResponsiveContainer>
+              </div>
+            )}
+            <div className="space-y-2">
+               <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
+                 <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform"></div> Insumos</span>
+                 <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
+               </div>
+               <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
+                 <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></div> Operacional Máquina</span>
+                 <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
+               </div>
+               <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
+                 <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-blue-500 group-hover:scale-125 transition-transform"></div> Mão de Obra</span>
+                 <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
+               </div>
+            </div>
+          </Card>
         </div>
 
-        {/* Breakdown */}
-        <Card title="Composição de Custos" className="flex flex-col">
-          {chartData.length > 0 && (
-            <div className="h-48 mb-4">
-               <ResponsiveContainer width="100%" height="100%">
-                 <PieChart>
-                   <Pie
-                     data={chartData}
-                     cx="50%"
-                     cy="50%"
-                     innerRadius={50}
-                     outerRadius={75}
-                     paddingAngle={8}
-                     dataKey="value"
-                   >
-                     {chartData.map((entry, index) => (
-                       <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                     ))}
-                   </Pie>
-                   <Tooltip
-                      contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', color: '#111827', fontSize: '11px', fontWeight: 'bold' }}
-                      formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`, 'Custo']}
-                   />
-                 </PieChart>
-               </ResponsiveContainer>
-            </div>
-          )}
-          <div className="space-y-2">
-             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
-               <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform"></div> Insumos</span>
-               <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
-             </div>
-             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
-               <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></div> Operacional Máquina</span>
-               <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
-             </div>
-             <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
-               <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-blue-500 group-hover:scale-125 transition-transform"></div> Mão de Obra</span>
-               <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
-             </div>
-          </div>
-        </Card>
+        {/* Action Button anchored to bottom of column */}
+        <Button onClick={saveProject} className="w-full py-4 text-lg shadow-2xl shadow-blue-500/20 mt-auto" disabled={saving}>
+          {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} className="drop-shadow-sm" />} 
+          {saving ? 'Salvando...' : 'Salvar Orçamento'}
+        </Button>
       </div>
     </div>
   );
