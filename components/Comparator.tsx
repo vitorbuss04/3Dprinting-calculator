@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft, Loader2 } from 'lucide-react';
 import { Printer, GlobalSettings } from '../types';
 import { StorageService } from '../services/storage';
 import { Card, Select, Input } from './UIComponents';
@@ -7,6 +7,7 @@ import { Card, Select, Input } from './UIComponents';
 export const Comparator: React.FC = () => {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ electricityCost: 0, currencySymbol: '$' });
+  const [loading, setLoading] = useState(true);
 
   const [printerAId, setPrinterAId] = useState('');
   const [printerBId, setPrinterBId] = useState('');
@@ -16,12 +17,20 @@ export const Comparator: React.FC = () => {
   const [hoursB, setHoursB] = useState(4); // Default assumption: B is faster
 
   useEffect(() => {
-    const p = StorageService.getPrinters();
-    setPrinters(p);
-    setSettings(StorageService.getSettings());
-    if (p.length >= 1) setPrinterAId(p[0].id);
-    if (p.length >= 2) setPrinterBId(p[1].id);
-    else if (p.length === 1) setPrinterBId(p[0].id);
+    const fetchData = async () => {
+      setLoading(true);
+      const [p, s] = await Promise.all([
+        StorageService.getPrinters(),
+        StorageService.getSettings()
+      ]);
+      setPrinters(p);
+      setSettings(s);
+      if (p.length >= 1) setPrinterAId(p[0].id);
+      if (p.length >= 2) setPrinterBId(p[1].id);
+      else if (p.length === 1) setPrinterBId(p[0].id);
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
   const calculateCost = (printerId: string, hours: number) => {
@@ -35,6 +44,8 @@ export const Comparator: React.FC = () => {
 
   const costA = calculateCost(printerAId, hoursA);
   const costB = calculateCost(printerBId, hoursB);
+
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
 
   return (
     <div className="space-y-6">

@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
-import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, Menu, X, ArrowRightLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, Menu, ArrowRightLeft, LogOut } from 'lucide-react';
 import { ViewState } from './types';
 import { Dashboard } from './components/Dashboard';
 import { AssetsManager } from './components/AssetsManager';
 import { Calculator } from './components/Calculator';
 import { Comparator } from './components/Comparator';
 import { History } from './components/History';
+import { Auth } from './components/Auth';
+import { supabase } from './services/supabaseClient';
+import { Session } from '@supabase/supabase-js';
 
 const App: React.FC = () => {
+  const [session, setSession] = useState<Session | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [loadingSession, setLoadingSession] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoadingSession(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -30,6 +54,14 @@ const App: React.FC = () => {
     }
   };
 
+  if (loadingSession) {
+    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Carregando...</div>;
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
@@ -42,7 +74,7 @@ const App: React.FC = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed md:static inset-y-0 left-0 z-30 w-64 bg-slate-800 border-r border-slate-700 transform transition-transform duration-200 ease-in-out
+        fixed md:static inset-y-0 left-0 z-30 w-64 bg-slate-800 border-r border-slate-700 transform transition-transform duration-200 ease-in-out flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <div className="h-16 flex items-center px-6 border-b border-slate-700">
@@ -50,7 +82,7 @@ const App: React.FC = () => {
           <span className="font-bold text-xl tracking-tight">PrintCalc</span>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-2 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -74,10 +106,17 @@ const App: React.FC = () => {
           })}
         </nav>
         
-        <div className="absolute bottom-4 left-4 right-4">
-           <div className="bg-slate-900 rounded-lg p-3 text-xs text-slate-500 border border-slate-700">
+        <div className="p-4 border-t border-slate-700 space-y-4">
+          <div className="bg-slate-900 rounded-lg p-3 text-xs text-slate-500 border border-slate-700">
               <p>Dica: Adicione seus ativos primeiro para permitir cálculos precisos.</p>
-           </div>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors"
+          >
+             <LogOut size={20} />
+             <span className="font-medium">Sair</span>
+          </button>
         </div>
       </aside>
 
@@ -95,6 +134,9 @@ const App: React.FC = () => {
               <h1 className="text-lg md:text-xl font-semibold text-slate-200 capitalize">
                 {navItems.find(i => i.id === currentView)?.label}
               </h1>
+           </div>
+           <div className="text-sm text-slate-400 hidden md:block">
+             {session.user.email}
            </div>
         </header>
 

@@ -1,24 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { Project, GlobalSettings } from '../types';
 import { StorageService } from '../services/storage';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
 
 export const History: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ currencySymbol: '$', electricityCost: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProjects(StorageService.getProjects());
-    setSettings(StorageService.getSettings());
+    const fetchData = async () => {
+      setLoading(true);
+      const [p, s] = await Promise.all([
+        StorageService.getProjects(),
+        StorageService.getSettings()
+      ]);
+      setProjects(p);
+      setSettings(s);
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
-  const deleteProject = (id: string) => {
+  const deleteProject = async (id: string) => {
     if(confirm('Tem certeza que deseja excluir este orçamento?')) {
-      const updated = projects.filter(p => p.id !== id);
-      setProjects(updated);
-      StorageService.saveProjects(updated);
+      const old = [...projects];
+      setProjects(projects.filter(p => p.id !== id));
+      try {
+        await StorageService.deleteProject(id);
+      } catch (e) {
+        setProjects(old);
+        alert('Erro ao excluir projeto');
+      }
     }
   }
+
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
 
   return (
     <div className="space-y-6">

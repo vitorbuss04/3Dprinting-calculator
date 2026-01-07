@@ -3,15 +3,25 @@ import { StorageService } from '../services/storage';
 import { Project, GlobalSettings } from '../types';
 import { Card } from './UIComponents';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { History, TrendingUp, DollarSign, Box } from 'lucide-react';
+import { History, TrendingUp, DollarSign, Box, Loader2 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ currencySymbol: '$', electricityCost: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProjects(StorageService.getProjects());
-    setSettings(StorageService.getSettings());
+    const fetchData = async () => {
+      setLoading(true);
+      const [p, s] = await Promise.all([
+        StorageService.getProjects(),
+        StorageService.getSettings()
+      ]);
+      setProjects(p);
+      setSettings(s);
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
   const totalRevenue = projects.reduce((acc, curr) => acc + curr.result.finalPrice, 0);
@@ -24,6 +34,8 @@ export const Dashboard: React.FC = () => {
     cost: p.result.totalProductionCost,
     profit: p.result.profit
   })).reverse();
+
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
 
   return (
     <div className="space-y-6">

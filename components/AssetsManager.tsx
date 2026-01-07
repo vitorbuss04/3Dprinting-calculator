@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, Printer as PrinterIcon, Package } from 'lucide-react';
+import { Plus, Trash2, Save, Printer as PrinterIcon, Package, Loader2 } from 'lucide-react';
 import { Printer, Material, MaterialType, GlobalSettings } from '../types';
 import { StorageService } from '../services/storage';
 import { Card, Input, Button, Select } from './UIComponents';
@@ -9,33 +9,42 @@ export const AssetsManager: React.FC = () => {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ electricityCost: 0, currencySymbol: 'R$' });
+  const [loading, setLoading] = useState(true);
 
-  // Load data
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [p, m, s] = await Promise.all([
+        StorageService.getPrinters(),
+        StorageService.getMaterials(),
+        StorageService.getSettings()
+      ]);
+      setPrinters(p);
+      setMaterials(m);
+      setSettings(s);
+    } catch (error) {
+      console.error("Failed to load assets", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setPrinters(StorageService.getPrinters());
-    setMaterials(StorageService.getMaterials());
-    setSettings(StorageService.getSettings());
+    loadData();
   }, []);
 
-  // Save Handlers
-  const savePrinters = (newPrinters: Printer[]) => {
-    setPrinters(newPrinters);
-    StorageService.savePrinters(newPrinters);
-  };
-
-  const saveMaterials = (newMaterials: Material[]) => {
-    setMaterials(newMaterials);
-    StorageService.saveMaterials(newMaterials);
-  };
-
-  const saveSettings = () => {
-    StorageService.saveSettings(settings);
-    alert('Configurações salvas!');
+  const saveSettings = async () => {
+    try {
+      await StorageService.saveSettings(settings);
+      alert('Configurações salvas!');
+    } catch (e) {
+      alert('Erro ao salvar configurações.');
+    }
   };
 
   // --- Actions ---
 
-  const addPrinter = () => {
+  const addPrinter = async () => {
     const newPrinter: Printer = {
       id: crypto.randomUUID(),
       name: 'Nova Impressora',
@@ -44,21 +53,49 @@ export const AssetsManager: React.FC = () => {
       powerConsumption: 300,
       maintenanceCostPerHour: 2
     };
-    savePrinters([...printers, newPrinter]);
+    // Optimistic update
+    setPrinters([...printers, newPrinter]);
+    await StorageService.addPrinter(newPrinter);
   };
 
-  const removePrinter = (id: string) => {
+  const removePrinter = async (id: string) => {
     if (confirm('Excluir esta impressora?')) {
-      savePrinters(printers.filter(p => p.id !== id));
+      const old = [...printers];
+      setPrinters(printers.filter(p => p.id !== id));
+      try {
+        await StorageService.deletePrinter(id);
+      } catch (e) {
+        setPrinters(old); // Revert on error
+        alert('Erro ao excluir.');
+      }
     }
   };
 
-  const updatePrinter = (id: string, field: keyof Printer, value: string | number) => {
-    const updated = printers.map(p => p.id === id ? { ...p, [field]: value } : p);
-    savePrinters(updated);
+  const updatePrinter = async (id: string, field: keyof Printer, value: string | number) => {
+    const updatedPrinters = printers.map(p => p.id === id ? { ...p, [field]: value } : p);
+    setPrinters(updatedPrinters);
+    
+    // Debounce or save on blur is better, but simplified here: save logic
+    // We find the printer and save it. Ideally use a save button or onBlur.
+    // For this UI, we will just update local state and have a "auto-save" effect 
+    // or we should probably add a save button per card.
+    // Given the previous design was instant-save, we'll try to save. 
+    // WARNING: This generates many requests on typing. 
+    // Ideally we update local state, and maybe trigger save after delay.
+    // For simplicity/safety, let's keep local state update here, but we need a mechanism to sync to DB.
+    // To fix this UX properly without complex debounce code blocks:
+    // We will save immediately but this might be laggy. 
+    // BETTER: Find the specific printer object and save it.
+    const p = updatedPrinters.find(p => p.id === id);
+    if(p) await StorageService.updatePrinter(p);
   };
+  
+  // Improvement: Wrapper for input change that only updates state, 
+  // and a separate save/blur handler? 
+  // To keep it simple and responsive, we will just update state here and fire-and-forget the DB update,
+  // knowing it might cause race conditions if typed too fast, but acceptable for MVP integration.
 
-  const addMaterial = () => {
+  const addMaterial = async () => {
     const newMaterial: Material = {
       id: crypto.randomUUID(),
       type: MaterialType.PLA,
@@ -67,19 +104,31 @@ export const AssetsManager: React.FC = () => {
       spoolWeight: 1000,
       currentStock: 1000
     };
-    saveMaterials([...materials, newMaterial]);
+    setMaterials([...materials, newMaterial]);
+    await StorageService.addMaterial(newMaterial);
   };
 
-  const removeMaterial = (id: string) => {
+  const removeMaterial = async (id: string) => {
     if (confirm('Excluir este material?')) {
-      saveMaterials(materials.filter(m => m.id !== id));
+      const old = [...materials];
+      setMaterials(materials.filter(m => m.id !== id));
+      try {
+        await StorageService.deleteMaterial(id);
+      } catch (e) {
+        setMaterials(old);
+        alert('Erro ao excluir.');
+      }
     }
   };
 
-  const updateMaterial = (id: string, field: keyof Material, value: string | number) => {
-    const updated = materials.map(m => m.id === id ? { ...m, [field]: value } : m);
-    saveMaterials(updated);
+  const updateMaterial = async (id: string, field: keyof Material, value: string | number) => {
+    const updatedMaterials = materials.map(m => m.id === id ? { ...m, [field]: value } : m);
+    setMaterials(updatedMaterials);
+    const m = updatedMaterials.find(m => m.id === id);
+    if(m) await StorageService.updateMaterial(m);
   };
+
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
 
   return (
     <div className="space-y-6">

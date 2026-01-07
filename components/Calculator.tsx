@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, Calculator as CalcIcon, AlertTriangle } from 'lucide-react';
+import { Save, Calculator as CalcIcon, AlertTriangle, Loader2 } from 'lucide-react';
 import { Printer, Material, GlobalSettings, Project, CalculationResult } from '../types';
 import { StorageService } from '../services/storage';
 import { Card, Input, Button, Select } from './UIComponents';
@@ -9,6 +9,8 @@ export const Calculator: React.FC = () => {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ electricityCost: 0, currencySymbol: '$' });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Form State
   const [projectName, setProjectName] = useState('Novo Projeto');
@@ -24,13 +26,26 @@ export const Calculator: React.FC = () => {
   const [markup, setMarkup] = useState(100); // %
 
   useEffect(() => {
-    const p = StorageService.getPrinters();
-    const m = StorageService.getMaterials();
-    setPrinters(p);
-    setMaterials(m);
-    setSettings(StorageService.getSettings());
-    if (p.length > 0) setSelectedPrinterId(p[0].id);
-    if (m.length > 0) setSelectedMaterialId(m[0].id);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [p, m, s] = await Promise.all([
+          StorageService.getPrinters(),
+          StorageService.getMaterials(),
+          StorageService.getSettings()
+        ]);
+        setPrinters(p);
+        setMaterials(m);
+        setSettings(s);
+        if (p.length > 0) setSelectedPrinterId(p[0].id);
+        if (m.length > 0) setSelectedMaterialId(m[0].id);
+      } catch (e) {
+        console.error("Error loading calculator data", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   // Calculation Logic
@@ -87,7 +102,8 @@ export const Calculator: React.FC = () => {
     printHours, printMinutes, weight, failureRate, laborHours, laborMinutes, laborRate, markup
   ]);
 
-  const saveProject = () => {
+  const saveProject = async () => {
+    setSaving(true);
     const project: Project = {
       id: crypto.randomUUID(),
       name: projectName,
@@ -104,9 +120,16 @@ export const Calculator: React.FC = () => {
       markup,
       result
     };
-    const current = StorageService.getProjects();
-    StorageService.saveProjects([project, ...current]);
-    alert('Projeto salvo no histórico!');
+    
+    try {
+      await StorageService.addProject(project);
+      alert('Projeto salvo no histórico!');
+    } catch (e) {
+      alert('Erro ao salvar projeto.');
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const chartData = [
@@ -114,6 +137,8 @@ export const Calculator: React.FC = () => {
     { name: 'Máquina', value: result.machineTotalCost, color: '#f59e0b' }, // amber-500
     { name: 'Mão de Obra', value: result.laborCost, color: '#3b82f6' }, // blue-500
   ].filter(d => d.value > 0);
+
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
 
   if (printers.length === 0 || materials.length === 0) {
     return (
@@ -176,8 +201,9 @@ export const Calculator: React.FC = () => {
           </div>
         </Card>
 
-        <Button onClick={saveProject} className="w-full py-4 text-lg">
-          <Save size={20} /> Salvar Orçamento no Histórico
+        <Button onClick={saveProject} className="w-full py-4 text-lg" disabled={saving}>
+          {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />} 
+          {saving ? 'Salvando...' : 'Salvar Orçamento no Histórico'}
         </Button>
       </div>
 
