@@ -54,8 +54,12 @@ const App: React.FC = () => {
     }
   };
 
+  const neuMain = "bg-[#f0f0f0]";
+  const neuShadowOut = "shadow-[10px_10px_20px_#d1d1d1,-10px_-10px_20px_#ffffff]";
+  const neuShadowIn = "shadow-[inset_4px_4px_8px_#d1d1d1,inset_-4px_-4px_8px_#ffffff]";
+
   if (loadingSession) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Carregando...</div>;
+    return <div className={`min-h-screen ${neuMain} flex items-center justify-center text-gray-500 font-black uppercase tracking-widest text-xs`}>Inicializando Sistema...</div>;
   }
 
   if (!session) {
@@ -63,26 +67,26 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden">
+    <div className={`min-h-screen ${neuMain} text-gray-700 flex overflow-hidden font-sans`}>
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 z-20 md:hidden"
+          className="fixed inset-0 bg-black/5 z-20 md:hidden backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed md:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out flex flex-col shadow-sm
+        fixed md:static inset-y-0 left-0 z-30 w-72 ${neuMain} p-6 transform transition-transform duration-500 ease-in-out flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-sm">3D</div>
-          <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
+        <div className={`h-20 ${neuShadowOut} rounded-3xl flex items-center px-6 mb-10`}>
+          <div className="bg-blue-600 w-10 h-10 rounded-2xl flex items-center justify-center mr-4 font-black text-white shadow-lg shadow-blue-500/20">3D</div>
+          <span className="font-black text-xl tracking-tighter text-gray-700 uppercase">PrintCalc</span>
         </div>
 
-        <nav className="p-4 space-y-2 flex-1">
+        <nav className="space-y-4 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -93,29 +97,29 @@ const App: React.FC = () => {
                   setCurrentView(item.id as ViewState);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 ${
                   isActive 
-                    ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100' 
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                    ? `text-blue-600 ${neuShadowIn}` 
+                    : `text-gray-400 hover:text-gray-600`
                 }`}
               >
-                <Icon size={20} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
-                <span className="font-medium">{item.label}</span>
+                <Icon size={20} className={isActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]' : ''} />
+                <span className="font-black text-xs uppercase tracking-widest">{item.label}</span>
               </button>
             );
           })}
         </nav>
         
-        <div className="p-4 border-t border-gray-100 space-y-4">
-          <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700 border border-blue-100">
-              <p>Dica: Mantenha seus custos de energia atualizados nas configurações.</p>
+        <div className="mt-10 space-y-6">
+          <div className={`${neuShadowIn} rounded-2xl p-5 text-[10px] font-black text-gray-400 leading-relaxed uppercase tracking-tighter`}>
+              Dica: Mantenha seus preços de insumos atualizados para maior precisão.
           </div>
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+            className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-gray-400 hover:text-red-500 transition-all duration-300 ${neuShadowOut} active:scale-95`}
           >
-             <LogOut size={20} />
-             <span className="font-medium">Sair</span>
+             <LogOut size={18} />
+             <span className="font-black text-xs uppercase tracking-widest">Encerrar</span>
           </button>
         </div>
       </aside>
@@ -123,26 +127,33 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-white/80 backdrop-blur-sm border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
-           <div className="flex items-center gap-4">
+        <header className="h-24 flex items-center px-8 md:px-12 justify-between z-10">
+           <div className="flex items-center gap-6">
               <button 
-                className="md:hidden text-gray-500 hover:text-gray-900"
+                className={`md:hidden p-4 rounded-2xl ${neuShadowOut} active:scale-90 transition-all`}
                 onClick={() => setIsSidebarOpen(true)}
               >
-                <Menu size={24} />
+                <Menu size={22} className="text-gray-500" />
               </button>
-              <h1 className="text-lg md:text-xl font-semibold text-gray-800 capitalize">
+              <h1 className="text-xl font-black text-gray-700 tracking-tighter uppercase">
                 {navItems.find(i => i.id === currentView)?.label}
               </h1>
            </div>
-           <div className="text-sm text-gray-500 hidden md:block">
-             {session.user.email}
+           
+           <div className={`flex items-center gap-5 p-2 px-6 rounded-3xl ${neuShadowOut}`}>
+             <div className="text-right hidden sm:block">
+               <p className="text-[10px] font-black text-gray-700 tracking-tight uppercase">{session.user.email?.split('@')[0]}</p>
+               <p className="text-[8px] font-bold text-gray-400 tracking-widest uppercase opacity-60">Operador</p>
+             </div>
+             <div className={`w-10 h-10 rounded-2xl ${neuShadowIn} flex items-center justify-center text-blue-600 font-black text-sm`}>
+               {session.user.email?.charAt(0).toUpperCase()}
+             </div>
            </div>
         </header>
 
         {/* Scrollable Area */}
-        <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50">
-          <div className="max-w-6xl mx-auto">
+        <div className="flex-1 overflow-auto p-6 md:p-12">
+          <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
              {renderContent()}
           </div>
         </div>

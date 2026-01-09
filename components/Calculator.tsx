@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Save, Calculator as CalcIcon, AlertTriangle, Loader2 } from 'lucide-react';
 import { Printer, Material, GlobalSettings, Project, CalculationResult } from '../types';
 import { StorageService } from '../services/storage';
-import { Card, Input, Button, Select } from './UIComponents';
+import { Card, Input, Button, Select, neuShadowIn } from './UIComponents';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export const Calculator: React.FC = () => {
@@ -12,277 +12,144 @@ export const Calculator: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Form State
   const [projectName, setProjectName] = useState('Novo Projeto');
   const [selectedPrinterId, setSelectedPrinterId] = useState<string>('');
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
   const [printHours, setPrintHours] = useState(0);
   const [printMinutes, setPrintMinutes] = useState(0);
-  const [weight, setWeight] = useState(0); // grams
-  const [failureRate, setFailureRate] = useState(10); // %
+  const [weight, setWeight] = useState(0);
+  const [failureRate, setFailureRate] = useState(10);
   const [laborHours, setLaborHours] = useState(0);
   const [laborMinutes, setLaborMinutes] = useState(0);
   const [laborRate, setLaborRate] = useState(0);
-  const [markup, setMarkup] = useState(100); // %
+  const [markup, setMarkup] = useState(100);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      try {
-        const [p, m, s] = await Promise.all([
-          StorageService.getPrinters(),
-          StorageService.getMaterials(),
-          StorageService.getSettings()
-        ]);
-        setPrinters(p);
-        setMaterials(m);
-        setSettings(s);
-        if (p.length > 0) setSelectedPrinterId(p[0].id);
-        if (m.length > 0) setSelectedMaterialId(m[0].id);
-      } catch (e) {
-        console.error("Error loading calculator data", e);
-      } finally {
-        setLoading(false);
-      }
+      const [p, m, s] = await Promise.all([
+        StorageService.getPrinters(),
+        StorageService.getMaterials(),
+        StorageService.getSettings()
+      ]);
+      setPrinters(p); setMaterials(m); setSettings(s);
+      if (p.length > 0) setSelectedPrinterId(p[0].id);
+      if (m.length > 0) setSelectedMaterialId(m[0].id);
+      setLoading(false);
     };
     fetchData();
   }, []);
 
-  // Calculation Logic
   const result: CalculationResult = useMemo(() => {
     const printer = printers.find(p => p.id === selectedPrinterId);
     const material = materials.find(m => m.id === selectedMaterialId);
-
-    if (!printer || !material) {
-      return {
-        depreciationCost: 0, energyCost: 0, materialCost: 0, maintenanceCost: 0,
-        laborCost: 0, machineTotalCost: 0, totalProductionCost: 0, finalPrice: 0, profit: 0
-      };
-    }
-
+    if (!printer || !material) return { depreciationCost: 0, energyCost: 0, materialCost: 0, maintenanceCost: 0, laborCost: 0, machineTotalCost: 0, totalProductionCost: 0, finalPrice: 0, profit: 0 };
     const totalPrintTimeHours = printHours + (printMinutes / 60);
-    const totalLaborTimeHours = laborHours + (laborMinutes / 60);
-
-    // 1. Depreciation
-    const depreciationPerHour = printer.acquisitionCost / printer.lifespanHours;
-    const depreciationCost = depreciationPerHour * totalPrintTimeHours;
-
-    // 2. Energy
+    const depreciationCost = (printer.acquisitionCost / printer.lifespanHours) * totalPrintTimeHours;
     const energyCost = (printer.powerConsumption / 1000) * settings.electricityCost * totalPrintTimeHours;
-
-    // 3. Material (with failure rate)
-    const costPerGram = material.spoolPrice / material.spoolWeight;
-    const materialCostBase = weight * costPerGram;
-    const materialCost = materialCostBase * (1 + (failureRate / 100));
-
-    // 4. Maintenance
+    const materialCost = (weight * (material.spoolPrice / material.spoolWeight)) * (1 + (failureRate / 100));
     const maintenanceCost = printer.maintenanceCostPerHour * totalPrintTimeHours;
-
-    // 5. Labor
-    const laborCost = totalLaborTimeHours * laborRate;
-
-    const machineTotalCost = depreciationCost + maintenanceCost + energyCost;
-    const totalProductionCost = machineTotalCost + materialCost + laborCost;
+    const laborCost = (laborHours + (laborMinutes / 60)) * laborRate;
+    const totalProductionCost = depreciationCost + energyCost + materialCost + maintenanceCost + laborCost;
     const finalPrice = totalProductionCost * (1 + (markup / 100));
-    const profit = finalPrice - totalProductionCost;
-
-    return {
-      depreciationCost,
-      energyCost,
-      materialCost,
-      maintenanceCost,
-      laborCost,
-      machineTotalCost,
-      totalProductionCost,
-      finalPrice,
-      profit
-    };
-  }, [
-    printers, materials, settings, selectedPrinterId, selectedMaterialId,
-    printHours, printMinutes, weight, failureRate, laborHours, laborMinutes, laborRate, markup
-  ]);
+    return { depreciationCost, energyCost, materialCost, maintenanceCost, laborCost, machineTotalCost: depreciationCost + maintenanceCost + energyCost, totalProductionCost, finalPrice, profit: finalPrice - totalProductionCost };
+  }, [printers, materials, settings, selectedPrinterId, selectedMaterialId, printHours, printMinutes, weight, failureRate, laborHours, laborMinutes, laborRate, markup]);
 
   const saveProject = async () => {
     setSaving(true);
-    const project: Project = {
-      id: crypto.randomUUID(),
-      name: projectName,
-      date: new Date().toISOString(),
-      printerId: selectedPrinterId,
-      materialId: selectedMaterialId,
-      printTimeHours: printHours,
-      printTimeMinutes: printMinutes,
-      modelWeight: weight,
-      failureRate,
-      laborTimeHours: laborHours,
-      laborTimeMinutes: laborMinutes,
-      laborHourlyRate: laborRate,
-      markup,
-      result
-    };
-    
     try {
-      await StorageService.addProject(project);
-      alert('Projeto salvo no histórico!');
-    } catch (e) {
-      alert('Erro ao salvar projeto.');
-      console.error(e);
-    } finally {
-      setSaving(false);
-    }
+      await StorageService.addProject({ id: crypto.randomUUID(), name: projectName, date: new Date().toISOString(), printerId: selectedPrinterId, materialId: selectedMaterialId, printTimeHours: printHours, printTimeMinutes: printMinutes, modelWeight: weight, failureRate, laborTimeHours: laborHours, laborTimeMinutes: laborMinutes, laborHourlyRate: laborRate, markup, result });
+      alert('Orçamento Registrado!');
+    } catch (e) { alert('Erro na Persistência'); } finally { setSaving(false); }
   };
 
+  if (loading) return <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-blue-500" size={40} /></div>;
+
   const chartData = [
-    { name: 'Material', value: result.materialCost, color: '#10b981' }, // emerald-500
-    { name: 'Máquina', value: result.machineTotalCost, color: '#f59e0b' }, // amber-500
-    { name: 'Mão de Obra', value: result.laborCost, color: '#3b82f6' }, // blue-500
+    { name: 'Filamento', value: result.materialCost, color: '#10b981' },
+    { name: 'Hardware', value: result.machineTotalCost, color: '#f59e0b' },
+    { name: 'Mão de Obra', value: result.laborCost, color: '#3b82f6' },
   ].filter(d => d.value > 0);
 
-  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
-
-  if (printers.length === 0 || materials.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-center">
-        <AlertTriangle className="text-yellow-500 mb-4" size={48} />
-        <h2 className="text-xl font-bold mb-2 text-gray-900">Nenhum Ativo Encontrado</h2>
-        <p className="text-gray-500">Por favor, adicione pelo menos uma Impressora e um Material na aba "Meus Ativos" para usar a calculadora.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-      {/* --- Inputs Column --- */}
-      <div className="lg:col-span-7 space-y-8 flex flex-col">
-        <Card title="Detalhes do Projeto">
-          <Input label="Nome do Projeto" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="Impressora"
-              options={printers.map(p => ({ value: p.id, label: p.name }))}
-              value={selectedPrinterId}
-              onChange={(e) => setSelectedPrinterId(e.target.value)}
-            />
-            <Select
-              label="Material"
-              options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})` }))}
-              value={selectedMaterialId}
-              onChange={(e) => setSelectedMaterialId(e.target.value)}
-            />
+    <div className="h-full grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0 overflow-visible p-1">
+      <div className="lg:col-span-7 flex flex-col gap-8 overflow-y-auto no-scrollbar pb-6 px-1">
+        <Card title="Engenharia do Modelo">
+          <Input label="ID do Projeto" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
+          <div className="grid grid-cols-2 gap-5">
+            <Select label="Hardware Ativo" options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(e) => setSelectedPrinterId(e.target.value)} />
+            <Select label="Polímero" options={materials.map(m => ({ value: m.id, label: m.name }))} value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-            <Input label="Tempo (Hrs)" type="number" min="0" value={printHours} onChange={(e) => setPrintHours(Number(e.target.value))} />
-            <Input label="Tempo (Min)" type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(Number(e.target.value))} />
-            <Input label="Peso (g)" type="number" min="0" value={weight} onChange={(e) => setWeight(Number(e.target.value))} />
-            <Input label="Falha (%)" type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(Number(e.target.value))} />
+          <div className="grid grid-cols-4 gap-4 mt-2 overflow-visible">
+            <Input label="Hrs" type="number" value={printHours} onChange={(e) => setPrintHours(Number(e.target.value))} />
+            <Input label="Min" type="number" value={printMinutes} onChange={(e) => setPrintMinutes(Number(e.target.value))} />
+            <Input label="Massa(g)" type="number" value={weight} onChange={(e) => setWeight(Number(e.target.value))} />
+            <Input label="Segurança(%)" type="number" value={failureRate} onChange={(e) => setFailureRate(Number(e.target.value))} />
           </div>
         </Card>
 
-        <Card title="Valores de Negócio" className="flex-1">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Input label="Mão de Obra (Hrs)" type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(Number(e.target.value))} />
-            <Input label="Mão de Obra (Min)" type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(Number(e.target.value))} />
-            <Input label="Valor Hora" type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(Number(e.target.value))} subLabel={settings.currencySymbol} />
+        <Card title="Configuração Comercial">
+          <div className="grid grid-cols-3 gap-5">
+            <Input label="M.O. Hrs" type="number" value={laborHours} onChange={(e) => setLaborHours(Number(e.target.value))} />
+            <Input label="M.O. Min" type="number" value={laborMinutes} onChange={(e) => setLaborMinutes(Number(e.target.value))} />
+            <Input label="Taxa Lab" type="number" value={laborRate} onChange={(e) => setLaborRate(Number(e.target.value))} subLabel={settings.currencySymbol} />
           </div>
-          <div className="mt-4">
-             <div className="flex justify-between mb-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Margem de Lucro (Markup)</label>
-                <span className="text-sm font-black text-blue-600">{markup}%</span>
-             </div>
-             <input
-               type="range"
-               min="0"
-               max="500"
-               step="5"
-               value={markup}
-               onChange={(e) => setMarkup(Number(e.target.value))}
-               className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
-             />
+          <div className="mt-4 px-1 overflow-visible">
+            <div className="flex justify-between mb-2 text-[0.7rem] font-black text-gray-400 uppercase tracking-widest">
+              <span>Margem de Lucro (Markup)</span>
+              <span className="text-blue-600">{markup}%</span>
+            </div>
+            <div className={`p-4 rounded-xl ${neuShadowIn} border border-white/20`}>
+              <input type="range" min="0" max="500" step="5" value={markup} onChange={(e) => setMarkup(Number(e.target.value))} className="w-full h-2 bg-gray-200/50 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+            </div>
           </div>
         </Card>
       </div>
 
-      {/* --- Results Column --- */}
-      <div className="lg:col-span-5 flex flex-col gap-6">
-        <div className="space-y-6">
-          {/* Main Price Card */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-800 border border-blue-500 rounded-3xl p-6 shadow-2xl shadow-indigo-500/30 relative overflow-hidden text-white transition-transform hover:scale-[1.02]">
-            <div className="absolute top-0 right-0 p-4 opacity-10 text-white translate-x-1/4 -translate-y-1/4">
-              <CalcIcon size={200} />
-            </div>
-            <h3 className="text-blue-100 font-bold uppercase tracking-widest text-[10px] mb-2 drop-shadow-sm">Preço de Venda Sugerido</h3>
-            <div className="text-4xl font-black mb-4 drop-shadow-md">
-              {settings.currencySymbol} {result.finalPrice.toFixed(2)}
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/10">
-              <div>
-                 <span className="block text-blue-100/70 text-[9px] font-bold uppercase tracking-wider mb-1">Custo Produção</span>
-                 <span className="font-mono text-lg font-bold">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
-              </div>
-              <div>
-                 <span className="block text-blue-100/70 text-[9px] font-bold uppercase tracking-wider mb-1">Lucro Líquido</span>
-                 <span className="font-mono text-lg font-bold text-emerald-300">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
+      <div className="lg:col-span-5 flex flex-col gap-8 min-h-0 overflow-visible">
+        <div className="flex-1 min-h-0 flex flex-col gap-8 overflow-visible">
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-900 rounded-[2.5vw] p-8 text-white shadow-2xl shadow-indigo-500/40 shrink-0 relative overflow-visible">
+            <div className="relative z-10">
+              <h4 className="text-[0.65rem] font-black uppercase tracking-[0.4em] opacity-80 mb-3">Valor de Mercado Final</h4>
+              <div className="text-[clamp(1.8rem,3.5vw,3.5rem)] font-black leading-none tracking-tighter">{settings.currencySymbol} {result.finalPrice.toFixed(2)}</div>
+              <div className="grid grid-cols-2 gap-6 mt-6 pt-6 border-t border-white/10 text-[0.75rem] font-bold uppercase tracking-tight">
+                <div>Custo Produção: <br/><span className="opacity-70">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span></div>
+                <div className="text-emerald-300">Net Profit: <br/>{settings.currencySymbol}{result.profit.toFixed(2)}</div>
               </div>
             </div>
+            <CalcIcon className="absolute top-1/2 right-0 -translate-y-1/2 opacity-[0.03] translate-x-1/4 pointer-events-none" size={200} />
           </div>
 
-          {/* Breakdown */}
-          <Card title="Composição de Custos" className="flex flex-col">
-            {chartData.length > 0 && (
-              <div className="h-48 mb-4">
-                 <ResponsiveContainer width="100%" height="100%">
-                   <PieChart>
-                     <Pie
-                       data={chartData}
-                       cx="50%"
-                       cy="50%"
-                       innerRadius={50}
-                       outerRadius={75}
-                       paddingAngle={8}
-                       dataKey="value"
-                     >
-                       {chartData.map((entry, index) => (
-                         <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                       ))}
-                     </Pie>
-                     <Tooltip
-                        contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', color: '#111827', fontSize: '11px', fontWeight: 'bold' }}
-                        formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`, 'Custo']}
-                     />
-                   </PieChart>
-                 </ResponsiveContainer>
+          <Card title="Breakdown de Custos" className="flex-1 overflow-visible">
+            <div className="h-full flex flex-col overflow-visible">
+              <div className="flex-1 min-h-0 overflow-visible">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={chartData} cx="50%" cy="50%" innerRadius="60%" outerRadius="90%" paddingAngle={8} dataKey="value" stroke="none">
+                      {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} className="outline-none" />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            )}
-            <div className="space-y-2">
-               <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
-                 <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform"></div> Insumos</span>
-                 <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span>
-               </div>
-               <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
-                 <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-125 transition-transform"></div> Operacional Máquina</span>
-                 <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span>
-               </div>
-               <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50/50 border border-gray-100 hover:bg-white transition-colors group">
-                 <span className="flex items-center gap-3 text-xs font-bold text-gray-600 tracking-tight"><div className="w-2 h-2 rounded-full bg-blue-500 group-hover:scale-125 transition-transform"></div> Mão de Obra</span>
-                 <span className="font-mono font-bold text-gray-900 text-sm">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span>
-               </div>
+              <div className="grid grid-cols-1 gap-2 mt-4 shrink-0 overflow-visible">
+                {chartData.map((d, i) => (
+                  <div key={i} className={`flex justify-between text-[0.65rem] font-black uppercase p-3 rounded-xl ${neuShadowIn} border border-white/30 bg-transparent`}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{backgroundColor: d.color}}></div>
+                      <span className="opacity-60">{d.name}</span>
+                    </div>
+                    <span>{settings.currencySymbol}{d.value.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </Card>
         </div>
 
-        {/* Action Button that fills the remaining gap */}
-        <div className="flex-1 flex min-h-[100px]">
-          <Button 
-            onClick={saveProject} 
-            className="w-full h-full text-lg shadow-2xl shadow-blue-500/20" 
-            disabled={saving}
-          >
-            <div className="flex flex-col items-center gap-2">
-              {saving ? <Loader2 className="animate-spin" size={28} /> : <Save size={28} className="drop-shadow-sm" />} 
-              <span>{saving ? 'Salvando...' : 'Salvar Orçamento'}</span>
-            </div>
-          </Button>
-        </div>
+        <Button onClick={saveProject} disabled={saving} className="h-[12vh] min-h-[70px] w-full bg-blue-600 text-white shadow-2xl shadow-blue-500/30 text-xl group overflow-visible">
+          {saving ? <Loader2 className="animate-spin" /> : <Save className="group-hover:scale-125 transition-transform" />} 
+          <span>Finalizar Orçamento</span>
+        </Button>
       </div>
     </div>
   );
