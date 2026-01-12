@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, Menu, ArrowRightLeft, LogOut } from 'lucide-react';
 import { ViewState } from './types';
@@ -10,7 +9,6 @@ import { History } from './components/History';
 import { Auth } from './components/Auth';
 import { supabase } from './services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
-import { neuMain, neuShadowOut, neuShadowIn, neuButton } from './components/UIComponents';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -57,7 +55,7 @@ const App: React.FC = () => {
   };
 
   if (loadingSession) {
-    return <div className={`h-screen ${neuMain} flex items-center justify-center text-gray-400 font-black uppercase tracking-[0.4em] text-[10px] animate-pulse`}>Sincronizando Sistema...</div>;
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Carregando...</div>;
   }
 
   if (!session) {
@@ -65,27 +63,26 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`h-screen w-full ${neuMain} text-gray-700 flex overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-600 overflow-x-hidden`}>
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden font-sans">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/10 z-40 md:hidden backdrop-blur-sm transition-opacity duration-500"
+          className="fixed inset-0 bg-black/10 z-20 md:hidden backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar - overflow-visible para garantir que nada corte o efeito neumórfico */}
+      {/* Sidebar */}
       <aside className={`
-        fixed md:static inset-y-0 left-0 z-50 w-[20vw] min-w-[280px] ${neuMain} p-[2.5vw] transform transition-all duration-500 ease-in-out flex flex-col shrink-0 overflow-visible
+        fixed md:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out flex flex-col shadow-sm
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `} style={{ backgroundClip: 'unset' }}>
-        <div className={`h-[10vh] min-h-[80px] ${neuShadowOut} rounded-[2vw] flex items-center px-8 mb-10 transform hover:scale-[1.02] transition-transform shrink-0`}>
-          <div className="bg-blue-600 w-11 h-11 rounded-2xl flex items-center justify-center mr-5 font-black text-white shadow-xl shadow-blue-500/30">3D</div>
-          <span className="font-black text-[clamp(1.1rem,1.6vw,1.7rem)] tracking-tighter text-gray-800 uppercase">PrintCalc</span>
+      `}>
+        <div className="h-16 flex items-center px-6 border-b border-gray-100">
+          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-lg shadow-blue-500/40 transform hover:scale-105 transition-transform">3D</div>
+          <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
         </div>
 
-        {/* Menu de navegação com overflow-visible para não cortar as sombras dos botões ativos */}
-        <nav className="space-y-5 flex-1 overflow-visible px-2 py-2">
+        <nav className="p-4 space-y-1 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -96,66 +93,62 @@ const App: React.FC = () => {
                   setCurrentView(item.id as ViewState);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-5 px-7 py-5 rounded-[1.5vw] transition-all duration-300 group ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
                   isActive 
-                    ? `bg-blue-600 text-white shadow-2xl shadow-blue-500/40 scale-[1.05]` 
-                    : `text-gray-400 hover:text-gray-600 ${neuButton}`
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-400/40 scale-[1.02]' 
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <Icon size={20} className={isActive ? 'drop-shadow-lg' : 'opacity-70 group-hover:scale-110 transition-transform'} />
-                <span className="font-black text-[clamp(0.65rem,0.85vw,0.8rem)] uppercase tracking-[0.2em]">{item.label}</span>
+                <Icon size={18} className={isActive ? 'drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]' : 'drop-shadow-sm'} />
+                <span className="font-medium text-sm">{item.label}</span>
               </button>
             );
           })}
         </nav>
         
-        <div className="mt-10 space-y-8 shrink-0 overflow-visible px-2">
-          <div className={`${neuShadowIn} rounded-[1.2vw] p-5 text-[0.65rem] font-black text-gray-400 leading-relaxed uppercase tracking-tighter border border-white/40`}>
-              Dica: Mantenha preços atualizados para precisão.
+        <div className="p-4 border-t border-gray-100 space-y-3">
+          <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 border border-gray-100 shadow-inner">
+              <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
           </div>
           <button 
             onClick={handleLogout}
-            className={`w-full flex items-center gap-5 px-7 py-5 rounded-[1.5vw] text-gray-400 hover:text-red-500 transition-all duration-300 ${neuShadowOut} active:scale-95 group`}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
           >
-             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-             <span className="font-black text-[clamp(0.65rem,0.85vw,0.8rem)] uppercase tracking-[0.25em]">Sair</span>
+             <LogOut size={18} className="drop-shadow-sm" />
+             <span className="font-medium text-sm">Sair</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content - min-w-0 e overflow-x-hidden para garantir ausência de rolagem horizontal */}
-      <main className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden overflow-x-hidden">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-[12vh] min-h-[90px] flex items-center px-[5vw] justify-between shrink-0 overflow-visible">
-           <div className="flex items-center gap-8 overflow-visible">
+        <header className="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
+           <div className="flex items-center gap-4">
               <button 
-                className={`md:hidden p-5 rounded-2xl ${neuShadowOut} active:scale-90 transition-all text-gray-500`}
+                className="md:hidden text-gray-500 hover:text-gray-900"
                 onClick={() => setIsSidebarOpen(true)}
               >
-                <Menu size={22} />
+                <Menu size={24} />
               </button>
-              <div className="flex flex-col">
-                <h1 className="text-[clamp(1.3rem,2.2vw,2.8rem)] font-black text-gray-800 tracking-tighter uppercase leading-none">
-                  {navItems.find(i => i.id === currentView)?.label}
-                </h1>
-                <p className="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest mt-1.5 opacity-60">Módulo Operacional</p>
-              </div>
+              <h1 className="text-lg font-bold text-gray-800 capitalize">
+                {navItems.find(i => i.id === currentView)?.label}
+              </h1>
            </div>
-           
-           <div className={`flex items-center gap-5 p-2.5 px-8 rounded-[2.5vw] ${neuShadowOut} transform hover:scale-[1.03] transition-all cursor-default group`}>
+           <div className="flex items-center gap-4">
              <div className="text-right hidden sm:block">
-               <p className="text-[clamp(0.65rem,0.9vw,0.85rem)] font-black text-gray-800 tracking-tight uppercase group-hover:text-blue-600 transition-colors">{session.user.email?.split('@')[0]}</p>
-               <p className="text-[0.6rem] font-bold text-gray-400 tracking-[0.1em] uppercase opacity-60">Controlador</p>
+               <p className="text-xs font-medium text-gray-900">{session.user.email?.split('@')[0]}</p>
+               <p className="text-[10px] text-gray-400">{session.user.email}</p>
              </div>
-             <div className={`w-11 h-11 rounded-2xl ${neuShadowIn} flex items-center justify-center text-blue-600 font-black text-base border border-white/50`}>
+             <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 font-bold text-xs transform hover:scale-110 transition-transform">
                {session.user.email?.charAt(0).toUpperCase()}
              </div>
            </div>
         </header>
 
-        {/* Scrollable Area - Aumentado o padding inferior para pb-[20vh] e removido h-full do container interno */}
-        <div className="flex-1 min-h-0 px-[5vw] pb-[20vh] overflow-y-auto no-scrollbar">
-          <div className="max-w-7xl mx-auto flex flex-col overflow-visible">
+        {/* Scrollable Area */}
+        <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50/50">
+          <div className="max-w-6xl mx-auto">
              {renderContent()}
           </div>
         </div>
