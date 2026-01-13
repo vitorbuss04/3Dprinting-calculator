@@ -12,7 +12,7 @@ export const Calculator: React.FC = () => {
   const [settings, setSettings] = useState<GlobalSettings>({ electricityCost: 0, currencySymbol: '$' });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const hasFetched = useRef(false); // Ref to prevent double-fetching in Strict Mode
+  const hasFetched = useRef(false);
 
   // Form State
   const [projectName, setProjectName] = useState('Novo Projeto');
@@ -28,36 +28,32 @@ export const Calculator: React.FC = () => {
   const [markup, setMarkup] = useState(100);
 
   useEffect(() => {
-    if (hasFetched.current) {
-        return;
-    }
+    if (hasFetched.current) return;
     hasFetched.current = true;
 
-    const fetchData = () => {
-      const loadPromise = Promise.all([
+    const fetchData = async () => {
+      setLoading(true);
+      const [p, m, s] = await Promise.all([
         StorageService.getPrinters(),
         StorageService.getMaterials(),
         StorageService.getSettings(),
       ]);
-
-      toast.promise(loadPromise, {
-        loading: 'Carregando dados da calculadora...',
-        success: ([p, m, s]) => {
-          setPrinters(p);
-          setMaterials(m);
-          setSettings(s);
-          if (p.length > 0) setSelectedPrinterId(p[0].id);
-          if (m.length > 0) setSelectedMaterialId(m[0].id);
-          return 'Calculadora pronta!';
-        },
-        error: 'Erro ao carregar dados iniciais.',
-      }).finally(() => {
-        setLoading(false);
-      });
+      setPrinters(p);
+      setMaterials(m);
+      setSettings(s);
+      if (p.length > 0) setSelectedPrinterId(p[0].id);
+      // Select the first material that is in stock
+      const firstInStockMaterial = m.find(mat => (mat.currentStock || 0) > 0);
+      if (firstInStockMaterial) {
+        setSelectedMaterialId(firstInStockMaterial.id);
+      } else if (m.length > 0) {
+        setSelectedMaterialId(m[0].id); // fallback to first material if none are in stock
+      }
+      setLoading(false);
     };
     
     fetchData();
-  }, []); // Empty dependency array is correct
+  }, []);
 
   const result: CalculationResult = useMemo(() => {
     const printer = printers.find(p => p.id === selectedPrinterId);
@@ -98,6 +94,15 @@ export const Calculator: React.FC = () => {
       toast.error('Por favor, dê um nome ao projeto.');
       return;
     }
+    
+    const material = materials.find(m => m.id === selectedMaterialId);
+    const materialUsed = parseFloat(weight) || 0;
+
+    if (!material || (material.currentStock || 0) < materialUsed) {
+        toast.error('Estoque de material insuficiente para este projeto.');
+        return;
+    }
+
     setIsSaving(true);
 
     const project: Project = {
@@ -108,7 +113,7 @@ export const Calculator: React.FC = () => {
       materialId: selectedMaterialId,
       printTimeHours: parseFloat(printHours) || 0,
       printTimeMinutes: parseFloat(printMinutes) || 0,
-      modelWeight: parseFloat(weight) || 0,
+      modelWeight: materialUsed,
       failureRate: parseFloat(failureRate) || 0,
       laborTimeHours: parseFloat(laborHours) || 0,
       laborTimeMinutes: parseFloat(laborMinutes) || 0,
@@ -117,15 +122,23 @@ export const Calculator: React.FC = () => {
       result
     };
 
-    const savePromise = StorageService.addProject(project);
+    try {
+        await StorageService.addProject(project);
+        
+        // Update material stock
+        const updatedStock = (material.currentStock || 0) - materialUsed;
+        const updatedMaterial = { ...material, currentStock: updatedStock };
+        await StorageService.updateMaterial(updatedMaterial);
 
-    toast.promise(savePromise, {
-      loading: 'Salvando projeto...',
-      success: 'Projeto salvo com sucesso no histórico!',
-      error: 'Erro ao salvar o projeto.',
-    }).finally(() => {
-      setIsSaving(false);
-    });
+        // Update state locally
+        setMaterials(materials.map(m => m.id === selectedMaterialId ? updatedMaterial : m));
+
+        toast.success('Projeto salvo e estoque atualizado!');
+    } catch (error) {
+        toast.error(`Erro ao salvar: ${error.message}`);
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   const chartData = [
@@ -146,6 +159,12 @@ export const Calculator: React.FC = () => {
     );
   }
 
+  const materialOptions = materials.map(m => ({
+    value: m.id,
+    label: `${m.name} (${m.type}) - ${(m.currentStock || 0).toFixed(0)}g restantes`,
+    disabled: (m.currentStock || 0) === 0
+  }));
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <div className="lg:col-span-7 space-y-6">
@@ -153,7 +172,7 @@ export const Calculator: React.FC = () => {
           <Input label="Nome do Projeto" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
           <div className="grid grid-cols-2 gap-4">
             <Select label="Impressora" options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(e) => setSelectedPrinterId(e.target.value)} />
-            <Select label="Material" options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})` }))} value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} />
+            <Select label="Material" options={materialOptions} value={selectedMaterialId} onChange={(e) => setSelectedMaterialId(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
             <Input label="Tempo (Hrs)" type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} />
@@ -210,10 +229,10 @@ export const Calculator: React.FC = () => {
         </div>
 
         <div className="flex-1 flex min-h-[120px]">
-          <Button onClick={saveProject} className="w-full h-full text-lg shadow-2xl shadow-blue-500/40 hover:shadow-blue-500/60 transition-all duration-300 transform active:scale-[0.98]" disabled={isSaving}>
+          <Button onClick={saveProject} className="w-full h-full text-lg shadow-2xl shadow-blue-500/40 hover:shadow-blue-500/60 transition-all duration-300 transform active:scale-[0.98]" disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}>
             <div className="flex flex-col items-center gap-3">
               {isSaving ? <Loader2 className="animate-spin" size={32} /> : <Save size={32} className="drop-shadow-sm" />} 
-              <span className="font-black tracking-tight">{isSaving ? 'Salvando...' : 'Salvar Orçamento'}</span>
+              <span className="font-black tracking-tight">{isSaving ? 'Salvando...' : 'Salvar e Deduzir do Estoque'}</span>
             </div>
           </Button>
         </div>

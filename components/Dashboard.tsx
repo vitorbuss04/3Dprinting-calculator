@@ -4,6 +4,7 @@ import { Project, GlobalSettings } from '../types';
 import { Card } from './UIComponents';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { TrendingUp, DollarSign, Box, Loader2 } from 'lucide-react';
+import { AssetsSummary } from './AssetsSummary';
 
 export const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -77,6 +78,8 @@ export const Dashboard: React.FC = () => {
            </div>
         </Card>
       </div>
+
+      <AssetsSummary />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card title="Desempenho Recente" className="h-96 flex flex-col">
