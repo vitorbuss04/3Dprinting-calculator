@@ -8,14 +8,16 @@ export const Card: React.FC<{ children: React.ReactNode; className?: string; tit
   </div>
 );
 
-// --- Input Field ---
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+// --- Input Field (Correct Controlled Component Pattern) ---
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
   label: string;
   subLabel?: string;
   icon?: React.ReactNode;
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const Input: React.FC<InputProps> = ({ label, subLabel, icon, className = '', ...props }) => (
+export const Input: React.FC<InputProps> = ({ label, subLabel, icon, className = '', value, onChange, ...rest }) => (
   <div className="flex flex-col gap-1.5 mb-4 group">
     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1 group-focus-within:text-blue-600 transition-colors">
       {label}
@@ -28,25 +30,31 @@ export const Input: React.FC<InputProps> = ({ label, subLabel, icon, className =
         </div>
       )}
       <input
+        value={value} // Explicitly pass value
+        onChange={onChange} // Explicitly pass onChange
         className={`w-full bg-gray-50/50 border border-gray-200 text-gray-900 rounded-xl py-2.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white outline-none transition-all placeholder-gray-400 text-sm ${icon ? 'pl-12 pr-4' : 'px-4'} ${className}`}
-        {...props}
+        {...rest}
       />
     </div>
   </div>
 );
 
-// --- Select Field ---
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+// --- Select Field (Correct Controlled Component Pattern) ---
+interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'value' | 'onChange'> {
   label: string;
   options: { value: string | number; label: string }[];
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const Select: React.FC<SelectProps> = ({ label, options, className = '', ...props }) => (
+export const Select: React.FC<SelectProps> = ({ label, options, className = '', value, onChange, ...rest }) => (
   <div className="flex flex-col gap-1.5 mb-4">
     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{label}</label>
     <select
+      value={value} // Explicitly pass value
+      onChange={onChange} // Explicitly pass onChange
       className={`bg-gray-50/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white outline-none transition-all text-sm appearance-none ${className}`}
-      {...props}
+      {...rest}
     >
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>

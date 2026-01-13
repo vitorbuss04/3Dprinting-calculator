@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '../services/supabaseClient';
 import { Loader2, Lock, Mail, UserPlus, LogIn } from 'lucide-react';
 import { Button, Input, Card } from './UIComponents';
@@ -8,33 +9,29 @@ export const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+  
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    const toastId = toast.loading(isSignUp ? 'Criando conta...' : 'Entrando...');
 
-    try {
+    const { error } = await (isSignUp
+      ? supabase.auth.signUp({ email, password })
+      : supabase.auth.signInWithPassword({ email, password }));
+
+    if (error) {
+      toast.error(error.message, { id: toastId });
+    } else {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        alert('Cadastro realizado! Verifique seu email ou faça login.');
+        toast.success('Conta criada! Verifique seu email para confirmação.', { id: toastId });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+        // On successful login, show a success message that will auto-dismiss.
+        // This avoids the race condition of trying to dismiss the toast while the component unmounts.
+        toast.success('Login bem-sucedido!', { id: toastId });
       }
-    } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro');
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -53,13 +50,6 @@ export const Auth: React.FC = () => {
             <h2 className="text-2xl font-black text-gray-800 mb-2 text-center tracking-tight">
               {isSignUp ? 'Criar Conta' : 'Boas-vindas!'}
             </h2>
-            
-            {error && (
-              <div className="bg-red-50 border border-red-100 text-red-600 text-xs font-bold p-4 rounded-2xl flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                {error}
-              </div>
-            )}
 
             <div className="space-y-2">
               <Input 
@@ -92,7 +82,7 @@ export const Auth: React.FC = () => {
 
           <div className="mt-8 text-center border-t border-gray-50 pt-6">
             <button
-              onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
+              onClick={() => { setIsSignUp(!isSignUp); }}
               className="text-xs font-bold text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest"
             >
               {isSignUp ? 'Já possui acesso? Clique aqui' : 'Novo por aqui? Cadastre-se'}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, Menu, ArrowRightLeft, LogOut } from 'lucide-react';
 import { ViewState } from './types';
 import { Dashboard } from './components/Dashboard';
@@ -31,8 +32,32 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    toast((t) => (
+      <div className="flex flex-col items-center gap-4 p-2">
+        <span className="font-bold text-gray-800">Deseja realmente sair?</span>
+        <div className="flex gap-3">
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              toast.dismiss(t.id);
+            }}
+            className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors"
+          >
+            Sair
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 6000,
+      position: 'top-center',
+    });
   };
 
   const navItems = [
@@ -63,97 +88,95 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden font-sans">
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/10 z-20 md:hidden backdrop-blur-sm"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+    <>
+      <Toaster />
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden font-sans">
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/10 z-20 md:hidden backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed md:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out flex flex-col shadow-sm
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
-        <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-lg shadow-blue-500/40 transform hover:scale-105 transition-transform">3D</div>
-          <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
-        </div>
-
-        <nav className="p-4 space-y-1 flex-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setCurrentView(item.id as ViewState);
-                  setIsSidebarOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
-                  isActive 
-                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-400/40 scale-[1.02]' 
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]' : 'drop-shadow-sm'} />
-                <span className="font-medium text-sm">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-        
-        <div className="p-4 border-t border-gray-100 space-y-3">
-          <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 border border-gray-100 shadow-inner">
-              <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
+        <aside className={`
+          fixed md:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out flex flex-col shadow-sm
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
+          <div className="h-16 flex items-center px-6 border-b border-gray-100">
+            <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-lg shadow-blue-500/40 transform hover:scale-105 transition-transform">3D</div>
+            <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-          >
-             <LogOut size={18} className="drop-shadow-sm" />
-             <span className="font-medium text-sm">Sair</span>
-          </button>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Header */}
-        <header className="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
-           <div className="flex items-center gap-4">
-              <button 
-                className="md:hidden text-gray-500 hover:text-gray-900"
-                onClick={() => setIsSidebarOpen(true)}
-              >
-                <Menu size={24} />
-              </button>
-              <h1 className="text-lg font-bold text-gray-800 capitalize">
-                {navItems.find(i => i.id === currentView)?.label}
-              </h1>
-           </div>
-           <div className="flex items-center gap-4">
-             <div className="text-right hidden sm:block">
-               <p className="text-xs font-medium text-gray-900">{session.user.email?.split('@')[0]}</p>
-               <p className="text-[10px] text-gray-400">{session.user.email}</p>
-             </div>
-             <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 font-bold text-xs transform hover:scale-110 transition-transform">
-               {session.user.email?.charAt(0).toUpperCase()}
-             </div>
-           </div>
-        </header>
-
-        {/* Scrollable Area */}
-        <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50/50">
-          <div className="max-w-6xl mx-auto">
-             {renderContent()}
+          <nav className="p-4 space-y-1 flex-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setCurrentView(item.id as ViewState);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
+                    isActive 
+                      ? 'bg-blue-600 text-white shadow-xl shadow-blue-400/40 scale-[1.02]' 
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon size={18} className={isActive ? 'drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]' : 'drop-shadow-sm'} />
+                  <span className="font-medium text-sm">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+          
+          <div className="p-4 border-t border-gray-100 space-y-3">
+            <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 border border-gray-100 shadow-inner">
+                <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            >
+               <LogOut size={18} className="drop-shadow-sm" />
+               <span className="font-medium text-sm">Sair</span>
+            </button>
           </div>
-        </div>
-      </main>
-    </div>
+        </aside>
+
+        <main className="flex-1 flex flex-col h-screen overflow-hidden">
+          <header className="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
+             <div className="flex items-center gap-4">
+                <button 
+                  className="md:hidden text-gray-500 hover:text-gray-900"
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  <Menu size={24} />
+                </button>
+                <h1 className="text-lg font-bold text-gray-800 capitalize">
+                  {navItems.find(i => i.id === currentView)?.label}
+                </h1>
+             </div>
+             <div className="flex items-center gap-4">
+               <div className="text-right hidden sm:block">
+                 <p className="text-xs font-medium text-gray-900">{session.user.email?.split('@')[0]}</p>
+                 <p className="text-[10px] text-gray-400">{session.user.email}</p>
+               </div>
+               <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 font-bold text-xs transform hover:scale-110 transition-transform">
+                 {session.user.email?.charAt(0).toUpperCase()}
+               </div>
+             </div>
+          </header>
+
+          <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50/50">
+            <div className="max-w-6xl mx-auto">
+               {renderContent()}
+            </div>
+          </div>
+        </main>
+      </div>
+    </>
   );
 };
 

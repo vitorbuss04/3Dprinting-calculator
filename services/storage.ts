@@ -17,9 +17,8 @@ const DEFAULT_SETTINGS: GlobalSettings = {
 export const StorageService = {
   // --- PRINTERS ---
   getPrinters: async (): Promise<Printer[]> => {
-    // RLS filters by user automatically on SELECT
     const { data, error } = await supabase.from('printers').select('*');
-    if (error) { console.error(error); return []; }
+    if (error) { throw new Error('Não foi possível buscar as impressoras.'); }
     
     return data.map((p: any) => ({
       id: p.id,
@@ -54,7 +53,6 @@ export const StorageService = {
       power_consumption: printer.powerConsumption,
       maintenance_cost_per_hour: printer.maintenanceCostPerHour
     };
-    // RLS ensures users can only update their own rows
     const { error } = await supabase.from('printers').update(payload).eq('id', printer.id);
     if (error) throw error;
   },
@@ -67,7 +65,7 @@ export const StorageService = {
   // --- MATERIALS ---
   getMaterials: async (): Promise<Material[]> => {
     const { data, error } = await supabase.from('materials').select('*');
-    if (error) { console.error(error); return []; }
+    if (error) { throw new Error("Não foi possível buscar os materiais."); }
     
     return data.map((m: any) => ({
       id: m.id,
@@ -113,15 +111,11 @@ export const StorageService = {
 
   // --- SETTINGS ---
   getSettings: async (): Promise<GlobalSettings> => {
-    // RLS filters, so single() gets the one row for this user
     const { data, error } = await supabase.from('global_settings').select('*').maybeSingle();
-    
-    if (error) console.error("Error fetching settings:", error);
-
+    if (error) console.warn("Erro ao buscar configurações, usando padrões.", error);
     if (!data) { 
       return DEFAULT_SETTINGS; 
     }
-
     return {
       electricityCost: data.electricity_cost,
       currencySymbol: data.currency_symbol
@@ -130,15 +124,11 @@ export const StorageService = {
 
   saveSettings: async (settings: GlobalSettings) => {
     const userId = await getUserId();
-    
-    // We try to update based on user_id (unique constraint)
     const payload = {
       user_id: userId,
       electricity_cost: settings.electricityCost,
       currency_symbol: settings.currencySymbol
     };
-
-    // Upsert using user_id as the conflict target
     const { error } = await supabase.from('global_settings').upsert(payload, { onConflict: 'user_id' });
     if (error) throw error;
   },
@@ -146,7 +136,7 @@ export const StorageService = {
   // --- PROJECTS ---
   getProjects: async (): Promise<Project[]> => {
     const { data, error } = await supabase.from('projects').select('*').order('date', { ascending: false });
-    if (error) { console.error(error); return []; }
+    if (error) { throw new Error("Não foi possível buscar os projetos."); }
 
     return data.map((p: any) => ({
       id: p.id,
@@ -162,7 +152,7 @@ export const StorageService = {
       laborTimeMinutes: p.labor_time_minutes,
       laborHourlyRate: p.labor_hourly_rate,
       markup: p.markup,
-      result: p.result // JSONB column
+      result: p.result
     }));
   },
 
@@ -186,6 +176,7 @@ export const StorageService = {
       result: project.result
     };
     const { error } = await supabase.from('projects').insert([payload]);
+    // A notificação de sucesso agora é tratada pela UI com react-hot-toast
     if (error) throw error;
   },
 

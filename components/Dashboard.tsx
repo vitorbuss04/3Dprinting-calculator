@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StorageService } from '../services/storage';
 import { Project, GlobalSettings } from '../types';
 import { Card } from './UIComponents';
@@ -9,8 +9,12 @@ export const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ currencySymbol: '$', electricityCost: 0 });
   const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     const fetchData = async () => {
       setLoading(true);
       const [p, s] = await Promise.all([
@@ -31,8 +35,9 @@ export const Dashboard: React.FC = () => {
   // Prepare Chart Data (Last 5 projects)
   const chartData = projects.slice(0, 5).map(p => ({
     name: p.name.length > 10 ? p.name.substring(0, 10) + '...' : p.name,
-    cost: p.result.totalProductionCost,
-    profit: p.result.profit
+    Gasto: p.result.totalProductionCost,
+    Lucro: p.result.profit,
+    Faturamento: p.result.finalPrice,
   })).reverse();
 
   if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
@@ -97,7 +102,7 @@ export const Dashboard: React.FC = () => {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#fff', border: 'none', color: '#111827', borderRadius: '16px', boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.15)', fontSize: '12px', fontWeight: 'bold' }}
                     cursor={{stroke: '#cbd5e1', strokeWidth: 1}}
-                    formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`]}
+                    formatter={(value: number, name: string) => [`${settings.currencySymbol} ${value.toFixed(2)}`, name]}
                   />
                   <Legend 
                     verticalAlign="bottom" 
@@ -109,7 +114,17 @@ export const Dashboard: React.FC = () => {
                   
                   <Line 
                     type="monotone" 
-                    dataKey="cost" 
+                    dataKey="Faturamento" 
+                    name="Faturamento" 
+                    stroke="#1e40af" 
+                    strokeWidth={4} // Thicker line for emphasis
+                    dot={{ r: 5, fill: '#1e40af', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 7, stroke: '#fff', strokeWidth: 3, shadow: '0 10px 15px rgba(30, 64, 175, 0.4)' }}
+                  />
+
+                  <Line 
+                    type="monotone" 
+                    dataKey="Gasto" 
                     name="Gasto" 
                     stroke="#ef4444" 
                     strokeWidth={3}
@@ -119,7 +134,7 @@ export const Dashboard: React.FC = () => {
 
                   <Line 
                     type="monotone" 
-                    dataKey="profit" 
+                    dataKey="Lucro" 
                     name="Lucro" 
                     stroke="#10b981" 
                     strokeWidth={3}
