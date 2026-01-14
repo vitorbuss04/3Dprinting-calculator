@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Printer, Material, GlobalSettings, Project } from '../types';
+import { Printer, Material, GlobalSettings, Project, ProjectFolder } from '../types';
 
 // Helper to get current user ID
 const getUserId = async () => {
@@ -19,7 +19,7 @@ export const StorageService = {
   getPrinters: async (): Promise<Printer[]> => {
     const { data, error } = await supabase.from('printers').select('*');
     if (error) { throw new Error('Não foi possível buscar as impressoras.'); }
-    
+
     return data.map((p: any) => ({
       id: p.id,
       name: p.name,
@@ -66,11 +66,12 @@ export const StorageService = {
   getMaterials: async (): Promise<Material[]> => {
     const { data, error } = await supabase.from('materials').select('*');
     if (error) { throw new Error("Não foi possível buscar os materiais."); }
-    
+
     return data.map((m: any) => ({
       id: m.id,
       type: m.type,
       name: m.name,
+      color: m.color || '', // Default to empty string if not present
       spoolPrice: m.spool_price,
       spoolWeight: m.spool_weight,
       currentStock: m.current_stock
@@ -84,6 +85,7 @@ export const StorageService = {
       user_id: userId,
       type: material.type,
       name: material.name,
+      color: material.color,
       spool_price: material.spoolPrice,
       spool_weight: material.spoolWeight,
       current_stock: material.currentStock
@@ -96,6 +98,7 @@ export const StorageService = {
     const payload = {
       type: material.type,
       name: material.name,
+      color: material.color,
       spool_price: material.spoolPrice,
       spool_weight: material.spoolWeight,
       current_stock: material.currentStock
@@ -113,8 +116,8 @@ export const StorageService = {
   getSettings: async (): Promise<GlobalSettings> => {
     const { data, error } = await supabase.from('global_settings').select('*').maybeSingle();
     if (error) console.warn("Erro ao buscar configurações, usando padrões.", error);
-    if (!data) { 
-      return DEFAULT_SETTINGS; 
+    if (!data) {
+      return DEFAULT_SETTINGS;
     }
     return {
       electricityCost: data.electricity_cost,
@@ -152,7 +155,8 @@ export const StorageService = {
       laborTimeMinutes: p.labor_time_minutes,
       laborHourlyRate: p.labor_hourly_rate,
       markup: p.markup,
-      result: p.result
+      result: p.result,
+      folderId: p.folder_id
     }));
   },
 
@@ -173,7 +177,9 @@ export const StorageService = {
       labor_time_minutes: project.laborTimeMinutes,
       labor_hourly_rate: project.laborHourlyRate,
       markup: project.markup,
-      result: project.result
+
+      result: project.result,
+      folder_id: project.folderId
     };
     const { error } = await supabase.from('projects').insert([payload]);
     // A notificação de sucesso agora é tratada pela UI com react-hot-toast
@@ -182,6 +188,38 @@ export const StorageService = {
 
   deleteProject: async (id: string) => {
     const { error } = await supabase.from('projects').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  // --- FOLDERS ---
+  getFolders: async (): Promise<ProjectFolder[]> => {
+    const { data, error } = await supabase.from('project_folders').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error("Não foi possível buscar as pastas.");
+    return data.map((f: any) => ({
+      id: f.id,
+      name: f.name,
+      createdAt: f.created_at
+    }));
+  },
+
+  createFolder: async (name: string): Promise<ProjectFolder> => {
+    const userId = await getUserId();
+    const payload = {
+      user_id: userId,
+      name: name
+    };
+    const { data, error } = await supabase.from('project_folders').insert([payload]).select().single();
+    if (error) throw error;
+    return {
+      id: data.id,
+      name: data.name,
+      createdAt: data.created_at
+    };
+  },
+
+  deleteFolder: async (id: string) => {
+    // Note: Projects will have folder_id set to null due to ON DELETE SET NULL
+    const { error } = await supabase.from('project_folders').delete().eq('id', id);
     if (error) throw error;
   }
 };

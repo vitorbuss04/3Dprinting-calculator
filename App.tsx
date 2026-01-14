@@ -8,6 +8,7 @@ import { Calculator } from './components/Calculator';
 import { Comparator } from './components/Comparator';
 import { History } from './components/History';
 import { Auth } from './components/Auth';
+import { Profile } from './components/Profile';
 import { supabase } from './services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
@@ -73,8 +74,10 @@ const App: React.FC = () => {
       case 'dashboard': return <Dashboard />;
       case 'assets': return <AssetsManager />;
       case 'calculator': return <Calculator />;
+
       case 'comparator': return <Comparator />;
       case 'history': return <History />;
+      case 'profile': return <Profile />;
       default: return <Dashboard />;
     }
   };
@@ -84,7 +87,12 @@ const App: React.FC = () => {
   }
 
   if (!session) {
-    return <Auth />;
+    return (
+      <>
+        <Toaster />
+        <Auth />
+      </>
+    );
   }
 
   return (
@@ -92,7 +100,7 @@ const App: React.FC = () => {
       <Toaster />
       <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden font-sans">
         {isSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/10 z-20 md:hidden backdrop-blur-sm"
             onClick={() => setIsSidebarOpen(false)}
           />
@@ -118,11 +126,10 @@ const App: React.FC = () => {
                     setCurrentView(item.id as ViewState);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
-                    isActive 
-                      ? 'bg-blue-600 text-white shadow-xl shadow-blue-400/40 scale-[1.02]' 
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${isActive
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-400/40 scale-[1.02]'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
                 >
                   <Icon size={18} className={isActive ? 'drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]' : 'drop-shadow-sm'} />
                   <span className="font-medium text-sm">{item.label}</span>
@@ -130,48 +137,48 @@ const App: React.FC = () => {
               );
             })}
           </nav>
-          
+
           <div className="p-4 border-t border-gray-100 space-y-3">
             <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 border border-gray-100 shadow-inner">
-                <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
+              <p>Dica: Mantenha seus preços de insumos atualizados para maior precisão.</p>
             </div>
-            <button 
+            <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
             >
-               <LogOut size={18} className="drop-shadow-sm" />
-               <span className="font-medium text-sm">Sair</span>
+              <LogOut size={18} className="drop-shadow-sm" />
+              <span className="font-medium text-sm">Sair</span>
             </button>
           </div>
         </aside>
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden">
           <header className="h-16 bg-white/70 backdrop-blur-md border-b border-gray-200 flex items-center px-6 md:px-8 justify-between z-10">
-             <div className="flex items-center gap-4">
-                <button 
-                  className="md:hidden text-gray-500 hover:text-gray-900"
-                  onClick={() => setIsSidebarOpen(true)}
-                >
-                  <Menu size={24} />
-                </button>
-                <h1 className="text-lg font-bold text-gray-800 capitalize">
-                  {navItems.find(i => i.id === currentView)?.label}
-                </h1>
-             </div>
-             <div className="flex items-center gap-4">
-               <div className="text-right hidden sm:block">
-                 <p className="text-xs font-medium text-gray-900">{session.user.email?.split('@')[0]}</p>
-                 <p className="text-[10px] text-gray-400">{session.user.email}</p>
-               </div>
-               <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 font-bold text-xs transform hover:scale-110 transition-transform">
-                 {session.user.email?.charAt(0).toUpperCase()}
-               </div>
-             </div>
+            <div className="flex items-center gap-4">
+              <button
+                className="md:hidden text-gray-500 hover:text-gray-900"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <Menu size={24} />
+              </button>
+              <h1 className="text-lg font-bold text-gray-800 capitalize">
+                {navItems.find(i => i.id === currentView)?.label}
+              </h1>
+            </div>
+            <div className="flex items-center gap-4 cursor-pointer" onClick={() => setCurrentView('profile')}>
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{session.user.email?.split('@')[0]}</p>
+                <p className="text-[10px] text-gray-400">{session.user.email}</p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 font-bold text-xs transform hover:scale-110 transition-transform hover:ring-2 hover:ring-blue-500/20">
+                {session.user.email?.charAt(0).toUpperCase()}
+              </div>
+            </div>
           </header>
 
           <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50/50">
             <div className="max-w-6xl mx-auto">
-               {renderContent()}
+              {renderContent()}
             </div>
           </div>
         </main>

@@ -19,7 +19,8 @@ export enum MaterialType {
 export interface Material {
   id: string;
   type: MaterialType;
-  name: string; // Marca/Cor
+  name: string; // Marca/Nome
+  color: string; // Cor do filamento
   spoolPrice: number; // R$
   spoolWeight: number; // gramas
   currentStock?: number; // gramas
@@ -30,10 +31,18 @@ export interface GlobalSettings {
   currencySymbol: string;
 }
 
+export interface AdditionalItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 export interface CalculationResult {
   depreciationCost: number;
   energyCost: number;
   materialCost: number;
+  additionalCost: number; // Cost of extra hardware/supplies
   maintenanceCost: number;
   laborCost: number;
   machineTotalCost: number; // Depreciação + Manutenção + Energia
@@ -48,6 +57,7 @@ export interface Project {
   date: string;
   printerId: string;
   materialId: string;
+  additionalItems?: AdditionalItem[]; // Optional for backward compatibility
   printTimeHours: number;
   printTimeMinutes: number;
   modelWeight: number; // gramas
@@ -57,6 +67,13 @@ export interface Project {
   laborHourlyRate: number;
   markup: number; // porcentagem (0-100+)
   result: CalculationResult;
+  folderId?: string | null;
 }
 
-export type ViewState = 'dashboard' | 'assets' | 'calculator' | 'history' | 'comparator';
+export interface ProjectFolder {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export type ViewState = 'dashboard' | 'assets' | 'calculator' | 'history' | 'comparator' | 'profile';

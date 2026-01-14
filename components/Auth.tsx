@@ -9,7 +9,7 @@ export const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -20,7 +20,12 @@ export const Auth: React.FC = () => {
       : supabase.auth.signInWithPassword({ email, password }));
 
     if (error) {
-      toast.error(error.message, { id: toastId });
+      let errorMsg = 'Erro na autenticação.';
+      if (error.message.includes('Invalid login credentials')) errorMsg = 'Email ou senha incorretos.';
+      else if (error.message.includes('User already registered')) errorMsg = 'Este email já está cadastrado.';
+      else if (error.message.includes('Email not confirmed')) errorMsg = 'Confirme seu email para entrar.';
+
+      toast.error(errorMsg, { id: toastId });
     } else {
       if (isSignUp) {
         toast.success('Conta criada! Verifique seu email para confirmação.', { id: toastId });
@@ -39,7 +44,7 @@ export const Auth: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <div className="bg-blue-600 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-400/50 transform hover:scale-110 transition-transform">
-             <span className="text-4xl font-black text-white drop-shadow-lg">3D</span>
+            <span className="text-4xl font-black text-white drop-shadow-lg">3D</span>
           </div>
           <h1 className="text-4xl font-black text-gray-900 tracking-tighter">PrintCalc Manager</h1>
           <p className="text-gray-400 font-medium mt-2">Gestão inteligente para sua farm 3D.</p>
@@ -52,21 +57,21 @@ export const Auth: React.FC = () => {
             </h2>
 
             <div className="space-y-2">
-              <Input 
-                label="Email" 
-                type="email" 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
+              <Input
+                label="Email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 icon={<Mail size={18} className="drop-shadow-sm" />}
                 placeholder="seu@email.com"
                 required
               />
-              
-              <Input 
-                label="Senha" 
-                type="password" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
+
+              <Input
+                label="Senha"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 icon={<Lock size={18} className="drop-shadow-sm" />}
                 placeholder="Sua senha secreta"
                 required
