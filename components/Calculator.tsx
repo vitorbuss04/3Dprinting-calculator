@@ -262,7 +262,7 @@ export const Calculator: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-500">
       <div className="lg:col-span-7 space-y-6">
-        <Card title="" variant="glass" className="relative overflow-hidden">
+        <Card title="" variant="glass" className="relative z-20">
           <div className="flex items-center gap-3 mb-6 relative z-10">
             <div className="p-2 bg-blue-50 rounded-lg text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"><CalcIcon size={20} /></div>
             <h3 className="font-bold text-gray-800 text-lg dark:text-gray-100">Detalhes do Projeto</h3>
