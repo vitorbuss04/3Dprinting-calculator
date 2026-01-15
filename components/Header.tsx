@@ -161,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <p className="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors dark:text-gray-200 dark:group-hover:text-blue-400">
                             {session.user.email?.split('@')[0]}
                         </p>
-                        <p className="text-[10px] text-gray-400 font-medium tracking-wide dark:text-gray-500">PRO PLAN</p>
+                        <p className="text-[10px] text-gray-400 font-medium tracking-wide dark:text-gray-500">BETA</p>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 border border-white/50 shadow-inner flex items-center justify-center text-gray-600 font-bold text-sm transform group-hover:scale-105 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/20 dark:from-white/10 dark:to-white/5 dark:border-white/10 dark:text-gray-300">
                         {session.user.email?.charAt(0).toUpperCase()}
