@@ -1,42 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3DPrint Calc Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#3b82f6',
-              secondary: '#10b981',
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3DPrint Calc Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#10b981',
+            dark: {
+              bg: '#0B0E14',
+              surface: '#151921',
+              border: 'rgba(255, 255, 255, 0.08)'
             }
           }
         }
       }
-    </script>
-    <style>
-      body {
-        background-color: #f9fafb; /* Gray 50 */
-        color: #111827; /* Gray 900 */
-      }
-      /* Custom Scrollbar for light theme */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f3f4f6;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #9ca3af;
-      }
-    </style>
+    }
+  </script>
+  <style>
+    body {
+      background-color: #f9fafb;
+      /* Gray 50 */
+      color: #111827;
+      /* Gray 900 */
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dark body {
+      background-color: #0B0E14;
+      color: #F9FAFB;
+    }
+
+    /* Light Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    /* Dark Scrollbar */
+    .dark ::-webkit-scrollbar-track {
+      background: #151921;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+      background: #374151;
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -50,8 +89,10 @@
 }
 </script>
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
+</body>
+
 </html>
