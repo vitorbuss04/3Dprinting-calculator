@@ -7,7 +7,7 @@
   <title>3DPrint Calc Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -15,16 +15,27 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Outfit', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['IBM Plex Mono', 'monospace'],
           },
           colors: {
-            primary: '#3b82f6',
-            secondary: '#10b981',
-            dark: {
-              bg: '#0B0E14',
-              surface: '#151921',
-              border: 'rgba(255, 255, 255, 0.08)'
-            }
+            industrial: {
+              orange: '#FF5C00', // Safety Orange
+              blue: '#00E0FF',   // Electric Blue
+              slate: {
+                50: '#F8FAFC',
+                400: '#94A3B8',
+                500: '#64748B',
+                600: '#475569',
+                700: '#334155',
+                800: '#1e293b',
+                850: '#141E2F',
+                900: '#0F172A',
+                950: '#020617',
+              }
+            },
+            primary: '#FF5C00',
+            secondary: '#00E0FF',
           }
         }
       }
@@ -32,65 +43,56 @@
   </script>
   <style>
     body {
-      background-color: #f9fafb;
-      /* Gray 50 */
-      color: #111827;
-      /* Gray 900 */
-      transition: background-color 0.3s ease, color 0.3s ease;
+      background-color: #020617; /* Slate-950 */
+      color: #F8FAFC; /* Slate-50 */
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .dark body {
-      background-color: #0B0E14;
-      color: #F9FAFB;
+    /* Industrial Borders */
+    .industrial-border {
+      border: 1px solid #1e293b;
     }
 
-    /* Light Scrollbar */
+    .industrial-border-accent {
+      border: 1px solid #FF5C00;
+    }
+
+    /* Precision Typography */
+    .font-technical {
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: -0.02em;
+    }
+
+    /* Scrollbars (Machinist Style) */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
     }
 
     ::-webkit-scrollbar-track {
-      background: #f3f4f6;
+      background: #020617;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #d1d5db;
-      border-radius: 4px;
+      background: #1e293b;
+      border-radius: 0;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #9ca3af;
+      background: #FF5C00;
     }
 
-    /* Dark Scrollbar */
-    .dark ::-webkit-scrollbar-track {
-      background: #151921;
-    }
-
-    .dark ::-webkit-scrollbar-thumb {
-      background: #374151;
-    }
-
-    .dark ::-webkit-scrollbar-thumb:hover {
-      background: #4b5563;
+    /* Mechanical Focus */
+    *:focus {
+      outline: 2px solid #FF5C00;
+      outline-offset: 2px;
     }
   </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
-  }
-}
-</script>
+
 </head>
 
-<body>
+<body class="dark overflow-x-hidden selection:bg-primary selection:text-white">
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
 </body>

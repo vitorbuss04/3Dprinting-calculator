@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Save, Printer as PrinterIcon, Package, Loader2, Check, X, Settings, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Save, Printer as PrinterIcon, Package, Loader2, Check, X, Settings, AlertCircle, RefreshCw, Info } from 'lucide-react';
 import { Printer, Material, MaterialType, GlobalSettings } from '../types';
 import { StorageService } from '../services/storage';
 import { Card } from './ui/Card';
@@ -71,7 +71,6 @@ export const AssetsManager: React.FC<AssetsManagerProps> = ({ initialTab = 'prin
 
   const saveChanges = async () => {
     setIsSaving(true);
-    // Validation logic...
     for (const p of printers) {
       if (!p.name.trim() || p.acquisitionCost <= 0 || p.lifespanHours <= 0 || p.powerConsumption <= 0) {
         toast.error('Valores inválidos em uma impressora. Verifique os campos.'); setIsSaving(false); return;
@@ -177,41 +176,46 @@ export const AssetsManager: React.FC<AssetsManagerProps> = ({ initialTab = 'prin
     }
   };
 
-  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-500" size={40} /></div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center p-20 gap-4">
+      <Loader2 className="animate-spin text-primary" size={32} />
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO....</span>
+    </div>
+  );
 
   const TabButton = ({ id, label, icon: Icon }: any) => (
     <button
       onClick={() => setActiveTab(id)}
       className={cn(
-        "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300 font-bold text-sm",
+        "flex items-center gap-3 px-6 py-4 transition-all duration-150 border-b-2 font-technical font-bold text-xs uppercase tracking-widest",
         activeTab === id
-          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105"
-          : "bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 shadow-sm dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200"
+          ? "border-primary text-white bg-slate-900/50"
+          : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/20"
       )}
     >
-      <Icon size={18} /> {label}
+      <Icon size={14} className={activeTab === id ? "text-primary" : "text-slate-600"} /> {label}
     </button>
   );
 
   return (
     <div className="space-y-8 pb-32 animate-in fade-in duration-500">
-      <div className="flex justify-center md:justify-start gap-4 flex-wrap">
-        <TabButton id="printers" label="Impressoras" icon={PrinterIcon} />
-        <TabButton id="materials" label="Materiais" icon={Package} />
-        <TabButton id="settings" label="Configurações" icon={Settings} />
+      <div className="flex justify-center md:justify-start border-b border-slate-800 bg-slate-950/50 -mx-6 px-6">
+        <TabButton id="printers" label="IMPRESSORAS" icon={PrinterIcon} />
+        <TabButton id="materials" label="MATERIAIS" icon={Package} />
+        <TabButton id="settings" label="CONFIGURAÇÕES" icon={Settings} />
       </div>
 
       {deletingAsset && (
-        <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm z-50 animate-in fade-in duration-200">
-          <Card className="max-w-sm w-full bg-white p-6 shadow-2xl scale-100 dark:bg-dark-surface dark:border-white/10">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 text-red-500 mx-auto mb-4 dark:bg-red-900/20 dark:text-red-400">
+        <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-200">
+          <Card variant="industrial" className="max-w-sm w-full p-8 border-red-500/50 bg-slate-950">
+            <div className="flex items-center justify-center w-12 h-12 border border-red-500/30 text-red-500 mx-auto mb-6">
               <Trash2 size={24} />
             </div>
-            <h3 className="font-bold text-gray-900 text-lg text-center dark:text-gray-100">Confirmar Exclusão</h3>
-            <p className="text-center text-gray-500 text-sm mt-2 mb-6 dark:text-gray-400">Esta ação será finalizada ao salvar.</p>
-            <div className="flex gap-3">
-              <Button variant="ghost" onClick={() => setDeletingAsset(null)} className="w-full">Cancelar</Button>
-              <Button variant="primary" onClick={confirmDelete} className="w-full bg-red-500 hover:bg-red-600 shadow-red-200">Excluir</Button>
+            <h3 className="font-technical font-bold text-white text-lg text-center uppercase tracking-widest">CONFIRMAR EXCLUSÃO</h3>
+            <p className="text-center text-slate-500 text-[10px] font-technical uppercase mt-4 mb-8">Este item será removido permanentemente. Deseja continuar?</p>
+            <div className="flex gap-4">
+              <Button variant="secondary" onClick={() => setDeletingAsset(null)} className="flex-1 font-technical text-[10px]">CANCELAR</Button>
+              <Button variant="primary" onClick={confirmDelete} className="flex-1 bg-red-600 hover:bg-red-700 font-technical text-[10px]">CONFIRMAR</Button>
             </div>
           </Card>
         </div>
@@ -219,30 +223,49 @@ export const AssetsManager: React.FC<AssetsManagerProps> = ({ initialTab = 'prin
 
       <div>
         {activeTab === 'printers' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Perfis de Impressora</h2>
-                <p className="text-sm text-gray-400 dark:text-gray-500">Gerencie suas máquinas e custos operacionais</p>
+          <div className="space-y-8">
+            <div className="flex items-center gap-6 border-b border-slate-800 pb-4">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-technical font-bold text-white uppercase tracking-[0.2em] truncate">IMPRESSORAS CADASTRADAS</h2>
+                <p className="text-xs font-technical text-slate-500 uppercase mt-1 truncate">Gerencie depreciação e capacidade das suas máquinas</p>
               </div>
-              <Button onClick={() => addAsset('printer')} leftIcon={<Plus size={18} />}>Add Impressora</Button>
+              <Button onClick={() => addAsset('printer')} variant="secondary" size="sm" className="font-technical text-[10px] shrink-0 whitespace-nowrap">
+                <Plus size={12} className="mr-1.5" /> ADICIONAR
+              </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {printers.map(printer => (
-                <Card key={printer.id} variant="glass" className="relative group hover:border-blue-300 transition-colors dark:hover:border-blue-500/30">
-                  <button onClick={() => handleDeleteClick(printer.id, 'printer')} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition-colors z-20 dark:text-gray-600 dark:hover:text-red-400"><Trash2 size={18} /></button>
-                  <div className="mb-5 pr-8">
-                    <Input label="Modelo/Nome" value={printer.name} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'name', e.target.value)} onKeyDown={handleKeyDown} className="font-bold text-lg bg-transparent border-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-blue-500 px-2 -ml-2 dark:hover:bg-white/5 dark:focus:bg-black/20" />
+                <Card key={printer.id} variant="industrial" className="group p-6">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-800">
+                    <div className="w-2 h-2 bg-secondary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Input 
+                          label="" 
+                          value={printer.name} 
+                          onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'name', e.target.value)} 
+                          onKeyDown={handleKeyDown} 
+                          className="font-technical font-bold text-sm tracking-widest text-white uppercase" 
+                      />
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteClick(printer.id, 'printer')} 
+                      className="shrink-0 p-2 text-slate-600 hover:text-red-500 transition-colors"
+                      title="Excluir impressora"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
-                    <Input label="Preço" type="number" value={printer.acquisitionCost} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'acquisitionCost', e.target.value)} onKeyDown={handleKeyDown} icon={<span className="text-[10px] text-gray-500 dark:text-gray-400">{settings.currencySymbol}</span>} />
-                    <Input label="Vida Útil (h)" type="number" value={printer.lifespanHours} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'lifespanHours', e.target.value)} onKeyDown={handleKeyDown} />
-                    <Input label="Potência (W)" type="number" value={printer.powerConsumption} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'powerConsumption', e.target.value)} onKeyDown={handleKeyDown} />
-                    <Input label={`Manut. (${settings.currencySymbol}/h)`} type="number" value={printer.maintenanceCostPerHour} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'maintenanceCostPerHour', e.target.value)} onKeyDown={handleKeyDown} />
+                    <Input label="PREÇO DE COMPRA" type="number" value={printer.acquisitionCost} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'acquisitionCost', e.target.value)} onKeyDown={handleKeyDown} icon={<span className="text-[10px] text-slate-500 font-technical">{settings.currencySymbol}</span>} className="font-technical" />
+                    <Input label="VIDA ÚTIL (h)" type="number" value={printer.lifespanHours} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'lifespanHours', e.target.value)} onKeyDown={handleKeyDown} className="font-technical" />
+                    <Input label="POTÊNCIA (W)" type="number" value={printer.powerConsumption} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'powerConsumption', e.target.value)} onKeyDown={handleKeyDown} className="font-technical" />
+                    <Input label={`MANUTENÇÃO (${settings.currencySymbol}/h)`} type="number" value={printer.maintenanceCostPerHour} onChange={(e) => handleAssetUpdate(printer.id, 'printer', 'maintenanceCostPerHour', e.target.value)} onKeyDown={handleKeyDown} className="font-technical" />
                   </div>
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center dark:border-white/10">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider dark:text-gray-500">Depreciação</span>
-                    <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg dark:bg-blue-500/20 dark:text-blue-400">{(Number(printer.acquisitionCost) / Number(printer.lifespanHours) || 0).toFixed(2)} / h</span>
+                  
+                  <div className="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center">
+                    <span className="text-[9px] font-technical font-bold text-slate-600 uppercase tracking-widest">TAXA DE DEPRECIAÇÃO</span>
+                    <span className="font-technical font-bold text-secondary text-xs">{settings.currencySymbol}{(Number(printer.acquisitionCost) / Number(printer.lifespanHours) || 0).toFixed(2)}/h</span>
                   </div>
                 </Card>
               ))}
@@ -251,56 +274,79 @@ export const AssetsManager: React.FC<AssetsManagerProps> = ({ initialTab = 'prin
         )}
 
         {activeTab === 'materials' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Filamentos e Resinas</h2>
-                <p className="text-sm text-gray-400 dark:text-gray-500">Gerencie estoque e custos de materiais</p>
+          <div className="space-y-8">
+            <div className="flex items-center gap-6 border-b border-slate-800 pb-4">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-technical font-bold text-white uppercase tracking-[0.2em] truncate">MATERIAIS CADASTRADOS</h2>
+                <p className="text-xs font-technical text-slate-500 uppercase mt-1 truncate">Gerencie consumíveis e níveis de estoque</p>
               </div>
-              <Button onClick={() => addAsset('material')} variant="secondary" leftIcon={<Plus size={18} />}>Add Material</Button>
+              <Button onClick={() => addAsset('material')} variant="secondary" size="sm" className="font-technical text-[10px] shrink-0 whitespace-nowrap">
+                <Plus size={12} className="mr-1.5" /> ADICIONAR
+              </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {materials.map(material => {
                 const stockPercentage = (Number(material.currentStock) && Number(material.spoolWeight)) ? (Number(material.currentStock) / Number(material.spoolWeight)) * 100 : 0;
                 return (
-                  <Card key={material.id} variant="neumorphic" className="relative hover:shadow-lg transition-all duration-300 group">
-                    <button onClick={() => handleDeleteClick(material.id, 'material')} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition-colors z-20 dark:text-gray-600 dark:hover:text-red-400"><Trash2 size={18} /></button>
-
-                    <div className="flex gap-4 mb-4">
-                      <div className="flex flex-col items-center gap-1.5 w-12 shrink-0">
-                        <label htmlFor={`color-${material.id}`} className="block text-xs font-bold text-gray-500 cursor-pointer hover:text-gray-800 transition-colors text-center w-full break-words leading-tight dark:text-gray-400 dark:hover:text-gray-300">Cor</label>
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ring-1 ring-black/5 group-hover:scale-105 dark:ring-white/10">
+                  <Card key={material.id} variant="industrial" className="group p-6">
+                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+                      <div className="flex flex-col items-center gap-1.5 shrink-0">
+                        <div className="relative w-10 h-10 border border-slate-800 overflow-hidden ring-1 ring-white/5 transition-all duration-300">
                           <input
                             type="color"
                             id={`color-${material.id}`}
                             value={material.color || '#000000'}
                             onChange={(e) => handleAssetUpdate(material.id, 'material', 'color', e.target.value)}
                             onKeyDown={handleKeyDown}
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] p-0 border-0 cursor-pointer outline-none"
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] p-0 border-0 cursor-pointer outline-none bg-transparent"
                           />
                         </div>
+                        <span className="text-[8px] font-technical font-bold text-slate-500 uppercase">COR</span>
                       </div>
-                      <div className="flex-1 pr-8">
-                        <Input label="Nome/Marca" value={material.name} onChange={(e) => handleAssetUpdate(material.id, 'material', 'name', e.target.value)} onKeyDown={handleKeyDown} className="font-bold bg-transparent border-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-blue-500 px-2 -ml-2 dark:hover:bg-white/5 dark:focus:bg-black/20" />
+                      <div className="flex-1 min-w-0">
+                        <Input 
+                            label="" 
+                            value={material.name} 
+                            onChange={(e) => handleAssetUpdate(material.id, 'material', 'name', e.target.value)} 
+                            onKeyDown={handleKeyDown} 
+                            className="font-technical font-bold text-sm tracking-widest text-white uppercase" 
+                        />
                       </div>
+                      <button 
+                        onClick={() => handleDeleteClick(material.id, 'material')} 
+                        className="shrink-0 p-2 text-slate-600 hover:text-red-500 transition-colors"
+                        title="Excluir material"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <Select label="Tipo" value={material.type} onChange={(val) => handleAssetUpdate(material.id, 'material', 'type', val)} options={Object.values(MaterialType).map(t => ({ value: t, label: t }))} />
-                      <Input label="Preço Rolo" type="number" value={material.spoolPrice} onChange={(e) => handleAssetUpdate(material.id, 'material', 'spoolPrice', e.target.value)} onKeyDown={handleKeyDown} icon={<span className="text-[10px] text-gray-500 dark:text-gray-400">{settings.currencySymbol}</span>} />
-                      <Input label="Peso (g)" type="number" value={material.spoolWeight} onChange={(e) => handleAssetUpdate(material.id, 'material', 'spoolWeight', e.target.value)} onKeyDown={handleKeyDown} />
-                      <Input label="Custo/g" value={(Number(material.spoolPrice) / Number(material.spoolWeight) || 0).toFixed(4)} disabled className="bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400" />
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <Select label="TIPO" value={material.type} onChange={(val) => handleAssetUpdate(material.id, 'material', 'type', val)} options={Object.values(MaterialType).map(t => ({ value: t, label: t }))} className="font-technical" />
+                      <Input label="PREÇO DA BOBINA" type="number" value={material.spoolPrice} onChange={(e) => handleAssetUpdate(material.id, 'material', 'spoolPrice', e.target.value)} onKeyDown={handleKeyDown} icon={<span className="text-[10px] text-slate-500 font-technical">{settings.currencySymbol}</span>} className="font-technical" />
+                      <Input label="PESO DA BOBINA (g)" type="number" value={material.spoolWeight} onChange={(e) => handleAssetUpdate(material.id, 'material', 'spoolWeight', e.target.value)} onKeyDown={handleKeyDown} className="font-technical" />
+                      <Input label="CUSTO/GRAMA" value={(Number(material.spoolPrice) / Number(material.spoolWeight) || 0).toFixed(4)} disabled className="font-technical bg-slate-900 border-none text-slate-400" />
                     </div>
 
-                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 dark:bg-white/5 dark:border-white/5">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-bold text-gray-500 uppercase dark:text-gray-400">Estoque</span>
-                        <span className="text-xs font-bold text-gray-900 dark:text-gray-200">{material.currentStock}g</span>
+                    <div className="bg-slate-900/50 p-4 border border-slate-800">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest">NÍVEL DE ESTOQUE</span>
+                        <span className="text-[10px] font-technical font-bold text-white">{material.currentStock}g RESTANTES</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mb-3 overflow-hidden dark:bg-white/10">
-                        <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(stockPercentage, 100)}%` }}></div>
+                      <div className="w-full bg-slate-800 h-1 mb-4 overflow-hidden">
+                        <div 
+                            className={cn("h-full transition-all duration-500", stockPercentage < 20 ? "bg-red-500" : "bg-primary")} 
+                            style={{ width: `${Math.min(stockPercentage, 100)}%` }} 
+                        />
                       </div>
-                      <Input label="Ajustar Estoque" type="number" value={material.currentStock || 0} onChange={(e) => handleAssetUpdate(material.id, 'material', 'currentStock', e.target.value)} onKeyDown={handleKeyDown} className="h-8 text-xs bg-white dark:bg-black/20" />
+                      <Input 
+                        label="AJUSTAR ESTOQUE (g)" 
+                        type="number" 
+                        value={material.currentStock || 0} 
+                        onChange={(e) => handleAssetUpdate(material.id, 'material', 'currentStock', e.target.value)} 
+                        onKeyDown={handleKeyDown} 
+                        className="h-8 text-[10px] font-technical" 
+                      />
                     </div>
                   </Card>
                 )
@@ -311,14 +357,18 @@ export const AssetsManager: React.FC<AssetsManagerProps> = ({ initialTab = 'prin
 
         {activeTab === 'settings' && (
           <div className="flex justify-center">
-            <Card title="Configuração Global" variant="glass" className="max-w-md w-full">
-              <div className="p-4 bg-yellow-50 rounded-xl mb-6 text-yellow-800 text-sm flex gap-3 items-start dark:bg-yellow-900/20 dark:text-yellow-400">
-                <Settings className="shrink-0 mt-0.5" size={16} />
-                <p>Estas configurações afetam todos os cálculos da aplicação.</p>
+            <Card variant="industrial" className="max-w-md w-full p-8 border-primary/20">
+              <div className="flex items-center gap-3 mb-8 border-b border-slate-800 pb-4 -mx-8 px-8">
+                <Settings className="text-primary" size={16} />
+                <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white uppercase">CONFIGURAÇÕES GERAIS</span>
               </div>
-              <div className="space-y-5">
-                <Input label="Custo de Energia (kWh)" type="number" step="0.01" value={settings.electricityCost} onChange={(e) => handleAssetUpdate(null, 'settings', 'electricityCost', e.target.value)} onKeyDown={handleKeyDown} icon={<span className="text-[10px]">{settings.currencySymbol}</span>} />
-                <Input label="Símbolo da Moeda" value={settings.currencySymbol} onChange={(e) => handleAssetUpdate(null, 'settings', 'currencySymbol', e.target.value)} onKeyDown={handleKeyDown} placeholder="R$, $, €" />
+              <div className="p-4 bg-slate-900/50 border border-slate-800 mb-8 text-slate-500 text-[10px] font-technical uppercase leading-relaxed flex gap-3">
+                <Info className="text-primary shrink-0" size={14} />
+                <p>Ajuste moeda e tarifa de energia usados nos cálculos ativos.</p>
+              </div>
+              <div className="space-y-6">
+                <Input label="TARIFA DE ENERGIA (KWH)" type="number" step="0.01" value={settings.electricityCost} onChange={(e) => handleAssetUpdate(null, 'settings', 'electricityCost', e.target.value)} onKeyDown={handleKeyDown} icon={<span className="text-[10px] text-slate-500 font-technical">{settings.currencySymbol}</span>} className="font-technical" />
+                <Input label="SÍMBOLO DA MOEDA" value={settings.currencySymbol} onChange={(e) => handleAssetUpdate(null, 'settings', 'currencySymbol', e.target.value)} onKeyDown={handleKeyDown} placeholder="R$, $, €" className="font-technical uppercase" />
               </div>
             </Card>
           </div>
@@ -326,21 +376,21 @@ export const AssetsManager: React.FC<AssetsManagerProps> = ({ initialTab = 'prin
       </div>
 
       {isDirty && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xl z-40 animate-in slide-in-from-bottom-10 fade-in duration-300">
-          <div className="bg-gray-900/90 backdrop-blur-md text-white rounded-2xl shadow-2xl p-4 flex items-center justify-between border border-white/10 ring-1 ring-black/5 dark:bg-white/10 dark:backdrop-blur-xl">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl z-40 animate-in slide-in-from-bottom-10 duration-300">
+          <div className="bg-slate-950 border border-primary/50 p-4 flex items-center justify-between shadow-[0_0_30px_rgba(255,92,0,0.1)]">
             <div className="flex items-center gap-4 pl-2">
               <div className="relative">
-                <RefreshCw className="text-blue-400 animate-spin-slow" size={24} />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                <RefreshCw className="text-primary animate-spin" style={{ animationDuration: '3s' }} size={20} />
+                <div className="absolute inset-0 bg-primary/20 blur-sm animate-pulse" />
               </div>
               <div>
-                <h4 className="font-bold text-sm">Alterações pendentes</h4>
-                <p className="text-xs text-gray-400">Não esqueça de salvar seu progresso.</p>
+                <h4 className="font-technical font-extrabold text-[10px] text-white uppercase tracking-widest">ALTERAÇÕES PENDENTES</h4>
+                <p className="text-[9px] font-technical text-slate-500 uppercase mt-0.5">Cache local difere do banco. Sincronização necessária.</p>
               </div>
             </div>
-            <Button onClick={saveChanges} disabled={isSaving} variant="primary" className="shadow-none bg-blue-600 hover:bg-blue-500 border-none">
-              {isSaving ? <Loader2 className="animate-spin mr-2" size={18} /> : <Save size={18} className="mr-2" />}
-              {isSaving ? 'Salvando...' : 'Salvar Tudo'}
+            <Button onClick={saveChanges} disabled={isSaving} variant="primary" className="py-2.5 px-6 font-technical text-[11px] !tracking-[0.2em] shadow-none">
+              {isSaving ? <Loader2 className="animate-spin mr-2" size={14} /> : <Save size={14} className="mr-2" />}
+              {isSaving ? 'SINCRONIZANDO...' : 'SALVAR ALTERAÇÕES'}
             </Button>
           </div>
         </div>

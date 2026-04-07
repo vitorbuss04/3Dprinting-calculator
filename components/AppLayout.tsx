@@ -22,7 +22,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     return (
-        <div className="min-h-screen bg-[#F3F5F9] text-gray-900 flex overflow-hidden font-sans selection:bg-blue-500/30 dark:bg-dark-bg dark:text-gray-100">
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex overflow-hidden font-technical selection:bg-primary selection:text-white">
             <Sidebar
                 currentView={currentView}
                 onViewChange={onViewChange}
@@ -32,10 +32,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             />
 
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-                {/* Background decorative elements */}
-                <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none dark:from-blue-900/10" />
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none dark:bg-blue-500/10" />
-
+                {/* Technical background elements */}
+                <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
+                     style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                
                 <Header
                     currentView={currentView}
                     onMenuClick={() => setIsSidebarOpen(true)}
@@ -44,9 +44,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     onViewChange={onViewChange}
                 />
 
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 relative scroll-smooth">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 relative custom-scrollbar">
                     <div className="max-w-7xl mx-auto pb-10">
                         {children}
+                    </div>
+                </div>
+
+                {/* System Status Line at Footer */}
+                <div className="hidden lg:flex h-6 border-t border-slate-900 bg-slate-950 px-6 items-center justify-between text-[8px] font-technical font-black text-slate-700 uppercase tracking-[0.3em] z-10">
+                    <div className="flex items-center gap-4">
+                        <span className="text-slate-500">DADOS PROTEGIDOS</span>
+                        <span className="text-slate-500">SINCRONIZAÇÃO: ATIVA</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className="text-emerald-900/50">SERVIDOR ONLINE</span>
+                        <span className="animate-pulse text-primary/30">SISTEMA ESTÁVEL</span>
                     </div>
                 </div>
             </main>

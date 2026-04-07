@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Printer, Material, GlobalSettings, Project, ProjectFolder } from '../types';
+import { Printer, Material, GlobalSettings, Project, ProjectFolder, ProjectStatus } from '../types';
 
 // Helper to get current user ID
 const getUserId = async () => {
@@ -156,7 +156,8 @@ export const StorageService = {
       laborHourlyRate: p.labor_hourly_rate,
       markup: p.markup,
       result: p.result,
-      folderId: p.folder_id
+      folderId: p.folder_id,
+      status: (p.status || 'aguardando') as ProjectStatus
     }));
   },
 
@@ -179,10 +180,16 @@ export const StorageService = {
       markup: project.markup,
 
       result: project.result,
-      folder_id: project.folderId
+      folder_id: project.folderId,
+      status: project.status || 'aguardando'
     };
     const { error } = await supabase.from('projects').insert([payload]);
     // A notificação de sucesso agora é tratada pela UI com react-hot-toast
+    if (error) throw error;
+  },
+
+  updateProjectStatus: async (id: string, status: ProjectStatus): Promise<void> => {
+    const { error } = await supabase.from('projects').update({ status }).eq('id', id);
     if (error) throw error;
   },
 

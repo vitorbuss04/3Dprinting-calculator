@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { Save, Calculator as CalcIcon, AlertTriangle, Loader2, Plus, Trash2, Package, RefreshCw } from 'lucide-react';
+import { Save, Calculator as CalcIcon, AlertTriangle, Loader2, Plus, Trash2, Package, Activity, Info, BarChart3, Settings2 } from 'lucide-react';
 import { Printer, Material, GlobalSettings, Project, CalculationResult, AdditionalItem, ProjectFolder } from '../types';
 import { StorageService } from '../services/storage';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { cn } from '../utils/cn';
 
 // Interface local para UI que permite strings nos inputs
@@ -29,7 +28,7 @@ export const Calculator: React.FC = () => {
   const [selectedFolderId, setSelectedFolderId] = useState<string | number>('');
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
-  const [partName, setPartName] = useState('Peça 01');
+  const [partName, setPartName] = useState('PEÇA_001');
   const [selectedPrinterId, setSelectedPrinterId] = useState<string | number>('');
   const [selectedMaterialId, setSelectedMaterialId] = useState<string | number>('');
 
@@ -110,13 +109,13 @@ export const Calculator: React.FC = () => {
       return { depreciationCost: 0, energyCost: 0, materialCost: 0, additionalCost: 0, maintenanceCost: 0, laborCost: 0, machineTotalCost: 0, totalProductionCost: 0, finalPrice: 0, profit: 0 };
     }
 
-    const numPrintHours = parseFloat(printHours.replace(',', '.')) || 0;
-    const numPrintMinutes = parseFloat(printMinutes.replace(',', '.')) || 0;
-    const numWeight = parseFloat(weight.replace(',', '.')) || 0;
-    const numFailureRate = parseFloat(failureRate.replace(',', '.')) || 0;
-    const numLaborHours = parseFloat(laborHours.replace(',', '.')) || 0;
-    const numLaborMinutes = parseFloat(laborMinutes.replace(',', '.')) || 0;
-    const numLaborRate = parseFloat(laborRate.replace(',', '.')) || 0;
+    const numPrintHours = parseFloat(printHours.toString().replace(',', '.')) || 0;
+    const numPrintMinutes = parseFloat(printMinutes.toString().replace(',', '.')) || 0;
+    const numWeight = parseFloat(weight.toString().replace(',', '.')) || 0;
+    const numFailureRate = parseFloat(failureRate.toString().replace(',', '.')) || 0;
+    const numLaborHours = parseFloat(laborHours.toString().replace(',', '.')) || 0;
+    const numLaborMinutes = parseFloat(laborMinutes.toString().replace(',', '.')) || 0;
+    const numLaborRate = parseFloat(laborRate.toString().replace(',', '.')) || 0;
 
     const totalPrintTimeHours = numPrintHours + (numPrintMinutes / 60);
     const totalLaborTimeHours = numLaborHours + (numLaborMinutes / 60);
@@ -177,7 +176,7 @@ export const Calculator: React.FC = () => {
     }
 
     const material = materials.find(m => m.id === selectedMaterialId);
-    const materialUsed = parseFloat(weight.replace(',', '.')) || 0;
+    const materialUsed = parseFloat(weight.toString().replace(',', '.')) || 0;
 
     if (!material || (material.currentStock || 0) < materialUsed) {
       toast.error('Estoque de material insuficiente para este projeto.');
@@ -198,13 +197,13 @@ export const Calculator: React.FC = () => {
         price: typeof item.price === 'string' ? parseFloat(item.price.replace(',', '.')) || 0 : item.price,
         quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity
       })),
-      printTimeHours: parseFloat(printHours.replace(',', '.')) || 0,
-      printTimeMinutes: parseFloat(printMinutes.replace(',', '.')) || 0,
+      printTimeHours: parseFloat(printHours.toString().replace(',', '.')) || 0,
+      printTimeMinutes: parseFloat(printMinutes.toString().replace(',', '.')) || 0,
       modelWeight: materialUsed,
-      failureRate: parseFloat(failureRate.replace(',', '.')) || 0,
-      laborTimeHours: parseFloat(laborHours.replace(',', '.')) || 0,
-      laborTimeMinutes: parseFloat(laborMinutes.replace(',', '.')) || 0,
-      laborHourlyRate: parseFloat(laborRate.replace(',', '.')) || 0,
+      failureRate: parseFloat(failureRate.toString().replace(',', '.')) || 0,
+      laborTimeHours: parseFloat(laborHours.toString().replace(',', '.')) || 0,
+      laborTimeMinutes: parseFloat(laborMinutes.toString().replace(',', '.')) || 0,
+      laborHourlyRate: parseFloat(laborRate.toString().replace(',', '.')) || 0,
       markup,
       result
     };
@@ -230,24 +229,29 @@ export const Calculator: React.FC = () => {
   };
 
   const chartData = [
-    { name: 'Material', value: result.materialCost, color: '#10b981' },
-    { name: 'Máquina', value: result.machineTotalCost, color: '#f59e0b' },
-    { name: 'Mão de Obra', value: result.laborCost, color: '#3b82f6' },
-    { name: 'Outros', value: result.additionalCost, color: '#8b5cf6' },
+    { name: 'Material', value: result.materialCost, color: '#FF5C00' },
+    { name: 'Máquina', value: result.machineTotalCost, color: '#475569' },
+    { name: 'Mão de Obra', value: result.laborCost, color: '#00E0FF' },
+    { name: 'Adicionais', value: result.additionalCost, color: '#94a3b8' },
   ].filter(d => d.value > 0);
 
-  if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center p-20 gap-4">
+      <Loader2 className="animate-spin text-primary" size={32} />
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO CALCULADORA...</span>
+    </div>
+  );
 
   if (printers.length === 0 || materials.length === 0) {
     return (
-      <Card variant="default" className="flex flex-col items-center justify-center h-96 text-center border-dashed border-2 bg-gray-50/50 dark:bg-white/5 dark:border-white/10">
-        <div className="p-4 bg-orange-100 rounded-full mb-4 animate-bounce dark:bg-orange-900/20">
-          <AlertTriangle className="text-orange-500 dark:text-orange-400" size={32} />
+      <Card variant="industrial" className="flex flex-col items-center justify-center h-96 text-center border-dashed">
+        <div className="p-4 bg-primary/10 border border-primary/20 rounded-none mb-6">
+          <AlertTriangle className="text-primary" size={32} />
         </div>
-        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Setup Necessário</h2>
-        <p className="text-gray-500 max-w-sm mb-6 dark:text-gray-400">Para começar a calcular, adicione suas impressoras e materiais.</p>
-        <Button variant="primary" onClick={() => { }} className="shadow-orange-200 bg-orange-500 hover:bg-orange-600 dark:shadow-none">
-          Ir para Meus Ativos (Use o Menu)
+        <h2 className="text-xl font-technical font-bold mb-2 text-white uppercase tracking-wider">EQUIPAMENTO NÃO CONFIGURADO</h2>
+        <p className="text-slate-500 max-w-sm mb-8 text-xs font-technical uppercase">Adicione impressoras e materiais antes de usar a calculadora.</p>
+        <Button variant="primary">
+          CONFIGURAR IMPRESSORAS E MATERIAIS
         </Button>
       </Card>
     );
@@ -255,172 +259,180 @@ export const Calculator: React.FC = () => {
 
   const materialOptions = materials.map(m => ({
     value: m.id,
-    label: `${m.name} (${m.type}) - ${(m.currentStock || 0).toFixed(0)}g restantes`,
+    label: `${m.name} // ${(m.currentStock || 0).toFixed(0)}g_REM`,
     disabled: (m.currentStock || 0) === 0
   }));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-500">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-300">
       <div className="lg:col-span-7 space-y-6">
-        <Card title="" variant="glass" className="relative z-20">
-          <div className="flex items-center gap-3 mb-6 relative z-10">
-            <div className="p-2 bg-blue-50 rounded-lg text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"><CalcIcon size={20} /></div>
-            <h3 className="font-bold text-gray-800 text-lg dark:text-gray-100">Detalhes do Projeto</h3>
+        {/* Module: Project Identification */}
+        <Card variant="industrial" className="relative">
+          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+            <Settings2 className="text-primary" size={16} />
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">IDENTIFICAÇÃO DO PROJETO</span>
           </div>
 
-          <div className="mb-6 bg-white/50 p-4 rounded-xl border border-white/40 shadow-sm dark:bg-white/5 dark:border-white/5">
-            {isCreatingFolder ? (
-              <div className="flex gap-2 items-end">
-                <div className="flex-grow">
-                  <Input
-                    label="Nome do Novo Projeto"
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                    placeholder="Ex: Armadura Homem de Ferro"
-                    autoFocus
-                    className="bg-white dark:bg-black/20"
+          <div className="space-y-6">
+            <div className="bg-slate-900/50 p-4 border border-slate-800/50">
+              {isCreatingFolder ? (
+                <div className="flex gap-2 items-end">
+                  <div className="flex-grow">
+                    <Input
+                      label="NOME DO NOVO PROJETO"
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      placeholder="Digite o nome..."
+                    />
+                  </div>
+                  <Button variant="secondary" onClick={() => setIsCreatingFolder(false)} className="mb-0 text-[10px]">CANCELAR</Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">PASTA DO PROJETO</label>
+                    <button onClick={() => setIsCreatingFolder(true)} className="text-[9px] font-technical font-bold text-primary hover:underline flex items-center gap-1">
+                      <Plus size={10} /> CRIAR NOVO
+                    </button>
+                  </div>
+                  <Select
+                    label=""
+                    options={[{ value: '', label: 'Selecione um projeto...' }, ...folders.map(f => ({ value: f.id, label: f.name }))]}
+                    value={selectedFolderId}
+                    onChange={(val) => setSelectedFolderId(val)}
                   />
                 </div>
-                <Button variant="ghost" onClick={() => setIsCreatingFolder(false)} className="mb-0 bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 dark:text-gray-300">Cancelar</Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1 dark:text-gray-400">Projeto / Pasta</label>
-                  <button onClick={() => setIsCreatingFolder(true)} className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 dark:text-blue-400 dark:hover:text-blue-300">
-                    <Plus size={12} /> Novo Projeto
-                  </button>
-                </div>
-                <Select
-                  label=""
-                  options={[{ value: '', label: 'Selecione um projeto...' }, ...folders.map(f => ({ value: f.id, label: f.name }))]}
-                  value={selectedFolderId}
-                  onChange={(val) => setSelectedFolderId(val)}
-                  className="bg-white"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-5">
-            <Input label="Nome da Peça / Impressão" value={partName} onChange={(e) => setPartName(e.target.value)} placeholder="Ex: Capacete - Parte Superior" className="font-medium" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Select label="Impressora" options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(val) => setSelectedPrinterId(val)} />
-              <Select label="Material" options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
+              )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50/50 rounded-xl border border-gray-100/50 dark:bg-white/5 dark:border-white/5">
-              <Input label="Tempo (Hrs)" type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="bg-white text-center font-bold text-blue-900 dark:bg-black/20 dark:text-blue-300" />
-              <Input label="Tempo (Min)" type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="bg-white text-center font-bold text-blue-900 dark:bg-black/20 dark:text-blue-300" />
-              <Input label="Peso (g)" type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="bg-white text-center font-bold text-emerald-700 dark:bg-black/20 dark:text-emerald-400" />
-              <Input label="Falha (%)" type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(e.target.value)} className="bg-white text-center font-bold text-red-700 dark:bg-black/20 dark:text-red-400" />
+            <Input 
+                label="NOME DA PEÇA" 
+                value={partName} 
+                onChange={(e) => setPartName(e.target.value.toUpperCase())} 
+                placeholder="PEÇA_ALPHA" 
+                className="font-technical tracking-widest"
+            />
+          </div>
+        </Card>
+
+        {/* Module: Machine Parameters */}
+        <Card variant="industrial">
+          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+            <Activity className="text-secondary" size={16} />
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">CONFIG. DA MÁQUINA</span>
+          </div>
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Select label="IMPRESSORA" options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(val) => setSelectedPrinterId(val)} />
+              <Select label="MATERIAL" options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <Input label="HORAS" type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center text-primary" />
+              <Input label="MINUTOS" type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center text-primary" />
+              <Input label="PESO (g)" type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center text-secondary" />
+              <Input label="FALHA (%)" type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(e.target.value)} className="text-center text-red-500" />
             </div>
           </div>
         </Card>
 
-        <Card variant="glass">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"><AlertTriangle size={20} /></div> {/* Using AlertTriangle as generic icon, maybe change */}
-            <h3 className="font-bold text-gray-800 text-lg dark:text-gray-100">Valores de Negócio</h3>
+        {/* Module: Human & Business Parameters */}
+        <Card variant="industrial">
+          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+            <Info className="text-slate-400" size={16} />
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">MÃO DE OBRA E NEGÓCIO</span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-            <Input label="Mão de Obra (Hrs)" type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
-            <Input label="Mão de Obra (Min)" type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
-            <Input label="Valor Hora" type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} icon={<span className="text-gray-500 font-bold text-xs dark:text-gray-400">{settings.currencySymbol}</span>} />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <Input label="HORAS TRABALHO" type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
+            <Input label="MINUTOS TRABALHO" type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
+            <Input label="VALOR POR HORA" type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-white/10">
-            <div className="flex justify-between mb-3">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2 dark:text-gray-400">
-                Margem de Lucro (Markup)
-                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] dark:bg-blue-500/20 dark:text-blue-300">{markup}%</span>
+          <div className="p-4 bg-slate-900/30 border border-slate-800">
+            <div className="flex justify-between mb-4">
+              <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">
+                MARGEM DE LUCRO <span className="text-primary ml-2">[{markup}%]</span>
               </label>
             </div>
-            <input type="range" min="0" max="500" step="5" value={markup} onChange={(e) => setMarkup(Number(e.target.value))} className="w-full h-2 bg-gradient-to-r from-blue-200 to-blue-600 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:from-blue-900 dark:to-blue-500" />
-            <div className="flex justify-between text-[10px] text-gray-400 font-bold mt-2">
-              <span>0% (Custo)</span>
-              <span>500% (5x)</span>
+            <input 
+                type="range" 
+                min="0" 
+                max="500" 
+                step="5" 
+                value={markup} 
+                onChange={(e) => setMarkup(Number(e.target.value))} 
+                className="w-full h-1 bg-slate-800 rounded-none appearance-none cursor-pointer accent-primary" 
+            />
+            <div className="flex justify-between text-[8px] font-technical text-slate-600 uppercase mt-2 tracking-tighter">
+              <span>SEM MARGEM</span>
+              <span>MARGEM MÉDIA</span>
+              <span>MARGEM MÁXIMA</span>
             </div>
           </div>
         </Card>
 
         {/* Additional Items Section */}
-        <Card className="relative group overflow-hidden" variant="neumorphic">
-          <div className="flex items-center justify-between mb-6">
+        <Card variant="industrial">
+          <div className="flex items-center justify-between mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-violet-50 rounded-lg text-violet-600 dark:bg-violet-500/20 dark:text-violet-400"><Package size={20} /></div>
-              <h3 className="font-bold text-gray-800 text-lg dark:text-gray-100">Outros Materiais</h3>
+              <Package className="text-slate-400" size={16} />
+              <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">ITENS ADICIONAIS</span>
             </div>
             <Button
               onClick={handleAddAdditionalItem}
-              size="sm"
               variant="secondary"
-              className="shadow-none bg-violet-100 text-violet-700 hover:bg-violet-200 hover:text-violet-800 dark:bg-violet-500/20 dark:text-violet-300 dark:hover:bg-violet-500/30 dark:hover:text-violet-200"
-              leftIcon={<Plus size={16} />}
+              className="py-1 px-3 text-[9px]"
             >
-              Adicionar
+              <Plus size={12} className="mr-1" /> ADICIONAR
             </Button>
           </div>
 
           {additionalItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 text-gray-400 dark:bg-white/5 dark:border-white/10 dark:text-gray-500">
-              <Package size={32} className="mb-3 opacity-20" />
-              <p className="text-sm font-medium">Nenhum item adicional.</p>
-              <p className="text-xs opacity-70">Adicione parafusos, eletrônicos, embalagens, etc.</p>
+            <div className="flex flex-col items-center justify-center p-12 bg-slate-900/20 border border-dashed border-slate-800 text-slate-600">
+              <span className="text-[10px] font-technical uppercase">Nenhum item adicional</span>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {additionalItems.map((item, index) => (
-                <div key={item.id} className="flex gap-3 items-start animate-in fade-in slide-in-from-top-2 duration-300 p-3 bg-white rounded-xl shadow-sm border border-gray-100 dark:bg-white/5 dark:border-white/10">
+                <div key={item.id} className="flex gap-2 items-end">
                   <div className="flex-1">
                     <Input
-                      label={index === 0 ? "Nome do Item" : undefined}
+                      label={index === 0 ? "NOME DO ITEM" : undefined}
                       value={item.name}
-                      placeholder="Ex: Parafuso M3"
+                      placeholder="Nome do item"
                       onChange={(e) => updateAdditionalItem(item.id, 'name', e.target.value)}
-                      className="bg-gray-50 border-transparent focus:bg-white dark:bg-black/20 dark:focus:bg-black/40"
                     />
                   </div>
-                  <div className="w-28">
+                  <div className="w-24">
                     <Input
-                      label={index === 0 ? "Preço Unit." : undefined}
+                      label={index === 0 ? "PREÇO UN." : undefined}
                       type="number"
-                      min="0"
                       value={item.price}
-                      placeholder="0.00"
                       onChange={(e) => updateAdditionalItem(item.id, 'price', e.target.value)}
-                      className="bg-gray-50 border-transparent focus:bg-white dark:bg-black/20 dark:focus:bg-black/40"
-                      icon={<span className="text-[10px] text-gray-500 dark:text-gray-400">{settings.currencySymbol}</span>}
                     />
                   </div>
-                  <div className="w-20">
+                  <div className="w-16">
                     <Input
-                      label={index === 0 ? "Qtd" : undefined}
+                      label={index === 0 ? "QTD" : undefined}
                       type="number"
-                      min="1"
                       value={item.quantity}
                       onChange={(e) => updateAdditionalItem(item.id, 'quantity', e.target.value)}
-                      className="bg-gray-50 border-transparent focus:bg-white dark:bg-black/20 dark:focus:bg-black/40"
                     />
                   </div>
                   <button
                     onClick={() => handleRemoveAdditionalItem(item.id)}
-                    className={cn(
-                      "p-2.5 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors dark:hover:bg-red-900/20",
-                      index === 0 ? "mt-6" : "mt-0"
-                    )}
-                    title="Remover item"
+                    className="p-2.5 text-slate-600 hover:text-red-500 transition-colors border border-transparent hover:border-red-900/50"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               ))}
-              <div className="flex justify-end pt-4 border-t border-gray-100 mt-4 dark:border-white/10">
-                <div className="bg-violet-50 px-4 py-2 rounded-xl flex items-center gap-3 dark:bg-violet-500/10">
-                  <p className="text-xs text-violet-600 font-bold uppercase tracking-wider dark:text-violet-400">Total Adicionais</p>
-                  <p className="font-mono font-bold text-violet-900 text-lg dark:text-violet-300">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</p>
+              <div className="flex justify-end pt-4 mt-6 border-t border-slate-800">
+                <div className="bg-slate-900/80 px-4 py-2 border border-slate-800 flex items-center gap-6">
+                  <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">SUBTOTAL ADICIONAIS</span>
+                  <span className="font-technical font-bold text-white text-lg">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -428,82 +440,85 @@ export const Calculator: React.FC = () => {
         </Card>
       </div>
 
-      <div className="lg:col-span-5 flex flex-col gap-6 sticky top-6">
-        <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-[2rem] p-8 shadow-2xl relative overflow-hidden text-white transition-all hover:shadow-blue-900/20 group">
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity"></div>
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity"></div>
-
+      {/* Right Column: Results Cockpit */}
+      <div className="lg:col-span-5 flex flex-col gap-6 sticky top-0" style={{ maxHeight: 'calc(100vh - 10rem)', overflowY: 'auto' }}>
+        <div className="bg-slate-950 border border-slate-700 p-8 relative overflow-hidden text-white shadow-2xl">
+          {/* Decorative Corner */}
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary translate-x-2 -translate-y-2" />
+          
           <div className="relative z-10">
-            <h3 className="text-blue-200 font-bold uppercase tracking-widest text-[10px] mb-1">Preço Sugerido</h3>
-            <div className="text-5xl font-black mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+            <h3 className="text-primary font-technical font-extrabold uppercase tracking-[0.3em] text-[10px] mb-6 flex items-center gap-2">
+                <Activity size={12} /> RESULTADO EM TEMPO REAL
+            </h3>
+            
+            <div className="text-6xl font-technical font-bold mb-8 tracking-tighter text-white tabular-nums">
               {settings.currencySymbol} {result.finalPrice.toFixed(2)}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Custo Produção</span>
-                <span className="font-mono text-xl font-bold">{settings.currencySymbol} {result.totalProductionCost.toFixed(2)}</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-900 border border-slate-800">
+                <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest block mb-1">CUSTO DE PRODUÇÃO</span>
+                <span className="font-technical text-lg font-bold text-white tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-xl bg-emerald-500/10 backdrop-blur-sm border border-emerald-500/20">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Lucro Líquido</span>
-                <span className="font-mono text-xl font-bold text-emerald-400">{settings.currencySymbol} {result.profit.toFixed(2)}</span>
+              <div className="p-4 bg-slate-900 border border-slate-800">
+                <span className="text-[9px] font-technical font-bold text-secondary uppercase tracking-widest block mb-1">LUCRO LÍQUIDO</span>
+                <span className="font-technical text-lg font-bold text-secondary tabular-nums">{settings.currencySymbol}{result.profit.toFixed(2)}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <Card title="Composição de Custos" className="flex flex-col" variant="neumorphic">
-          {chartData.length > 0 ? (
-            <div className="h-56 -ml-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {chartData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'rgba(21, 25, 33, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)', fontSize: '12px', fontWeight: 'bold', color: '#F9FAFB' }}
-                    itemStyle={{ color: '#F9FAFB' }}
-                    formatter={(value: number) => [`${settings.currencySymbol} ${value.toFixed(2)}`, '']}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-48 flex items-center justify-center text-gray-300">
-              <span className="text-sm font-medium">Aguardando dados...</span>
+        <Card variant="industrial" className="flex flex-col">
+          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+            <BarChart3 className="text-primary" size={16} />
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">DISTRIBUIÇÃO DE CUSTOS</span>
+          </div>
+          
+          {chartData.length > 0 ? (() => {
+            const total = chartData.reduce((sum, item) => sum + item.value, 0);
+            return (
+              <div className="space-y-3">
+                {chartData.map(item => {
+                  const pct = total > 0 ? (item.value / total) * 100 : 0;
+                  return (
+                    <div key={item.name}>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[9px] font-technical font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: item.color }} />
+                          {item.name}
+                        </span>
+                        <span className="font-technical font-bold text-white text-[10px] tabular-nums">
+                          {settings.currencySymbol}{item.value.toFixed(2)}
+                          <span className="text-slate-600 ml-1.5 text-[8px]">{pct.toFixed(0)}%</span>
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-800/60 h-[3px]">
+                        <div
+                          className="h-full transition-all duration-500"
+                          style={{ width: `${pct}%`, backgroundColor: item.color }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })() : (
+            <div className="h-32 flex items-center justify-center text-slate-700">
+              <span className="text-[10px] font-technical uppercase">Aguardando dados</span>
             </div>
           )}
-
-          <div className="space-y-2 mt-2">
-            <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 dark:bg-white/5 dark:border-white/5"><span className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-400"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Insumos</span><span className="font-mono font-bold text-gray-900 text-xs dark:text-gray-200">{settings.currencySymbol} {result.materialCost.toFixed(2)}</span></div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 dark:bg-white/5 dark:border-white/5"><span className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-400"><div className="w-2 h-2 rounded-full bg-amber-500"></div> Máquina</span><span className="font-mono font-bold text-gray-900 text-xs dark:text-gray-200">{settings.currencySymbol} {result.machineTotalCost.toFixed(2)}</span></div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 dark:bg-white/5 dark:border-white/5"><span className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-400"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Mão de Obra</span><span className="font-mono font-bold text-gray-900 text-xs dark:text-gray-200">{settings.currencySymbol} {result.laborCost.toFixed(2)}</span></div>
-            {result.additionalCost > 0 && <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100 dark:bg-white/5 dark:border-white/5"><span className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-400"><div className="w-2 h-2 rounded-full bg-violet-500"></div> Adicionais</span><span className="font-mono font-bold text-gray-900 text-xs dark:text-gray-200">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span></div>}
-          </div>
         </Card>
 
-        <div className="flex-1 flex min-h-[100px]">
-          <Button
-            onClick={saveProject}
-            variant="primary"
-            className="w-full h-full text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1"
-            disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
-          >
-            <div className="flex flex-col items-center gap-2">
-              {isSaving ? <Loader2 className="animate-spin" size={28} /> : <Save size={28} />}
-              <span className="font-bold">{isSaving ? 'Salvando...' : 'Salvar Projeto'}</span>
-            </div>
-          </Button>
-        </div>
+        <Button
+          onClick={saveProject}
+          variant="primary"
+          className="w-full py-3.5 text-sm font-technical !tracking-[0.4em]"
+          disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
+        >
+          {isSaving ? <Loader2 className="animate-spin mr-2.5" size={16} /> : <Save size={16} className="mr-2.5" />}
+          <span>{isSaving ? 'SALVANDO...' : 'SALVAR PROJETO'}</span>
+        </Button>
       </div>
     </div>
   );

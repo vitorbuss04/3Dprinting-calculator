@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Project, Printer, Material, GlobalSettings, ProjectFolder } from '../types';
+import { Project, Printer, Material, GlobalSettings, ProjectFolder, ProjectStatus } from '../types';
 import { StorageService } from '../services/storage';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { Trash2, Check, X, Loader2, AlertTriangle, PackageOpen, Tag, Calendar, Scaling, PiggyBank, Briefcase, Layers, Clock, FolderOpen, Info, Search, Filter } from 'lucide-react';
+import { Trash2, Check, X, Loader2, AlertTriangle, PackageOpen, Tag, Calendar, Scaling, PiggyBank, Briefcase, Layers, Clock, FolderOpen, Info, Search, Filter, ShieldAlert } from 'lucide-react';
 import { ProjectDetailsModal } from './ProjectDetailsModal';
 import toast from 'react-hot-toast';
 import { cn } from '../utils/cn';
@@ -18,6 +18,7 @@ export const History: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletingFolderId, setDeletingFolderId] = useState<string | null>(null);
   const [detailsProject, setDetailsProject] = useState<Project | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const hasFetched = useRef(false);
 
   const fetchData = async () => {
@@ -37,7 +38,7 @@ export const History: React.FC = () => {
       setFolders(Object.fromEntries(foldersData.map(f => [f.id, f])));
       setSettings(settingsData);
     } catch (e) {
-      toast.error('Não foi possível carregar os dados.');
+      toast.error('Não foi possível sincronizar os dados.');
     } finally {
       setIsLoading(false);
     }
@@ -52,12 +53,12 @@ export const History: React.FC = () => {
   const handleDeleteProject = async (id: string) => {
     setDeletingId(null);
     toast.promise(StorageService.deleteProject(id), {
-      loading: 'Excluindo...',
+      loading: 'Excluindo registro...',
       success: () => {
         setProjects(prev => prev.filter(p => p.id !== id));
-        return 'Projeto excluído!';
+        return 'Registro removido com sucesso';
       },
-      error: 'Erro ao excluir.'
+      error: 'Erro ao excluir registro'
     });
   };
 
@@ -70,15 +71,33 @@ export const History: React.FC = () => {
         delete newFolders[folderId];
         setFolders(newFolders);
         setProjects(prev => prev.map(p => p.folderId === folderId ? { ...p, folderId: null } : p));
-        return 'Pasta excluída! Projetos movidos para "Sem Pasta".';
+        return 'Pasta removida, projetos movidos';
       },
-      error: 'Erro ao excluir.'
+      error: 'Erro ao excluir pasta'
     });
   };
 
-  const currency = settings?.currencySymbol || 'R$';
+  const handleStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
+    setUpdatingStatusId(projectId);
+    try {
+      await StorageService.updateProjectStatus(projectId, newStatus);
+      setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: newStatus } : p));
+      toast.success('Status atualizado');
+    } catch {
+      toast.error('Erro ao atualizar status');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
 
-  if (isLoading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-500" size={40} /></div>;
+  const currency = settings?.currencySymbol || '$';
+
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center p-20 gap-4">
+      <Loader2 className="animate-spin text-primary" size={32} />
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO HISTÓRICO...</span>
+    </div>
+  );
 
   const groupedProjects = projects.reduce((groups, project) => {
     const folderId = project.folderId || 'uncategorized';
@@ -102,76 +121,67 @@ export const History: React.FC = () => {
 
   if (projects.length === 0 && Object.keys(folders).length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center text-gray-400 dark:text-gray-500">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 dark:bg-dark-surface">
-          <FolderOpen size={32} className="opacity-50" />
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <div className="w-16 h-16 border border-slate-800 flex items-center justify-center mb-6">
+          <FolderOpen size={24} className="text-slate-600" />
         </div>
-        <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-200">Nenhum Projeto</h2>
-        <p className="max-w-md">Seu histórico está vazio. Crie seu primeiro projeto na Calculadora.</p>
+        <h2 className="text-sm font-technical font-black text-slate-400 uppercase tracking-[0.2em] mb-2">SEM PROJETOS</h2>
+        <p className="text-[10px] font-technical text-slate-600 uppercase max-w-xs">Nenhum dado operacional encontrado. Inicie um cálculo para gerar histórico.</p>
       </div>
     );
   }
 
-  const DetailItem: React.FC<{ icon: React.ReactNode; label: string; value: string | number; }> = ({ icon, label, value }) => (
-    <div className="flex items-center gap-3 text-xs p-2.5 bg-gray-50/50 rounded-lg hover:bg-gray-100 transition-colors dark:bg-white/5 dark:hover:bg-white/10">
-      <div className="text-gray-400 dark:text-gray-500">{icon}</div>
-      <span className="text-gray-500 font-medium tracking-tight whitespace-nowrap dark:text-gray-400">{label}:</span>
-      <span className="font-bold text-gray-800 ml-auto truncate max-w-[120px] dark:text-gray-200" title={String(value)}>{value}</span>
-    </div>
-  );
-
   return (
-    <div className="space-y-12 animate-in fade-in duration-500 pb-20">
+    <div className="space-y-16 animate-in fade-in duration-500 pb-20">
       {sortedFolderIds.map((folderId) => {
         const isUncategorized = folderId === 'uncategorized';
-        const folderName = isUncategorized ? 'Outros / Sem Pasta' : (folders[folderId]?.name || 'Pasta Desconhecida');
+        const folderName = isUncategorized ? 'PROJETOS SEM PASTA' : (folders[folderId]?.name || 'PASTA DESCONHECIDA');
         const folderProjects = groupedProjects[folderId] || [];
 
         const folderTotalCost = folderProjects.reduce((sum, p) => sum + p.result.finalPrice, 0);
         const folderTotalProfit = folderProjects.reduce((sum, p) => sum + p.result.profit, 0);
         const folderTotalTime = folderProjects.reduce((sum, p) => sum + (p.printTimeHours + p.printTimeMinutes / 60), 0);
 
-        if (folderProjects.length === 0 && isUncategorized) return null; // Don't show empty uncategorized
+        if (folderProjects.length === 0 && isUncategorized) return null;
 
         return (
           <div key={folderId} className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-gray-200/60 pb-4 gap-6 dark:border-white/10">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  {isUncategorized ? (
-                    <div className="p-2 bg-gray-100 rounded-lg text-gray-500 dark:bg-white/10 dark:text-gray-400"><PackageOpen size={20} /></div>
-                  ) : (
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"><FolderOpen size={20} /></div>
-                  )}
-                  <h2 className="text-2xl font-bold text-gray-800 tracking-tight dark:text-gray-100">{folderName}</h2>
+            {/* Mission Manifest Header */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-slate-800 pb-6 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={cn("p-2 border", isUncategorized ? "border-slate-700 text-slate-500" : "border-primary/50 text-primary bg-primary/5")}>
+                    {isUncategorized ? <PackageOpen size={18} /> : <FolderOpen size={18} />}
+                  </div>
+                  <h2 className="text-lg font-technical font-black text-white tracking-[0.1em] uppercase">{folderName}</h2>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <span className="px-3 py-1 rounded-full bg-gray-100 text-xs font-bold text-gray-500 flex items-center gap-2 dark:bg-white/10 dark:text-gray-400">
-                    <Layers size={12} />
-                    {folderProjects.length} {folderProjects.length === 1 ? 'projeto' : 'projetos'}
+                  <span className="flex items-center gap-2 text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest bg-slate-900 px-2 py-1 border border-slate-800">
+                    <Layers size={10} />
+                    {folderProjects.length} REGISTROS
                   </span>
                   {!isUncategorized && (
                     <button
                       onClick={() => setDeletingFolderId(folderId)}
-                      className="text-xs font-bold text-red-400 hover:text-red-500 hover:underline flex items-center gap-1 transition-colors"
+                      className="text-[10px] font-technical font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5"
                     >
-                      <Trash2 size={12} /> Excluir Pasta
+                      <Trash2 size={10} /> EXCLUIR PASTA
                     </button>
                   )}
                 </div>
 
-                {/* DELETE FOLDER DIALOG */}
+                {/* PURGE OVERLAY */}
                 {deletingFolderId === folderId && (
-                  <div className="mt-4 p-4 bg-red-50/50 border border-red-100 rounded-xl animate-in slide-in-from-top-2 max-w-md dark:bg-red-900/20 dark:border-red-500/30">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                  <div className="p-4 border border-red-500/30 bg-red-500/5 mt-4 max-w-md animate-in slide-in-from-left-4">
+                    <div className="flex items-start gap-4">
+                      <ShieldAlert className="text-red-500 shrink-0" size={16} />
                       <div>
-                        <p className="font-bold text-red-900 text-sm dark:text-red-400">Tem certeza?</p>
-                        <p className="text-xs text-red-700 mt-1 mb-3 dark:text-red-300">Os projetos serão movidos para "Sem Pasta".</p>
+                        <p className="font-technical text-[10px] font-black text-red-500 uppercase tracking-widest">CONFIRMAR EXCLUSÃO</p>
+                        <p className="text-[10px] font-technical text-slate-400 uppercase mt-1 mb-3">A pasta será excluída. Registros contidos serão movidos para projetos sem pasta.</p>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" className="h-8 text-xs bg-white hover:bg-red-100 dark:bg-white/5 dark:hover:bg-red-500/20 dark:text-gray-300" onClick={() => setDeletingFolderId(null)}>Cancelar</Button>
-                          <Button size="sm" variant="primary" className="h-8 text-xs bg-red-500 hover:bg-red-600 shadow-none border-none dark:bg-red-600 dark:hover:bg-red-700" onClick={() => handleDeleteFolder(folderId)}>Excluir Pasta</Button>
+                          <Button size="sm" variant="ghost" className="h-7 text-[9px] border-slate-700 hover:bg-slate-800 font-technical uppercase" onClick={() => setDeletingFolderId(null)}>CANCELAR</Button>
+                          <Button size="sm" variant="primary" className="h-7 text-[9px] bg-red-600 hover:bg-red-700 font-technical uppercase border-none" onClick={() => handleDeleteFolder(folderId)}>EXECUTAR</Button>
                         </div>
                       </div>
                     </div>
@@ -180,94 +190,125 @@ export const History: React.FC = () => {
               </div>
 
               {folderProjects.length > 0 && (
-                <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm dark:bg-dark-surface dark:border-white/10">
-                  <div className="px-4 border-l-2 border-blue-500 pl-4">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Tempo Total</span>
-                    <span className="font-bold text-gray-800 text-lg flex items-center gap-1 dark:text-gray-200">
-                      <Clock size={14} className="text-blue-500" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-950 p-4 border border-slate-800">
+                  <div className="px-4 border-l border-primary/30">
+                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">TEMPO TOTAL</span>
+                    <span className="font-technical font-black text-white text-base flex items-center gap-1.5">
+                      <Clock size={12} className="text-primary" />
                       {Math.floor(folderTotalTime)}h {Math.round((folderTotalTime % 1) * 60)}m
                     </span>
                   </div>
-                  <div className="px-4 border-l-2 border-emerald-500 pl-4">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Lucro Total</span>
-                    <span className="font-bold text-emerald-600 text-lg dark:text-emerald-400">{currency} {folderTotalProfit.toFixed(2)}</span>
+                  <div className="px-4 border-l border-emerald-500/30">
+                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">LUCRO TOTAL</span>
+                    <span className="font-technical font-black text-emerald-500 text-base">{currency} {folderTotalProfit.toFixed(2)}</span>
                   </div>
-                  <div className="px-4 border-l-2 border-indigo-500 pl-4">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Valor Total</span>
-                    <span className="font-black text-indigo-900 text-xl dark:text-indigo-300">{currency} {folderTotalCost.toFixed(2)}</span>
+                  <div className="px-4 border-l border-indigo-500/30 col-span-2 sm:col-span-1 border-t sm:border-t-0 pt-4 sm:pt-0">
+                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">VALOR TOTAL</span>
+                    <span className="font-technical font-black text-white text-xl">{currency} {folderTotalCost.toFixed(2)}</span>
                   </div>
                 </div>
               )}
             </div>
 
             {folderProjects.length === 0 ? (
-              <div className="p-10 border-2 border-dashed border-gray-100 rounded-xl flex flex-col items-center justify-center text-gray-300 dark:border-white/10 dark:text-gray-600">
-                <FolderOpen size={40} className="mb-2 opacity-50" />
-                <p className="text-sm font-medium">Pasta vazia.</p>
+              <div className="p-12 border border-dashed border-slate-800 flex flex-col items-center justify-center">
+                <FolderOpen size={24} className="text-slate-800 mb-2" />
+                <p className="text-[10px] font-technical text-slate-700 uppercase tracking-widest">Pasta sem projetos</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {folderProjects.map((project) => (
                   <Card
                     key={project.id}
-                    variant="glass"
+                    variant="industrial"
                     className={cn(
-                      "flex flex-col relative transition-all duration-300 group hover:border-blue-300/50 hover:shadow-lg hover:-translate-y-1",
-                      deletingId === project.id && "ring-2 ring-red-500 ring-offset-2"
+                      "flex flex-col relative p-0 group transition-all duration-300",
+                      deletingId === project.id && "border-red-900 shadow-[0_0_20px_rgba(220,38,38,0.1)]"
                     )}
                   >
-                    <div className={cn("transition-all duration-300", deletingId === project.id && "opacity-20 blur-sm pointer-events-none")}>
-                      <div className="flex justify-between items-start mb-5">
-                        <div className="pr-10">
-                          <h3 className="font-bold text-lg text-gray-800 leading-snug line-clamp-2 dark:text-gray-100" title={project.name}>{project.name}</h3>
-                          <p className="text-xs text-gray-400 mt-1 font-medium">{new Date(project.date).toLocaleDateString()}</p>
+                    <div className={cn("transition-all duration-300 p-6", deletingId === project.id && "opacity-20 blur-sm pointer-events-none")}>
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="space-y-1 flex-1 min-w-0 pr-2">
+                          <h3 className="font-technical font-black text-sm text-white uppercase tracking-wider line-clamp-1">{project.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-primary/40" />
+                            <p className="text-[9px] font-technical text-slate-500 uppercase tracking-widest">DATA: {new Date(project.date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <StatusBadge status={project.status || 'aguardando'} />
+                      </div>
+
+                      {/* Status Selector */}
+                      <div className="mb-4">
+                        <label className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">STATUS DE PRODUÇÃO</label>
+                        <div className="relative">
+                          <select
+                            value={project.status || 'aguardando'}
+                            onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus)}
+                            disabled={updatingStatusId === project.id}
+                            className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer disabled:opacity-50"
+                          >
+                            <option value="aguardando">⏳ AGUARDANDO</option>
+                            <option value="em_producao">⚙️ EM PRODUÇÃO</option>
+                            <option value="concluido">✅ CONCLUÍDO</option>
+                            <option value="cancelado">✖ CANCELADO</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                            {updatingStatusId === project.id
+                              ? <Loader2 size={10} className="animate-spin" />
+                              : <span className="text-[8px]">▼</span>}
+                          </div>
                         </div>
                       </div>
 
-                      <div className="text-center bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 mb-5 group-hover:shadow-inner transition-shadow dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-500/20">
-                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Preço Final</p>
-                        <p className="text-3xl font-black text-blue-600 tracking-tighter dark:text-blue-400">{currency} {project.result.finalPrice.toFixed(2)}</p>
+                      <div className="bg-slate-950 border border-slate-800 p-4 mb-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-8 h-8 opacity-5">
+                            <div className="absolute top-0 right-0 border-t-8 border-r-8 border-t-white border-r-transparent rotate-180" />
+                        </div>
+                        <p className="text-[9px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] mb-1">VALOR DA PEÇA</p>
+                        <p className="text-3xl font-technical font-black text-white tracking-tighter">
+                            <span className="text-primary mr-1 bg-primary/10 px-1">{currency}</span>
+                            {project.result.finalPrice.toFixed(2)}
+                        </p>
                       </div>
 
-                      <div className="space-y-2.5">
-                        <DetailItem icon={<Tag size={14} />} label="Impressora" value={printers[project.printerId] || 'N/A'} />
-                        <DetailItem icon={<PackageOpen size={14} />} label="Material" value={materials[project.materialId] || 'N/A'} />
-                        <div className="grid grid-cols-2 gap-2.5">
-                          <DetailItem icon={<Clock size={14} />} label="Tempo" value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} />
-                          <DetailItem icon={<Scaling size={14} />} label="Peso" value={`${project.modelWeight}g`} />
+                      <div className="space-y-2">
+                        <HistoryDetail icon={<Tag size={12} />} label="IMPRESSORA" value={printers[project.printerId] || 'N/A'} />
+                        <HistoryDetail icon={<PackageOpen size={12} />} label="MATERIAL" value={materials[project.materialId] || 'N/A'} />
+                        <div className="grid grid-cols-2 gap-2">
+                          <HistoryDetail icon={<Clock size={12} />} label="TEMPO" value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} />
+                          <HistoryDetail icon={<Scaling size={12} />} label="PESO" value={`${project.modelWeight}g`} />
                         </div>
-                        <DetailItem icon={<PiggyBank size={14} />} label="Lucro Líq." value={`${currency} ${project.result.profit.toFixed(2)}`} />
+                        <HistoryDetail icon={<PiggyBank size={12} />} label="LUCRO" value={`${currency} ${project.result.profit.toFixed(2)}`} color="text-emerald-500" />
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {/* Action Palette */}
+                    <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <button
                         onClick={() => setDetailsProject(project)}
-                        className="p-2 bg-white text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg shadow-sm border border-gray-100 transition-colors dark:bg-dark-surface dark:border-white/10 dark:text-blue-400 dark:hover:bg-blue-900/30"
-                        title="Ver Detalhes"
+                        className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-primary/50 transition-colors flex items-center justify-center"
+                        title="Ver detalhes"
                       >
-                        <Info size={18} />
+                        <Info size={14} />
                       </button>
                       <button
                         onClick={() => setDeletingId(project.id)}
-                        className="p-2 bg-white text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg shadow-sm border border-gray-100 transition-colors dark:bg-dark-surface dark:border-white/10 dark:text-gray-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                        className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-red-500 hover:border-red-900/50 transition-colors flex items-center justify-center"
                         title="Excluir"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
 
-                    {/* Delete Confirmation Overlay */}
+                    {/* Purge Confirmation */}
                     {deletingId === project.id && (
-                      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200 dark:bg-black/80 rounded-2xl">
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-500 mb-3 dark:bg-red-900/30 dark:text-red-400">
-                          <Trash2 size={24} />
-                        </div>
-                        <p className="font-bold text-gray-800 mb-4 dark:text-gray-200">Excluir permanentemente?</p>
-                        <div className="flex gap-3 w-full">
-                          <Button size="sm" variant="ghost" className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 dark:text-gray-300" onClick={() => setDeletingId(null)}>Cancelar</Button>
-                          <Button size="sm" variant="primary" className="flex-1 bg-red-500 hover:bg-red-600 border-none shadow-none" onClick={() => handleDeleteProject(project.id)}>Excluir</Button>
+                      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 bg-slate-950/90">
+                        <ShieldAlert className="text-red-500 mb-4" size={32} />
+                        <h4 className="font-technical font-black text-xs text-white uppercase tracking-[0.2em] mb-4">EXCLUIR ESTE PROJETO?</h4>
+                        <div className="flex gap-2 w-full max-w-[200px]">
+                          <Button size="sm" variant="ghost" className="flex-1 h-8 text-[10px] font-technical uppercase border-slate-700 hover:bg-slate-800" onClick={() => setDeletingId(null)}>CANCELAR</Button>
+                          <Button size="sm" variant="primary" className="flex-1 h-8 text-[10px] font-technical uppercase bg-red-600 hover:bg-red-700 border-none" onClick={() => handleDeleteProject(project.id)}>CONFIRMAR</Button>
                         </div>
                       </div>
                     )}
@@ -287,5 +328,31 @@ export const History: React.FC = () => {
         materialName={detailsProject ? materials[detailsProject.materialId] : undefined}
       />
     </div>
+  );
+};
+
+const HistoryDetail = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color?: string }) => (
+  <div className="flex items-center justify-between p-2 border border-slate-900 bg-slate-900/30">
+    <div className="flex items-center gap-2">
+      <div className="text-slate-600">{icon}</div>
+      <span className="text-[9px] font-technical font-black text-slate-500 uppercase tracking-widest">{label}</span>
+    </div>
+    <span className={cn("text-[10px] font-technical font-black text-slate-200 truncate max-w-[140px]", color)}>{value}</span>
+  </div>
+);
+
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  aguardando:   { label: 'AGUARDANDO',   color: 'border-amber-500/50 text-amber-400 bg-amber-500/10' },
+  em_producao:  { label: 'EM PRODUÇÃO',  color: 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10' },
+  concluido:    { label: 'CONCLUÍDO',    color: 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' },
+  cancelado:    { label: 'CANCELADO',    color: 'border-red-500/50 text-red-400 bg-red-500/10' },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['aguardando'];
+  return (
+    <span className={cn('inline-flex items-center px-2 py-0.5 border text-[8px] font-technical font-black uppercase tracking-widest shrink-0', cfg.color)}>
+      {cfg.label}
+    </span>
   );
 };

@@ -2,10 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { StorageService } from '../services/storage';
 import { Project, GlobalSettings, ViewState } from '../types';
 import { Card } from './ui/Card';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
-import { TrendingUp, DollarSign, Box, Loader2 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
+import { TrendingUp, DollarSign, Box, Loader2, Activity, Zap, Cpu, ChevronDown } from 'lucide-react';
 import { AssetsSummary } from './AssetsSummary';
 import { cn } from '../utils/cn';
+import { format } from 'date-fns';
+import { ProjectStatus } from '../types';
 
 interface DashboardProps {
   onNavigate: (view: ViewState, params?: any) => void;
@@ -15,6 +17,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ currencySymbol: '$', electricityCost: 0 });
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -34,164 +37,258 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     fetchData();
   }, []);
 
-  const totalRevenue = projects.reduce((acc, curr) => acc + curr.result.finalPrice, 0);
-  const totalProfit = projects.reduce((acc, curr) => acc + curr.result.profit, 0);
-  const totalPrints = projects.length;
+  const concludedProjects = projects.filter(p => p.status === 'concluido');
 
-  const chartData = projects.slice(0, 5).map(p => ({
-    name: p.name.length > 10 ? p.name.substring(0, 10) + '...' : p.name,
+  const totalRevenue = concludedProjects.reduce((acc, curr) => acc + curr.result.finalPrice, 0);
+  const totalProfit  = concludedProjects.reduce((acc, curr) => acc + curr.result.profit, 0);
+  const totalPrints  = concludedProjects.length;
+
+  const chartData = concludedProjects.slice(0, 5).map(p => ({
+    name: p.name.length > 8 ? p.name.substring(0, 8) : p.name,
     Gasto: p.result.totalProductionCost,
     Lucro: p.result.profit,
     Faturamento: p.result.finalPrice,
   })).reverse();
 
-  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-500" size={40} /></div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center p-20 gap-4">
+      <Loader2 className="animate-spin text-primary" size={32} />
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO DADOS...</span>
+    </div>
+  );
 
-  const StatCard = ({ title, value, icon: Icon, colorClass, bgClass, shadowClass, onClick }: any) => (
-    <Card
-      variant="neumorphic"
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-5 group hover:-translate-y-1 transition-transform relative overflow-hidden",
-        onClick ? "cursor-pointer active:scale-95" : "cursor-default"
-      )}
-    >
-      <div className={cn("p-4 rounded-2xl shadow-inner", bgClass, colorClass)}>
-        <Icon size={28} className="drop-shadow-sm" />
-      </div>
-      <div className="flex-1 relative z-10">
-        <p className="text-gray-400 text-[11px] font-black uppercase tracking-widest mb-1 dark:text-gray-500">{title}</p>
-        <div className="flex items-baseline gap-1">
-          <p className="text-3xl font-black text-gray-800 tracking-tighter dark:text-gray-100">
+  const StatBlock = ({ title, value, icon: Icon, colorClass, data }: any) => (
+    <Card variant="industrial" className="flex flex-col gap-4 relative overflow-hidden group">
+      <div className="flex justify-between items-start z-10">
+        <div>
+          <p className="text-slate-500 text-[10px] font-technical font-bold uppercase tracking-widest mb-1">{title}</p>
+          <p className={cn("text-2xl font-technical font-bold tracking-tighter", colorClass)}>
             {value}
           </p>
         </div>
+        <div className={cn("p-2 bg-slate-950 border border-slate-800", colorClass)}>
+          <Icon size={16} />
+        </div>
       </div>
-      <div className={cn("absolute -right-6 -bottom-6 w-24 h-24 rounded-full opacity-10 blur-xl", shadowClass)} />
+      
+      {/* Sparkline integration */}
+      <div className="h-10 w-full opacity-50 group-hover:opacity-100 transition-opacity">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <Area 
+              type="monotone" 
+              dataKey="val" 
+              stroke="currentColor" 
+              fill="currentColor" 
+              fillOpacity={0.1} 
+              strokeWidth={1.5}
+              className={colorClass}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </Card>
   );
 
+  // Trend data for sparklines — only concluded projects
+  const last5Revenue = concludedProjects.slice(0, 5).map(p => ({ val: p.result.finalPrice })).reverse();
+  const last5Profit  = concludedProjects.slice(0, 5).map(p => ({ val: p.result.profit })).reverse();
+  const last5Prints  = concludedProjects.slice(0, 5).map((_, i) => ({ val: i + 1 }));
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          title="Receita Total"
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* System Status Banner */}
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/30 border border-slate-800 text-[9px] font-technical text-slate-500 uppercase">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5"><Zap size={10} className="text-primary" /> SISTEMA PRONTO</span>
+          <span className="flex items-center gap-1.5"><Cpu size={10} className="text-secondary" /> SINCRONIZADO</span>
+        </div>
+        <div className="flex items-center gap-2">
+            Operando: <span className="text-white">00:42:15</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatBlock
+          title="RECEITA TOTAL"
           value={`${settings.currencySymbol}${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={TrendingUp}
-          colorClass="text-blue-600 dark:text-blue-400"
-          bgClass="bg-blue-50 dark:bg-blue-500/20"
-          shadowClass="bg-blue-500"
+          colorClass="text-primary"
+          data={last5Revenue}
         />
-        <StatCard
-          title="Lucro Total"
+        <StatBlock
+          title="LUCRO LÍQUIDO"
           value={`${settings.currencySymbol}${totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={DollarSign}
-          colorClass="text-emerald-600 dark:text-emerald-400"
-          bgClass="bg-emerald-50 dark:bg-emerald-500/20"
-          shadowClass="bg-emerald-500"
+          colorClass="text-secondary"
+          data={last5Profit}
         />
-        <StatCard
-          title="Orçamentos"
-          value={totalPrints}
+        <StatBlock
+          title="TOTAL DE PROJETOS"
+          value={totalPrints.toString().padStart(2, '0')}
           icon={Box}
-          colorClass="text-indigo-600 dark:text-indigo-400"
-          bgClass="bg-indigo-50 dark:bg-indigo-500/20"
-          shadowClass="bg-indigo-500"
-          onClick={() => onNavigate('history')}
+          colorClass="text-white"
+          data={last5Prints}
         />
       </div>
 
       <AssetsSummary onNavigate={onNavigate} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card variant="glass" className="h-[28rem] flex flex-col p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Desempenho Financeiro</h3>
-            <p className="text-sm text-gray-400 dark:text-gray-500">Análise dos últimos 5 projetos</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Chart Section */}
+        <Card variant="industrial" className="lg:col-span-2 flex flex-col p-6 min-h-[400px]">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                <Activity size={14} className="text-primary" /> GRÁFICO FINANCEIRO
+              </h3>
+              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">Métricas de produção dos últimos projetos // Moeda: {settings.currencySymbol}</p>
+            </div>
+            <div className="flex gap-2">
+                <div className="px-2 py-1 bg-slate-950 border border-slate-800 text-[9px] font-technical text-slate-400 uppercase">ÚLTIMOS 5</div>
+            </div>
           </div>
 
           {projects.length > 0 ? (
-            <div className="flex-1 min-h-0 w-full">
+            <div className="flex-1 w-full min-h-0">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" strokeOpacity={0.2} />
+                <LineChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#1e293b" />
                   <XAxis
                     dataKey="name"
-                    stroke="#94a3b8"
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#64748B' }}
+                    stroke="#475569"
+                    tick={{ fontSize: 9, fontFamily: 'IBM Plex Mono', fontWeight: 600 }}
                     axisLine={false}
                     tickLine={false}
                     dy={10}
                   />
                   <YAxis
-                    stroke="#94a3b8"
-                    tick={{ fontSize: 10, fontWeight: 600, fill: '#64748B' }}
+                    stroke="#475569"
+                    tick={{ fontSize: 9, fontFamily: 'IBM Plex Mono', fontWeight: 600 }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'rgba(21, 25, 33, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)', fontSize: '12px', fontWeight: 'bold', color: '#F9FAFB' }}
-                    cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '0px', fontSize: '10px', fontFamily: 'IBM Plex Mono', color: '#F8FAFC' }}
+                    itemStyle={{ padding: '0px', color: '#F8FAFC' }}
+                    cursor={{ stroke: '#FF5C00', strokeWidth: 1 }}
                     formatter={(value: number) => settings.currencySymbol + ' ' + value.toFixed(2)}
                   />
                   <Legend
-                    verticalAlign="bottom"
-                    align="center"
-                    iconType="circle"
-                    iconSize={8}
-                    wrapperStyle={{ paddingTop: '20px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748B' }}
+                    verticalAlign="top"
+                    align="right"
+                    iconType="rect"
+                    iconSize={10}
+                    wrapperStyle={{ paddingBottom: '30px', fontSize: '9px', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase', color: '#64748B' }}
                   />
 
-                  <Line type="monotone" dataKey="Faturamento" stroke="#3b82f6" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
-                  <Line type="monotone" dataKey="Lucro" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
-                  <Line type="monotone" dataKey="Gasto" stroke="#ef4444" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+                  <Line type="stepAfter" dataKey="Faturamento" stroke="#FF5C00" strokeWidth={2} dot={{ r: 3, stroke: '#FF5C00', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey="Lucro" stroke="#00E0FF" strokeWidth={2} dot={{ r: 3, stroke: '#00E0FF', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey="Gasto" stroke="#475569" strokeWidth={2} dot={{ r: 3, stroke: '#475569', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400">
-              <Box size={48} className="mb-4 opacity-20" />
-              <p className="font-medium">Sem dados para exibir</p>
+            <div className="flex flex-col items-center justify-center flex-1 border border-dashed border-slate-800 text-slate-600">
+              <Box size={24} className="mb-3 opacity-30" />
+              <p className="text-[10px] font-technical uppercase italic">Nenhum projeto ainda</p>
             </div>
           )}
         </Card>
 
-        <Card variant="glass" className="h-[28rem] flex flex-col p-0 overflow-hidden relative">
-          <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-white to-transparent pointer-events-none z-10 dark:from-dark-surface dark:to-transparent" />
-          <div className="p-6 pb-2 z-20">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Últimos Orçamentos</h3>
-            <p className="text-sm text-gray-400 dark:text-gray-500">Histórico recente de atividades</p>
+        {/* Side: Status Panel */}
+        <Card variant="industrial" className="flex flex-col p-0 overflow-hidden border-l-0 lg:border-l border-slate-800">
+          <div className="p-6 pb-3 bg-slate-950/50 border-b border-slate-800 space-y-3">
+            <div>
+              <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest">PROJETOS POR STATUS</h3>
+              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">Filtre por fase de produção // Máx. 4</p>
+            </div>
+            {/* Filter Dropdown */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
+                className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer"
+              >
+                <option value="all">🔹 TODOS OS STATUS</option>
+                <option value="aguardando">⏳ AGUARDANDO</option>
+                <option value="em_producao">⚙️ EM PRODUÇÃO</option>
+                <option value="concluido">✅ CONCLUÍDO</option>
+                <option value="cancelado">✖ CANCELADO</option>
+              </select>
+              <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
+            </div>
           </div>
 
-          <div className="overflow-y-auto custom-scrollbar flex-1 px-6 pb-6 pt-2 space-y-3">
-            {projects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-48 text-gray-400">
-                <p className="font-medium">Nenhum histórico encontrado.</p>
+          {(() => {
+            const filtered = (statusFilter === 'all'
+              ? projects
+              : projects.filter(p => p.status === statusFilter)
+            ).slice(0, 4);
+
+            const STATUS_COLORS: Record<string, string> = {
+              aguardando:  'text-amber-400',
+              em_producao: 'text-cyan-400',
+              concluido:   'text-emerald-400',
+              cancelado:   'text-red-400',
+            };
+            const STATUS_LABELS: Record<string, string> = {
+              aguardando:  'AGUARDANDO',
+              em_producao: 'EM PRODUÇÃO',
+              concluido:   'CONCLUÍDO',
+              cancelado:   'CANCELADO',
+            };
+
+            return (
+              <div className="overflow-y-auto custom-scrollbar flex-1">
+                {filtered.length === 0 ? (
+                  <div className="p-8 text-center text-slate-600">
+                    <p className="text-[9px] font-technical uppercase">Nenhum projeto neste status</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800/50">
+                    {filtered.map(p => {
+                      const st = p.status || 'aguardando';
+                      return (
+                        <div
+                          key={p.id}
+                          className="flex justify-between items-center p-4 hover:bg-slate-900 group transition-colors cursor-pointer"
+                          onClick={() => onNavigate('history')}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500 group-hover:border-primary group-hover:text-primary transition-colors shrink-0">
+                              <Box size={14} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-technical font-bold text-slate-200 group-hover:text-white transition-colors uppercase truncate">{p.name}</p>
+                              <p className={cn('text-[8px] font-technical font-black uppercase mt-0.5', STATUS_COLORS[st])}>
+                                {STATUS_LABELS[st]}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0 ml-2">
+                            <p className="text-[10px] font-technical font-bold text-primary">
+                              +{settings.currencySymbol}{p.result.finalPrice.toFixed(2)}
+                            </p>
+                            <p className="text-[8px] font-technical text-slate-600 uppercase mt-0.5">{format(new Date(p.date), "yy.MM.dd")}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            ) : (
-              projects.slice(0, 6).map(p => (
-                <div key={p.id} className="flex justify-between items-center p-4 bg-white/50 border border-gray-100/50 rounded-2xl hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-default group dark:bg-white/5 dark:border-white/5 dark:hover:bg-white/10 dark:hover:border-white/10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-105 transition-transform dark:from-blue-500/20 dark:to-indigo-500/20 dark:border-white/10 dark:text-blue-400">
-                      <Box size={20} className="drop-shadow-sm" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800 text-sm dark:text-gray-200">{p.name}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 dark:text-gray-500">{new Date(p.date).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-black text-emerald-600 text-sm bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
-                      {settings.currencySymbol}{p.result.finalPrice.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-white to-transparent pointer-events-none z-10 dark:from-dark-surface" />
+            );
+          })()}
+
+          <button
+            className="w-full p-3 bg-slate-950 border-t border-slate-800 text-[10px] font-technical font-bold text-slate-500 hover:text-white transition-colors flex items-center justify-center gap-2"
+            onClick={() => onNavigate('history')}
+          >
+            VER HISTÓRICO COMPLETO <TrendingUp size={12} />
+          </button>
         </Card>
       </div >
     </div >
   );
-};
+};

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, ArrowRightLeft, LogOut, ChevronLeft } from 'lucide-react';
+import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, ArrowRightLeft, LogOut, ChevronLeft, Terminal, Cpu, Settings } from 'lucide-react';
 import { ViewState } from '../types';
 import { cn } from '../utils/cn';
 
@@ -21,52 +21,59 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [isCollapsed, setIsCollapsed] = React.useState(false);
 
     const navItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'calculator', label: 'Calculadora', icon: CalcIcon },
-        { id: 'assets', label: 'Meus Ativos', icon: Printer },
-        { id: 'comparator', label: 'Comparador', icon: ArrowRightLeft },
-        { id: 'history', label: 'Histórico', icon: HistoryIcon },
+        { id: 'dashboard', label: 'PAINEL GERAL', icon: LayoutDashboard },
+        { id: 'calculator', label: 'CALCULADORA', icon: CalcIcon },
+        { id: 'assets', label: 'IMPRESSORAS E MATERIAIS', icon: Printer },
+        { id: 'comparator', label: 'COMPARAR CUSTOS', icon: ArrowRightLeft },
+        { id: 'history', label: 'HISTÓRICO', icon: HistoryIcon },
+        { id: 'profile', label: 'MEU PERFIL', icon: Settings },
     ];
 
     return (
         <>
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-20 md:hidden backdrop-blur-sm transition-opacity"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
                     onClick={onClose}
                 />
             )}
 
             <aside className={cn(
-                "fixed md:static inset-y-0 left-0 z-30 bg-white/80 backdrop-blur-xl border-r border-white/20 shadow-2xl md:shadow-none transform transition-all duration-300 ease-in-out flex flex-col dark:bg-dark-surface/80 dark:border-white/10",
+                "fixed md:static inset-y-0 left-0 z-50 bg-slate-950 border-r border-slate-900 transform transition-all duration-300 ease-in-out flex flex-col",
                 isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-                isCollapsed ? 'md:w-20' : 'w-72'
+                isCollapsed ? 'md:w-16' : 'w-64'
             )}>
                 {/* Toggle Button (Desktop Only) */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-gray-200 rounded-full items-center justify-center text-gray-500 hover:text-blue-600 shadow-sm z-50 hover:scale-110 transition-all dark:bg-dark-surface dark:border-white/10 dark:text-gray-400"
+                    className="hidden md:flex absolute -right-3 top-20 w-6 h-6 bg-slate-950 border border-slate-800 items-center justify-center text-slate-600 hover:text-primary z-50 transition-all active:bg-slate-900 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                 >
-                    <ChevronLeft size={14} className={cn("transition-transform", isCollapsed && "rotate-180")} />
+                    <ChevronLeft size={10} className={cn("transition-transform duration-300", isCollapsed && "rotate-180")} />
                 </button>
 
+                {/* Brand Unit */}
                 <div className={cn(
-                    "h-20 flex items-center border-b border-gray-100/50 transition-all duration-300 dark:border-white/5",
-                    isCollapsed ? "px-0 justify-center" : "px-8"
+                    "h-16 flex items-center border-b border-slate-900 transition-all duration-300 bg-slate-900/10",
+                    isCollapsed ? "justify-center" : "px-6"
                 )}>
-                    <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
-                        <span className="font-bold text-lg">3D</span>
+                    <div className="w-8 h-8 shrink-0 flex items-center justify-center border-2 border-primary relative group">
+                        <span className="font-technical font-black text-xs text-white">3DP</span>
+                        <div className="absolute top-0 right-0 w-1 h-1 bg-primary" />
+                        <div className="absolute bottom-0 left-0 w-1 h-1 bg-primary" />
                     </div>
 
-                    <span className={cn(
-                        "font-bold text-2xl tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 dark:from-white dark:to-gray-400",
-                        isCollapsed ? "w-0 opacity-0 ml-0" : "w-auto opacity-100"
-                    )}>
-                        PrintCalc
-                    </span>
+                    {!isCollapsed && (
+                        <div className="ml-4 overflow-hidden">
+                            <span className="block font-technical font-black text-sm tracking-[0.2em] text-white whitespace-nowrap">
+                                GESTÃO 3D
+                            </span>
+                            <span className="block font-technical font-bold text-[8px] tracking-widest text-slate-600 uppercase mt-0.5">PAINEL DE CONTROLE</span>
+                        </div>
+                    )}
                 </div>
 
-                <nav className="p-4 space-y-2 flex-1 overflow-y-auto overflow-x-hidden">
+                {/* Navigation Hub */}
+                <nav className="p-3 space-y-1.5 flex-1 overflow-y-auto custom-scrollbar mt-4">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = currentView === item.id;
@@ -78,68 +85,73 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     onClose();
                                 }}
                                 className={cn(
-                                    "w-full flex items-center py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden whitespace-nowrap",
-                                    isCollapsed ? "justify-center px-0" : "gap-4 px-4",
+                                    "w-full flex items-center py-3 transition-all duration-150 relative group whitespace-nowrap rounded-none",
+                                    isCollapsed ? "justify-center" : "gap-3 px-3",
                                     isActive
-                                        ? "text-white shadow-lg shadow-blue-500/25"
-                                        : "text-gray-500 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-blue-400"
+                                        ? "text-white bg-slate-900/50 border border-slate-800 shadow-[inset_0_0_10px_rgba(255,92,0,0.03)]"
+                                        : "text-slate-600 hover:text-slate-300 hover:bg-slate-900/20"
                                 )}
                                 title={isCollapsed ? item.label : undefined}
                             >
                                 {isActive && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600" />
+                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary shadow-[0_0_10px_rgba(255,92,0,0.5)]" />
                                 )}
                                 <Icon
-                                    size={20}
+                                    size={16}
                                     className={cn(
-                                        "relative z-10 transition-transform duration-300 flex-shrink-0",
-                                        isActive ? "drop-shadow-sm" : "",
-                                        !isActive && "group-hover:scale-110"
+                                        "relative z-10 transition-colors shrink-0",
+                                        isActive ? "text-primary" : "text-slate-700 group-hover:text-slate-500"
                                     )}
                                 />
-                                <span className={cn(
-                                    "relative z-10 font-medium text-sm tracking-wide transition-all duration-300",
-                                    isActive ? "font-semibold" : "",
-                                    isCollapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
-                                )}>
-                                    {item.label}
-                                </span>
+                                {!isCollapsed && (
+                                    <span className={cn(
+                                        "relative z-10 font-technical text-[10px] font-black tracking-[0.15em] transition-all",
+                                        isActive ? "text-white" : "text-slate-600 group-hover:text-slate-400"
+                                    )}>
+                                        {item.label}
+                                    </span>
+                                )}
                             </button>
                         );
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-gray-100/50 space-y-4 dark:border-white/5">
-                    {/* Tip Card */}
+                {/* Footer Utility */}
+                <div className="p-4 border-t border-slate-900 space-y-4 bg-slate-900/10">
                     {!isCollapsed && (
-                        <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 animate-in fade-in duration-300 dark:bg-none dark:bg-white/5 dark:border-white/5">
-                            <div className="absolute top-0 right-0 -mt-2 -mr-2 w-12 h-12 bg-blue-500/10 rounded-full blur-xl" />
-                            <p className="relative z-10 text-xs text-blue-800 font-medium leading-relaxed dark:text-gray-300">
-                                💡 Mantenha seus preços de insumos atualizados para maior precisão.
-                            </p>
+                        <div className="p-3 border border-slate-800 bg-slate-950/50 space-y-2">
+                             <div className="flex items-center justify-between">
+                                <span className="text-[8px] font-technical font-black text-slate-700 uppercase tracking-widest">STATUS DO SISTEMA</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+                             </div>
+                             <div className="h-1 bg-slate-900 w-full">
+                                <div className="h-full bg-primary/20 w-[64%]" />
+                             </div>
+                             <p className="text-[8px] font-technical text-slate-500 uppercase tracking-wider leading-tight">OPERAÇÕES: 1.429</p>
                         </div>
                     )}
 
                     <button
                         onClick={onLogout}
                         className={cn(
-                            "w-full flex items-center py-3 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all duration-300 group whitespace-nowrap dark:text-gray-400 dark:hover:bg-red-500/10 dark:hover:text-red-400",
-                            isCollapsed ? "justify-center px-0" : "gap-3 px-4"
+                            "w-full flex items-center py-2.5 transition-all duration-200 group whitespace-nowrap border border-transparent hover:border-red-900/30 hover:bg-red-950/20",
+                            isCollapsed ? "justify-center" : "gap-3 px-3"
                         )}
-                        title={isCollapsed ? "Sair da Conta" : undefined}
+                        title={isCollapsed ? "Sair da conta" : undefined}
                     >
-                        <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-red-100 transition-colors shrink-0 dark:bg-white/5 dark:group-hover:bg-red-500/20">
-                            <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </div>
-
-                        <span className={cn(
-                            "font-semibold text-sm transition-all duration-300",
-                            isCollapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
-                        )}>
-                            Sair da Conta
-                        </span>
+                        <LogOut size={14} className="text-slate-700 group-hover:text-red-500 shrink-0" />
+                        {!isCollapsed && (
+                            <span className="font-technical text-[10px] font-black tracking-widest text-slate-700 group-hover:text-red-500 uppercase">
+                                SAIR
+                            </span>
+                        )}
                     </button>
                 </div>
+                
+                {/* Visual Accent */}
+                {!isCollapsed && (
+                   <div className="h-1 bg-gradient-to-r from-transparent via-slate-900 to-transparent opacity-50" />
+                )}
             </aside>
         </>
     );

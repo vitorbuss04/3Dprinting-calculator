@@ -3,7 +3,7 @@ import { supabase } from '../services/supabaseClient';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
-import { User, Lock, Mail, Fingerprint, Calendar, Loader2 } from 'lucide-react';
+import { User, Lock, Mail, Fingerprint, Calendar, Loader2, Shield, Activity, Database, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Profile: React.FC = () => {
@@ -52,92 +52,158 @@ export const Profile: React.FC = () => {
         }
     };
 
-    if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" size={32} /></div>;
-    if (!user) return null;
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center p-20 gap-4">
+            <Loader2 className="animate-spin text-primary" size={32} />
+            <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO PERFIL...</span>
+        </div>
+    );
+    
+    if (!user) return (
+        <div className="p-20 text-center">
+            <div className="w-12 h-12 border border-red-900 mx-auto flex items-center justify-center mb-4 text-red-500">
+                <Shield size={24} />
+            </div>
+            <h2 className="font-technical font-black text-white uppercase tracking-[0.2em]">ACESSO NEGADO</h2>
+            <p className="font-technical text-[10px] text-slate-500 uppercase mt-2">NENHUMA SESSÃO ATIVA</p>
+        </div>
+    );
 
     return (
-        <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
-            {/* Header Info */}
-            <div className="bg-white/80 backdrop-blur-md p-8 rounded-[2rem] shadow-xl shadow-blue-500/10 border border-white/20 flex flex-col md:flex-row items-center gap-6 text-center md:text-left dark:bg-dark-surface/50 dark:border-white/10 dark:shadow-none">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-4xl font-black shadow-lg shadow-blue-500/30 transform rotate-3">
-                    {user.email?.charAt(0).toUpperCase()}
+        <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in duration-500 pb-20">
+            {/* Header: User Identification Unit */}
+            <div className="bg-slate-950 border border-slate-900 p-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 text-slate-700 group-hover:text-primary transition-colors">
+                    <Fingerprint size={120} strokeWidth={1} />
                 </div>
-                <div>
-                    <h2 className="text-3xl font-black text-gray-800 tracking-tight dark:text-gray-100">Meu Perfil</h2>
-                    <p className="text-gray-500 font-medium text-lg dark:text-gray-400">{user.email}</p>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 mt-3 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider border border-emerald-100 shadow-sm dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Conta Ativa
-                    </span>
+                
+                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                    <div className="w-24 h-24 bg-slate-900 border border-slate-800 flex items-center justify-center text-white text-3xl font-black font-technical relative overflow-hidden">
+                        {user.email?.charAt(0).toUpperCase()}
+                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-700" />
+                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-700" />
+                    </div>
+                    
+                    <div className="text-center md:text-left">
+                        <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
+                             <h2 className="text-2xl font-technical font-black text-white uppercase tracking-[0.2em]">MEU PERFIL</h2>
+                             <span className="px-2 py-0.5 border border-emerald-900/30 text-emerald-500 text-[10px] font-technical font-black uppercase tracking-widest bg-emerald-500/5">
+                                SESSÃO ATIVA
+                             </span>
+                        </div>
+                        <p className="font-technical text-slate-400 text-sm tracking-wide mb-4">{user.email}</p>
+                        
+                        <div className="flex flex-wrap gap-4 justify-center md:justify-start text-[9px] font-technical text-slate-600 uppercase tracking-widest">
+                            <span className="flex items-center gap-2">
+                                <Activity size={10} className="text-primary" /> FUNÇÃO: OPERADOR
+                            </span>
+                            <span className="flex items-center gap-2">
+                                <Database size={10} className="text-secondary" /> DADOS: SINCRONIZADOS
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Account Details */}
-                <Card title="Detalhes da Conta" variant="glass" className="h-full">
-                    <div className="space-y-6">
-                        <div className="flex gap-4 items-center">
-                            <div className="p-3.5 bg-blue-50 rounded-2xl text-blue-600 shadow-sm dark:bg-blue-500/20 dark:text-blue-400"><Mail size={22} /></div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 dark:text-gray-500">Email</p>
-                                <p className="text-gray-800 font-bold text-sm truncate dark:text-gray-200" title={user.email}>{user.email}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {/* Section: System Metadata */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
+                         <span className="w-1.5 h-1.5 bg-secondary" />
+                         <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">DADOS DA CONTA</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div className="p-4 border border-slate-900 bg-slate-900/10 flex gap-4">
+                            <div className="w-10 h-10 border border-slate-800 bg-slate-950 flex items-center justify-center text-slate-600">
+                                <Mail size={16} />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">E-MAIL</p>
+                                <p className="text-xs font-technical font-bold text-white uppercase tracking-wider">{user.email}</p>
                             </div>
                         </div>
 
-                        <div className="flex gap-4 items-center">
-                            <div className="p-3.5 bg-purple-50 rounded-2xl text-purple-600 shadow-sm dark:bg-purple-500/20 dark:text-purple-400"><Fingerprint size={22} /></div>
+                        <div className="p-4 border border-slate-900 bg-slate-900/10 flex gap-4">
+                            <div className="w-10 h-10 border border-slate-800 bg-slate-950 flex items-center justify-center text-slate-600">
+                                <Fingerprint size={16} />
+                            </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 dark:text-gray-500">ID do Usuário</p>
-                                <p className="font-mono text-gray-600 text-xs bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 truncate block dark:bg-white/5 dark:text-gray-400 dark:border-white/10">
+                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">ID DA CONTA</p>
+                                <p className="text-[10px] font-technical font-bold text-slate-500 bg-slate-950 border border-slate-900 px-2 py-1.5 truncate">
                                     {user.id}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex gap-4 items-center">
-                            <div className="p-3.5 bg-orange-50 rounded-2xl text-orange-600 shadow-sm dark:bg-orange-500/20 dark:text-orange-400"><Calendar size={22} /></div>
+                        <div className="p-4 border border-slate-900 bg-slate-900/10 flex gap-4">
+                            <div className="w-10 h-10 border border-slate-800 bg-slate-950 flex items-center justify-center text-slate-600">
+                                <Calendar size={16} />
+                            </div>
                             <div>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 dark:text-gray-500">Membro Desde</p>
-                                <p className="text-gray-800 font-bold text-sm dark:text-gray-200">
-                                    {new Date(user.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">DATA DE CADASTRO</p>
+                                <p className="text-xs font-technical font-bold text-white uppercase tracking-wider">
+                                    {new Date(user.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
                                 </p>
                             </div>
                         </div>
                     </div>
-                </Card>
+                </div>
 
-                {/* Security / Password */}
-                <Card title="Segurança" variant="glass" className="h-full">
-                    <div className="bg-amber-50/80 rounded-2xl p-4 mb-6 border border-amber-100/50 flex gap-3 items-start dark:bg-amber-900/10 dark:border-amber-500/10">
-                        <Lock size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-amber-800 leading-relaxed font-medium dark:text-amber-500">
-                            Para maior segurança, escolha uma senha forte. Logins em outros dispositivos poderão ser encerrados.
-                        </p>
+                {/* Section: Security Purge / Update */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
+                         <span className="w-1.5 h-1.5 bg-primary" />
+                         <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">ALTERAR SENHA</h3>
                     </div>
 
-                    <div className="space-y-4">
-                        <Input
-                            label="Nova Senha"
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="••••••••"
-                        />
-                        <Input
-                            label="Confirmar Senha"
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="••••••••"
-                        />
-
-                        <div className="pt-2">
-                            <Button onClick={handleUpdatePassword} disabled={isUpdating} className="w-full" variant="primary">
-                                {isUpdating ? 'Atualizando...' : 'Atualizar Senha'}
-                            </Button>
+                    <Card variant="industrial" className="border-primary/20 p-8 space-y-8 bg-slate-950">
+                        <div className="p-4 border border-primary/20 bg-primary/5 flex gap-4">
+                            <Shield size={18} className="text-primary shrink-0 mt-0.5" />
+                            <p className="text-[10px] font-technical font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
+                                PREENCHA OS CAMPOS ABAIXO PARA DEFINIR UMA NOVA SENHA.
+                            </p>
                         </div>
-                    </div>
-                </Card>
+
+                        <div className="space-y-6">
+                            <Input
+                                label="NOVA SENHA"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="font-technical"
+                            />
+                            <Input
+                                label="CONFIRMAR SENHA"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="font-technical"
+                            />
+
+                            <div className="pt-4">
+                                <Button 
+                                    onClick={handleUpdatePassword} 
+                                    disabled={isUpdating} 
+                                    className="w-full font-technical font-black text-[11px] tracking-[0.2em]" 
+                                    variant="primary"
+                                >
+                                    {isUpdating ? (
+                                        <span className="flex items-center gap-2">
+                                            <Loader2 className="animate-spin" size={14} /> SINCRONIZANDO...
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-2 justify-center">
+                                            <Key size={14} /> SALVAR NOVA SENHA
+                                        </span>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
             </div>
         </div>
     );

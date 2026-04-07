@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StorageService } from '../services/storage';
 import { Printer, Material } from '../types';
-import { Card } from './ui/Card'; // Updated import
-import { Printer as PrinterIcon, Droplets } from 'lucide-react';
+import { Card } from './ui/Card';
+import { Printer as PrinterIcon, Droplets, ArrowRight, Database, Package } from 'lucide-react';
 import { cn } from '../utils/cn';
-
 import { ViewState } from '../types';
 
 interface AssetsSummaryProps {
@@ -37,51 +36,67 @@ export const AssetsSummary: React.FC<AssetsSummaryProps> = ({ onNavigate }) => {
   const totalMaterialStock = materials.reduce((acc, curr) => acc + (curr.currentStock || 0), 0);
 
   if (loading) {
-    return null;
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-24">
+            <div className="bg-slate-900/20 border border-slate-900 animate-pulse" />
+            <div className="bg-slate-900/20 border border-slate-900 animate-pulse" />
+        </div>
+    );
   }
 
-  const SummaryCard = ({ title, value, unit, icon: Icon, colorClass, bgClass, shadowClass, onClick }: any) => (
+  const SummaryCard = ({ title, value, unit, icon: Icon, colorClass, onClick, subtext }: any) => (
     <Card
-      variant="glass"
+      variant="industrial"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-5 p-5 group hover:-translate-y-1 transition-transform relative overflow-hidden",
-        onClick ? "cursor-pointer active:scale-95" : "cursor-default"
+        "flex flex-col p-6 group transition-all relative overflow-hidden h-full",
+        onClick ? "cursor-pointer active:scale-[0.98]" : "cursor-default"
       )}
     >
-      <div className={cn("p-4 rounded-2xl shadow-inner transition-colors duration-300", bgClass, colorClass)}>
-        <Icon size={24} className="drop-shadow-md" />
+      <div className="flex justify-between items-start mb-4">
+        <div className={cn("w-10 h-10 border border-slate-800 flex items-center justify-center bg-slate-950 transition-colors group-hover:border-current", colorClass)}>
+           <Icon size={18} />
+        </div>
+        <div className="text-right">
+           <p className="text-slate-600 text-[9px] font-technical font-black uppercase tracking-[0.2em]">{title}</p>
+           <p className="text-xs font-technical text-slate-500 uppercase mt-1 tracking-wider">{subtext}</p>
+        </div>
       </div>
-      <div className="flex-1 relative z-10">
-        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1 dark:text-gray-500">{title}</p>
-        <p className="text-2xl font-black text-gray-800 tracking-tighter dark:text-gray-100">
-          {value} <span className="text-sm font-semibold text-gray-400 ml-1 dark:text-gray-500">{unit}</span>
+      
+      <div className="flex items-baseline gap-2 mt-auto">
+        <p className="text-2xl font-technical font-extrabold text-white tracking-tighter">
+          {value}
         </p>
+        <span className="text-[10px] font-technical font-black text-slate-600 uppercase tracking-widest">{unit}</span>
       </div>
-      <div className={cn("absolute -right-6 -bottom-6 w-24 h-24 rounded-full opacity-0 group-hover:opacity-10 transition-opacity blur-xl", shadowClass)} />
+
+      <div className="absolute bottom-0 right-0 p-4 translate-y-1 group-hover:translate-y-0 transition-transform text-slate-800 group-hover:text-primary">
+         <ArrowRight size={14} />
+      </div>
+      
+      {/* Precision corner accent */}
+      <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-800 group-hover:border-primary transition-colors" />
     </Card>
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <SummaryCard
-        title="Impressoras Ativas"
-        value={printers.length}
-        unit={printers.length === 1 ? "Unidade" : "Unidades"}
+        title="IMPRESSORAS"
+        subtext="TOTAL ATIVO"
+        value={printers.length.toString().padStart(2, '0')}
+        unit="UNIDADES"
         icon={PrinterIcon}
-        colorClass="text-orange-600 group-hover:text-white group-hover:bg-orange-500 dark:text-orange-400 dark:group-hover:text-white dark:group-hover:bg-orange-600"
-        bgClass="bg-orange-50 dark:bg-orange-500/20"
-        shadowClass="bg-orange-500"
+        colorClass="text-secondary"
         onClick={() => onNavigate?.('assets', 'printers')}
       />
       <SummaryCard
-        title="Estoque de Material"
+        title="MATÉRIA-PRIMA"
+        subtext="ESTOQUE GLOBAL"
         value={(totalMaterialStock / 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        unit="kg"
-        icon={Droplets}
-        colorClass="text-cyan-600 group-hover:text-white group-hover:bg-cyan-500 dark:text-cyan-400 dark:group-hover:text-white dark:group-hover:bg-cyan-600"
-        bgClass="bg-cyan-50 dark:bg-cyan-500/20"
-        shadowClass="bg-cyan-500"
+        unit="QUILOGRAMAS"
+        icon={Package}
+        colorClass="text-primary"
         onClick={() => onNavigate?.('assets', 'materials')}
       />
     </div>

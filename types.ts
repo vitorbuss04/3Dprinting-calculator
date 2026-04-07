@@ -68,6 +68,7 @@ export interface Project {
   markup: number; // porcentagem (0-100+)
   result: CalculationResult;
   folderId?: string | null;
+  status?: ProjectStatus;
 }
 
 export interface ProjectFolder {
@@ -75,5 +76,7 @@ export interface ProjectFolder {
   name: string;
   createdAt: string;
 }
+
+export type ProjectStatus = 'aguardando' | 'em_producao' | 'concluido' | 'cancelado';
 
 export type ViewState = 'dashboard' | 'assets' | 'calculator' | 'history' | 'comparator' | 'profile';
