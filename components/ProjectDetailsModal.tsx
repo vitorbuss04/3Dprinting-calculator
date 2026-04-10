@@ -12,9 +12,10 @@ interface ProjectDetailsModalProps {
     onClose: () => void;
     printerName?: string;
     materialName?: string;
+    folderStatus?: ProjectStatus;
 }
 
-export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, isOpen, onClose, printerName, materialName }) => {
+export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, isOpen, onClose, printerName, materialName, folderStatus }) => {
     const [currencySymbol, setCurrencySymbol] = useState('$');
 
     useEffect(() => {
@@ -85,7 +86,7 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                                 concluido:   { label: 'CONCLUÍDO',   cls: 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' },
                                 cancelado:   { label: 'CANCELADO',   cls: 'border-red-500/50 text-red-400 bg-red-500/10' },
                               };
-                              const s = project.status || 'aguardando';
+                              const s = folderStatus || 'aguardando';
                               const cfg = STATUS_CFG[s] || STATUS_CFG['aguardando'];
                               return (
                                 <div className={cn('flex items-center gap-1.5 px-2 py-1 border text-[9px] font-technical font-black uppercase tracking-widest', cfg.cls)}>

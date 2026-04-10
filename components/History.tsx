@@ -77,12 +77,16 @@ export const History: React.FC = () => {
     });
   };
 
-  const handleStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
-    setUpdatingStatusId(projectId);
+  const handleFolderStatusChange = async (folderId: string, newStatus: ProjectStatus) => {
+    if (folderId === 'uncategorized') return;
+    setUpdatingStatusId(folderId);
     try {
-      await StorageService.updateProjectStatus(projectId, newStatus);
-      setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: newStatus } : p));
-      toast.success('Status atualizado');
+      await StorageService.updateFolderStatus(folderId, newStatus);
+      setFolders(prev => ({
+        ...prev,
+        [folderId]: { ...prev[folderId]! , status: newStatus }
+      }));
+      toast.success('Status do projeto atualizado');
     } catch {
       toast.error('Erro ao atualizar status');
     } finally {
@@ -162,12 +166,28 @@ export const History: React.FC = () => {
                     {folderProjects.length} REGISTROS
                   </span>
                   {!isUncategorized && (
-                    <button
-                      onClick={() => setDeletingFolderId(folderId)}
-                      className="text-[10px] font-technical font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5"
-                    >
-                      <Trash2 size={10} /> EXCLUIR PASTA
-                    </button>
+                    <div className="flex items-center gap-4">
+                      <div className="w-48">
+                        <select
+                          value={folders[folderId]?.status || 'aguardando'}
+                          onChange={(e) => handleFolderStatusChange(folderId, e.target.value as ProjectStatus)}
+                          disabled={updatingStatusId === folderId}
+                          className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-1 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer disabled:opacity-50"
+                        >
+                          <option value="aguardando">⏳ AGUARDANDO</option>
+                          <option value="em_producao">⚙️ EM PRODUÇÃO</option>
+                          <option value="concluido">✅ CONCLUÍDO</option>
+                          <option value="cancelado">✖ CANCELADO</option>
+                        </select>
+                      </div>
+                      <StatusBadge status={folders[folderId]?.status || 'aguardando'} />
+                      <button
+                        onClick={() => setDeletingFolderId(folderId)}
+                        className="text-[10px] font-technical font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5"
+                      >
+                        <Trash2 size={10} /> EXCLUIR PASTA
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -233,30 +253,6 @@ export const History: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-primary/40" />
                             <p className="text-[9px] font-technical text-slate-500 uppercase tracking-widest">DATA: {new Date(project.date).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        <StatusBadge status={project.status || 'aguardando'} />
-                      </div>
-
-                      {/* Status Selector */}
-                      <div className="mb-4">
-                        <label className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">STATUS DE PRODUÇÃO</label>
-                        <div className="relative">
-                          <select
-                            value={project.status || 'aguardando'}
-                            onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus)}
-                            disabled={updatingStatusId === project.id}
-                            className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer disabled:opacity-50"
-                          >
-                            <option value="aguardando">⏳ AGUARDANDO</option>
-                            <option value="em_producao">⚙️ EM PRODUÇÃO</option>
-                            <option value="concluido">✅ CONCLUÍDO</option>
-                            <option value="cancelado">✖ CANCELADO</option>
-                          </select>
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                            {updatingStatusId === project.id
-                              ? <Loader2 size={10} className="animate-spin" />
-                              : <span className="text-[8px]">▼</span>}
                           </div>
                         </div>
                       </div>
@@ -326,6 +322,7 @@ export const History: React.FC = () => {
         onClose={() => setDetailsProject(null)}
         printerName={detailsProject ? printers[detailsProject.printerId] : undefined}
         materialName={detailsProject ? materials[detailsProject.materialId] : undefined}
+        folderStatus={detailsProject ? folders[detailsProject.folderId]?.status : undefined}
       />
     </div>
   );

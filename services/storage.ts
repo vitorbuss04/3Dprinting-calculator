@@ -156,8 +156,7 @@ export const StorageService = {
       laborHourlyRate: p.labor_hourly_rate,
       markup: p.markup,
       result: p.result,
-      folderId: p.folder_id,
-      status: (p.status || 'aguardando') as ProjectStatus
+      folderId: p.folder_id
     }));
   },
 
@@ -180,16 +179,15 @@ export const StorageService = {
       markup: project.markup,
 
       result: project.result,
-      folder_id: project.folderId,
-      status: project.status || 'aguardando'
+      folder_id: project.folderId
     };
     const { error } = await supabase.from('projects').insert([payload]);
     // A notificação de sucesso agora é tratada pela UI com react-hot-toast
     if (error) throw error;
   },
 
-  updateProjectStatus: async (id: string, status: ProjectStatus): Promise<void> => {
-    const { error } = await supabase.from('projects').update({ status }).eq('id', id);
+  updateFolderStatus: async (id: string, status: ProjectStatus): Promise<void> => {
+    const { error } = await supabase.from('project_folders').update({ status }).eq('id', id);
     if (error) throw error;
   },
 
@@ -205,7 +203,8 @@ export const StorageService = {
     return data.map((f: any) => ({
       id: f.id,
       name: f.name,
-      createdAt: f.created_at
+      createdAt: f.created_at,
+      status: (f.status || 'aguardando') as ProjectStatus
     }));
   },
 
@@ -220,7 +219,8 @@ export const StorageService = {
     return {
       id: data.id,
       name: data.name,
-      createdAt: data.created_at
+      createdAt: data.created_at,
+      status: (data.status || 'aguardando') as ProjectStatus
     };
   },
 

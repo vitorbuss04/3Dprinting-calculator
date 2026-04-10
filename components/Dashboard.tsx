@@ -7,7 +7,7 @@ import { TrendingUp, DollarSign, Box, Loader2, Activity, Zap, Cpu, ChevronDown }
 import { AssetsSummary } from './AssetsSummary';
 import { cn } from '../utils/cn';
 import { format } from 'date-fns';
-import { ProjectStatus } from '../types';
+import { ProjectStatus, ProjectFolder } from '../types';
 
 interface DashboardProps {
   onNavigate: (view: ViewState, params?: any) => void;
@@ -15,6 +15,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [folders, setFolders] = useState<ProjectFolder[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ currencySymbol: '$', electricityCost: 0 });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
@@ -26,29 +27,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
     const fetchData = async () => {
       setLoading(true);
-      const [p, s] = await Promise.all([
+      const [p, f, s] = await Promise.all([
         StorageService.getProjects(),
+        StorageService.getFolders(),
         StorageService.getSettings()
       ]);
       setProjects(p);
+      setFolders(f);
       setSettings(s);
       setLoading(false);
     };
     fetchData();
   }, []);
 
-  const concludedProjects = projects.filter(p => p.status === 'concluido');
+  const concludedFolderIds = folders.filter(f => f.status === 'concluido').map(f => f.id);
+  const concludedProjects = projects.filter(p => p.folderId && concludedFolderIds.includes(p.folderId));
 
   const totalRevenue = concludedProjects.reduce((acc, curr) => acc + curr.result.finalPrice, 0);
   const totalProfit  = concludedProjects.reduce((acc, curr) => acc + curr.result.profit, 0);
-  const totalPrints  = concludedProjects.length;
+  const totalPrints  = concludedFolderIds.length;
 
-  const chartData = concludedProjects.slice(0, 5).map(p => ({
-    name: p.name.length > 8 ? p.name.substring(0, 8) : p.name,
-    Gasto: p.result.totalProductionCost,
-    Lucro: p.result.profit,
-    Faturamento: p.result.finalPrice,
-  })).reverse();
+  const concludedFolders = folders.filter(f => f.status === 'concluido').slice(0, 5);
+  const chartData = concludedFolders.map(f => {
+    const folderProjects = projects.filter(p => p.folderId === f.id);
+    return {
+      name: f.name.length > 8 ? f.name.substring(0, 8) : f.name,
+      Gasto: folderProjects.reduce((acc, p) => acc + p.result.totalProductionCost, 0),
+      Lucro: folderProjects.reduce((acc, p) => acc + p.result.profit, 0),
+      Faturamento: folderProjects.reduce((acc, p) => acc + p.result.finalPrice, 0),
+    };
+  }).reverse();
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
@@ -90,10 +98,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     </Card>
   );
 
-  // Trend data for sparklines — only concluded projects
-  const last5Revenue = concludedProjects.slice(0, 5).map(p => ({ val: p.result.finalPrice })).reverse();
-  const last5Profit  = concludedProjects.slice(0, 5).map(p => ({ val: p.result.profit })).reverse();
-  const last5Prints  = concludedProjects.slice(0, 5).map((_, i) => ({ val: i + 1 }));
+  // Trend data for sparklines — only concluded projects (folders)
+  const last5Revenue = chartData.map(d => ({ val: d.Faturamento }));
+  const last5Profit  = chartData.map(d => ({ val: d.Lucro }));
+  const last5Prints  = chartData.map((_, i) => ({ val: i + 1 }));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -221,9 +229,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
 
           {(() => {
-            const filtered = (statusFilter === 'all'
-              ? projects
-              : projects.filter(p => p.status === statusFilter)
+            const filteredFolders = (statusFilter === 'all'
+              ? folders
+              : folders.filter(f => f.status === statusFilter)
             ).slice(0, 4);
 
             const STATUS_COLORS: Record<string, string> = {
@@ -241,17 +249,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
             return (
               <div className="overflow-y-auto custom-scrollbar flex-1">
-                {filtered.length === 0 ? (
+                {filteredFolders.length === 0 ? (
                   <div className="p-8 text-center text-slate-600">
                     <p className="text-[9px] font-technical uppercase">Nenhum projeto neste status</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-800/50">
-                    {filtered.map(p => {
-                      const st = p.status || 'aguardando';
+                    {filteredFolders.map(folder => {
+                      const st = folder.status || 'aguardando';
+                      const folderProjects = projects.filter(prj => prj.folderId === folder.id);
+                      const folderTotal = folderProjects.reduce((sum, prj) => sum + prj.result.finalPrice, 0);
+                      
                       return (
                         <div
-                          key={p.id}
+                          key={folder.id}
                           className="flex justify-between items-center p-4 hover:bg-slate-900 group transition-colors cursor-pointer"
                           onClick={() => onNavigate('history')}
                         >
@@ -260,7 +271,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                               <Box size={14} />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[11px] font-technical font-bold text-slate-200 group-hover:text-white transition-colors uppercase truncate">{p.name}</p>
+                              <p className="text-[11px] font-technical font-bold text-slate-200 group-hover:text-white transition-colors uppercase truncate">{folder.name}</p>
                               <p className={cn('text-[8px] font-technical font-black uppercase mt-0.5', STATUS_COLORS[st])}>
                                 {STATUS_LABELS[st]}
                               </p>
@@ -268,9 +279,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                           </div>
                           <div className="text-right shrink-0 ml-2">
                             <p className="text-[10px] font-technical font-bold text-primary">
-                              +{settings.currencySymbol}{p.result.finalPrice.toFixed(2)}
+                              +{settings.currencySymbol}{folderTotal.toFixed(2)}
                             </p>
-                            <p className="text-[8px] font-technical text-slate-600 uppercase mt-0.5">{format(new Date(p.date), "yy.MM.dd")}</p>
+                            <p className="text-[8px] font-technical text-slate-600 uppercase mt-0.5">{format(new Date(folder.createdAt), "yy.MM.dd")}</p>
                           </div>
                         </div>
                       );
