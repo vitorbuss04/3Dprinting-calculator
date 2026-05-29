@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ViewState } from '../types';
 import { Session } from '@supabase/supabase-js';
+import { useTranslation } from 'react-i18next';
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -19,6 +20,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     session,
     onLogout
 }) => {
+    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     return (
@@ -53,12 +55,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 {/* System Status Line at Footer */}
                 <div className="hidden lg:flex h-6 border-t border-slate-900 bg-slate-950 px-6 items-center justify-between text-[8px] font-technical font-black text-slate-700 uppercase tracking-[0.3em] z-10">
                     <div className="flex items-center gap-4">
-                        <span className="text-slate-500">DADOS PROTEGIDOS</span>
-                        <span className="text-slate-500">SINCRONIZAÇÃO: ATIVA</span>
+                        <span className="text-slate-500">{t('secured_data')}</span>
+                        <span className="text-slate-500">{t('sync_active')}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="text-emerald-900/50">SERVIDOR ONLINE</span>
-                        <span className="animate-pulse text-primary/30">SISTEMA ESTÁVEL</span>
+                        <span className="text-emerald-900/50">{t('server_online')}</span>
+                        <span className="animate-pulse text-primary/30">{t('system_stable')}</span>
                     </div>
                 </div>
             </main>

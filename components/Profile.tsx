@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../services/supabaseClient';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
@@ -7,6 +8,7 @@ import { User, Lock, Mail, Fingerprint, Calendar, Loader2, Shield, Activity, Dat
 import toast from 'react-hot-toast';
 
 export const Profile: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -24,15 +26,15 @@ export const Profile: React.FC = () => {
 
     const handleUpdatePassword = async () => {
         if (!newPassword) {
-            toast.error('Por favor, digite uma nova senha.');
+            toast.error(t('toast_enter_new_password'));
             return;
         }
         if (newPassword.length < 6) {
-            toast.error('A senha deve ter pelo menos 6 caracteres.');
+            toast.error(t('toast_password_too_short'));
             return;
         }
         if (newPassword !== confirmPassword) {
-            toast.error('As senhas não coincidem.');
+            toast.error(t('toast_passwords_do_not_match'));
             return;
         }
 
@@ -41,21 +43,23 @@ export const Profile: React.FC = () => {
             const { error } = await supabase.auth.updateUser({ password: newPassword });
             if (error) throw error;
 
-            toast.success('Senha atualizada com sucesso!');
+            toast.success(t('toast_password_updated'));
             setNewPassword('');
             setConfirmPassword('');
         } catch (error: any) {
             console.error(error);
-            toast.error('Erro ao atualizar senha: ' + error.message);
+            toast.error(t('toast_password_update_error') + error.message);
         } finally {
             setIsUpdating(false);
         }
     };
 
+    const locale = i18n.language === 'en' ? 'en-US' : 'pt-BR';
+
     if (loading) return (
         <div className="flex flex-col items-center justify-center p-20 gap-4">
             <Loader2 className="animate-spin text-primary" size={32} />
-            <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO PERFIL...</span>
+            <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_profile')}</span>
         </div>
     );
     
@@ -64,8 +68,8 @@ export const Profile: React.FC = () => {
             <div className="w-12 h-12 border border-red-900 mx-auto flex items-center justify-center mb-4 text-red-500">
                 <Shield size={24} />
             </div>
-            <h2 className="font-technical font-black text-white uppercase tracking-[0.2em]">ACESSO NEGADO</h2>
-            <p className="font-technical text-[10px] text-slate-500 uppercase mt-2">NENHUMA SESSÃO ATIVA</p>
+            <h2 className="font-technical font-black text-white uppercase tracking-[0.2em]">{t('access_denied')}</h2>
+            <p className="font-technical text-[10px] text-slate-500 uppercase mt-2">{t('no_active_session')}</p>
         </div>
     );
 
@@ -86,19 +90,19 @@ export const Profile: React.FC = () => {
                     
                     <div className="text-center md:text-left">
                         <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
-                             <h2 className="text-2xl font-technical font-black text-white uppercase tracking-[0.2em]">MEU PERFIL</h2>
+                             <h2 className="text-2xl font-technical font-black text-white uppercase tracking-[0.2em]">{t('my_profile')}</h2>
                              <span className="px-2 py-0.5 border border-emerald-900/30 text-emerald-500 text-[10px] font-technical font-black uppercase tracking-widest bg-emerald-500/5">
-                                SESSÃO ATIVA
+                                {t('active_session')}
                              </span>
                         </div>
                         <p className="font-technical text-slate-400 text-sm tracking-wide mb-4">{user.email}</p>
                         
                         <div className="flex flex-wrap gap-4 justify-center md:justify-start text-[9px] font-technical text-slate-600 uppercase tracking-widest">
                             <span className="flex items-center gap-2">
-                                <Activity size={10} className="text-primary" /> FUNÇÃO: OPERADOR
+                                <Activity size={10} className="text-primary" /> {t('role_operator')}
                             </span>
                             <span className="flex items-center gap-2">
-                                <Database size={10} className="text-secondary" /> DADOS: SINCRONIZADOS
+                                <Database size={10} className="text-secondary" /> {t('data_synchronized')}
                             </span>
                         </div>
                     </div>
@@ -109,8 +113,8 @@ export const Profile: React.FC = () => {
                 {/* Section: System Metadata */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
-                         <span className="w-1.5 h-1.5 bg-secondary" />
-                         <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">DADOS DA CONTA</h3>
+                          <span className="w-1.5 h-1.5 bg-secondary" />
+                          <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">{t('account_data')}</h3>
                     </div>
                     
                     <div className="space-y-4">
@@ -119,7 +123,7 @@ export const Profile: React.FC = () => {
                                 <Mail size={16} />
                             </div>
                             <div>
-                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">E-MAIL</p>
+                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">{t('email')}</p>
                                 <p className="text-xs font-technical font-bold text-white uppercase tracking-wider">{user.email}</p>
                             </div>
                         </div>
@@ -129,7 +133,7 @@ export const Profile: React.FC = () => {
                                 <Fingerprint size={16} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">ID DA CONTA</p>
+                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">{t('account_id')}</p>
                                 <p className="text-[10px] font-technical font-bold text-slate-500 bg-slate-950 border border-slate-900 px-2 py-1.5 truncate">
                                     {user.id}
                                 </p>
@@ -141,9 +145,9 @@ export const Profile: React.FC = () => {
                                 <Calendar size={16} />
                             </div>
                             <div>
-                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">DATA DE CADASTRO</p>
+                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">{t('registration_date')}</p>
                                 <p className="text-xs font-technical font-bold text-white uppercase tracking-wider">
-                                    {new Date(user.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
+                                    {new Date(user.created_at).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
                                 </p>
                             </div>
                         </div>
@@ -153,21 +157,21 @@ export const Profile: React.FC = () => {
                 {/* Section: Security Purge / Update */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
-                         <span className="w-1.5 h-1.5 bg-primary" />
-                         <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">ALTERAR SENHA</h3>
+                          <span className="w-1.5 h-1.5 bg-primary" />
+                          <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">{t('change_password')}</h3>
                     </div>
 
                     <Card variant="industrial" className="border-primary/20 p-8 space-y-8 bg-slate-950">
                         <div className="p-4 border border-primary/20 bg-primary/5 flex gap-4">
                             <Shield size={18} className="text-primary shrink-0 mt-0.5" />
                             <p className="text-[10px] font-technical font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
-                                PREENCHA OS CAMPOS ABAIXO PARA DEFINIR UMA NOVA SENHA.
+                                {t('fill_fields_new_password')}
                             </p>
                         </div>
 
                         <div className="space-y-6">
                             <Input
-                                label="NOVA SENHA"
+                                label={t('new_password')}
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -175,7 +179,7 @@ export const Profile: React.FC = () => {
                                 className="font-technical"
                             />
                             <Input
-                                label="CONFIRMAR SENHA"
+                                label={t('confirm_password')}
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -192,11 +196,11 @@ export const Profile: React.FC = () => {
                                 >
                                     {isUpdating ? (
                                         <span className="flex items-center gap-2">
-                                            <Loader2 className="animate-spin" size={14} /> SINCRONIZANDO...
+                                            <Loader2 className="animate-spin" size={14} /> {t('syncing')}
                                         </span>
                                     ) : (
                                         <span className="flex items-center gap-2 justify-center">
-                                            <Key size={14} /> SALVAR NOVA SENHA
+                                            <Key size={14} /> {t('save_new_password')}
                                         </span>
                                     )}
                                 </Button>

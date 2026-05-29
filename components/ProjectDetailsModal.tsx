@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { Project, ProjectStatus } from '../types';
 import { X, Printer, PackageOpen, Clock, Scaling, Activity, Hammer, Zap, Coins, Calculator, Layers, Tag, Calendar, PiggyBank, Briefcase, FileCode, CircleDot } from 'lucide-react';
 import { StorageService } from '../services/storage';
@@ -16,6 +17,7 @@ interface ProjectDetailsModalProps {
 }
 
 export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, isOpen, onClose, printerName, materialName, folderStatus }) => {
+    const { t } = useTranslation();
     const [currencySymbol, setCurrencySymbol] = useState('$');
 
     useEffect(() => {
@@ -81,10 +83,10 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                             </div>
                             {(() => {
                               const STATUS_CFG: Record<string, { label: string; cls: string }> = {
-                                aguardando:  { label: 'AGUARDANDO',  cls: 'border-amber-500/50 text-amber-400 bg-amber-500/10' },
-                                em_producao: { label: 'EM PRODUÇÃO', cls: 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10' },
-                                concluido:   { label: 'CONCLUÍDO',   cls: 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' },
-                                cancelado:   { label: 'CANCELADO',   cls: 'border-red-500/50 text-red-400 bg-red-500/10' },
+                                aguardando:  { label: t('status_waiting'),  cls: 'border-amber-500/50 text-amber-400 bg-amber-500/10' },
+                                em_producao: { label: t('status_production'), cls: 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10' },
+                                concluido:   { label: t('status_completed'),   cls: 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' },
+                                cancelado:   { label: t('status_cancelled'),   cls: 'border-red-500/50 text-red-400 bg-red-500/10' },
                               };
                               const s = folderStatus || 'aguardando';
                               const cfg = STATUS_CFG[s] || STATUS_CFG['aguardando'];
@@ -110,10 +112,10 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border border-slate-800 overflow-hidden">
-                        <StatCard icon={Printer} label="IMPRESSORA" value={printerName || project.printerId.substring(0, 8)} color="primary" />
-                        <StatCard icon={PackageOpen} label="MATERIAL" value={materialName || project.materialId.substring(0, 8)} color="secondary" />
-                        <StatCard icon={Clock} label="TEMPO DE IMPRESSÃO" value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} color="primary" />
-                        <StatCard icon={Scaling} label="PESO DO MODELO" value={`${project.modelWeight}g`} color="secondary" />
+                        <StatCard icon={Printer} label={t('printer_label')} value={printerName || project.printerId.substring(0, 8)} color="primary" />
+                        <StatCard icon={PackageOpen} label={t('material_label')} value={materialName || project.materialId.substring(0, 8)} color="secondary" />
+                        <StatCard icon={Clock} label={t('print_time_label')} value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} color="primary" />
+                        <StatCard icon={Scaling} label={t('model_weight_label')} value={`${project.modelWeight}g`} color="secondary" />
                     </div>
 
                     {/* Content Columns */}
@@ -125,24 +127,27 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                             
                             <h3 className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                                <div className="w-1.5 h-1.5 bg-primary" /> ANÁLISE DE CUSTOS
+                                <div className="w-1.5 h-1.5 bg-primary" /> {t('cost_analysis_label')}
                             </h3>
                             <div className="space-y-0.5">
-                                <CostRow label="CUSTO DE ENERGIA" value={project.result.energyCost} iconData={{ icon: Zap, color: 'text-amber-500' }} />
-                                <CostRow label="MATERIAL" value={project.result.materialCost} iconData={{ icon: PackageOpen, color: 'text-purple-500' }} />
-                                <CostRow label="DEPRECIAÇÃO" value={project.result.depreciationCost} iconData={{ icon: Activity, color: 'text-slate-500' }} />
-                                <CostRow label="MANUTENÇÃO" value={project.result.maintenanceCost} iconData={{ icon: Hammer, color: 'text-blue-500' }} />
-                                <CostRow label="MÃO DE OBRA" value={project.result.laborCost} iconData={{ icon: Briefcase, color: 'text-indigo-500' }} />
+                                <CostRow label={t('energy_cost_label')} value={project.result.energyCost} iconData={{ icon: Zap, color: 'text-amber-500' }} />
+                                <CostRow label={t('material_label')} value={project.result.materialCost} iconData={{ icon: PackageOpen, color: 'text-purple-500' }} />
+                                <CostRow label={t('depreciation_label')} value={project.result.depreciationCost} iconData={{ icon: Activity, color: 'text-slate-500' }} />
+                                <CostRow label={t('maintenance_label')} value={project.result.maintenanceCost} iconData={{ icon: Hammer, color: 'text-blue-500' }} />
+                                <CostRow label={t('labor_label')} value={project.result.laborCost} iconData={{ icon: Briefcase, color: 'text-indigo-500' }} />
                                 {project.result.additionalCost > 0 && (
-                                    <CostRow label="ITENS ADICIONAIS" value={project.result.additionalCost} iconData={{ icon: Layers, color: 'text-emerald-500' }} />
+                                    <CostRow label={t('additional_items')} value={project.result.additionalCost} iconData={{ icon: Layers, color: 'text-emerald-500' }} />
                                 )}
 
-                                <CostRow label="PREÇO FINAL" value={project.result.finalPrice} iconData={{ icon: Tag, color: 'text-primary' }} isTotal />
+                                <div className="mt-4 border-t border-slate-800/50 pt-2" />
+                                <CostRow label={t('production_cost')} value={project.result.totalProductionCost} iconData={{ icon: Calculator, color: 'text-slate-400' }} />
+
+                                <CostRow label={t('final_price_label')} value={project.result.finalPrice} iconData={{ icon: Tag, color: 'text-primary' }} isTotal />
                                 
                                 <div className="flex justify-between items-center p-3 mt-4 bg-emerald-500/5 border border-emerald-500/20">
                                     <div className="flex items-center gap-2">
                                         <PiggyBank size={14} className="text-emerald-500" />
-                                        <span className="text-[10px] font-technical font-black text-emerald-500 uppercase tracking-widest">LUCRO LÍQUIDO PROJETADO</span>
+                                        <span className="text-[10px] font-technical font-black text-emerald-500 uppercase tracking-widest">{t('projected_net_profit')}</span>
                                     </div>
                                     <span className="font-technical font-black text-emerald-500 text-lg">{currencySymbol} {project.result.profit.toFixed(2)}</span>
                                 </div>
@@ -153,13 +158,13 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                         <div className="flex-1 space-y-6">
                             <div className="bg-slate-950 border border-slate-800 p-6">
                                 <h3 className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                                    <div className="w-1.5 h-1.5 bg-secondary" /> PARÂMETROS DA PEÇA
+                                    <div className="w-1.5 h-1.5 bg-secondary" /> {t('part_parameters_label')}
                                 </h3>
                                 <div className="space-y-1">
-                                    <ParameterRow label="TAXA DE FALHA" value={`${project.failureRate}%`} />
-                                    <ParameterRow label="MARGEM DE LUCRO" value={`${project.markup}%`} />
-                                    <ParameterRow label="TEMPO DE TRABALHO" value={`${project.laborTimeHours}h ${project.laborTimeMinutes}m`} />
-                                    <ParameterRow label="VALOR HORA" value={`${currencySymbol} ${project.laborHourlyRate.toFixed(2)}/h`} />
+                                    <ParameterRow label={t('failure_rate_label')} value={`${project.failureRate}%`} />
+                                    <ParameterRow label={t('profit_margin_label')} value={`${project.markup}%`} />
+                                    <ParameterRow label={t('labor_time_label')} value={`${project.laborTimeHours}h ${project.laborTimeMinutes}m`} />
+                                    <ParameterRow label={t('labor_rate_label')} value={`${currencySymbol} ${project.laborHourlyRate.toFixed(2)}/h`} />
                                 </div>
                             </div>
 
@@ -167,14 +172,14 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                             {project.additionalItems && project.additionalItems.length > 0 && (
                                 <div className="bg-slate-950 border border-slate-800 p-6">
                                     <h3 className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                                        <div className="w-1.5 h-1.5 bg-slate-500" /> COMPONENTES EXTRAS
+                                        <div className="w-1.5 h-1.5 bg-slate-500" /> {t('extra_components_label')}
                                     </h3>
                                     <div className="space-y-4">
                                         {project.additionalItems.map((item, idx) => (
                                             <div key={idx} className="flex justify-between border-b border-slate-900 pb-3 last:border-0 last:pb-0">
                                                 <div className="space-y-1">
                                                     <span className="font-technical font-black text-white text-[10px] block uppercase truncate max-w-[140px]">{item.name}</span>
-                                                    <span className="text-[9px] font-technical font-bold text-slate-600 uppercase tracking-widest">QTD: {item.quantity}</span>
+                                                    <span className="text-[9px] font-technical font-bold text-slate-600 uppercase tracking-widest">{t('qty_label')}{item.quantity}</span>
                                                 </div>
                                                 <span className="font-technical font-black text-slate-300 text-[11px]">{currencySymbol} {(item.price * item.quantity).toFixed(2)}</span>
                                             </div>
@@ -191,12 +196,12 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                             <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest font-mono">SISTEMA ESTÁVEL</span>
+                             <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest font-mono">{t('system_stable')}</span>
                         </div>
-                        <span className="text-[9px] font-technical text-slate-700 uppercase tracking-[0.3em] hidden sm:block">FCD-X99 // REGISTRO SOMENTE LEITURA</span>
+                        <span className="text-[9px] font-technical text-slate-700 uppercase tracking-[0.3em] hidden sm:block">{t('read_only_record')}</span>
                     </div>
                     <Button onClick={onClose} variant="ghost" className="px-8 h-10 border-slate-700 hover:bg-slate-800 text-slate-300 font-technical uppercase text-xs tracking-widest">
-                        FECHAR DETALHES DO PROJETO
+                        {t('close_details_label')}
                     </Button>
                 </div>
             </div>

@@ -9,7 +9,7 @@ const PopoverTrigger = PopoverPrimitive.Trigger;
 const PopoverContent = React.forwardRef<
     React.ElementRef<typeof PopoverPrimitive.Content>,
     React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
+>(({ className, align = 'center', sideOffset = 4, children, style, onPointerDownOutside, onFocusOutside, onInteractOutside, onEscapeKeyDown, onOpenAutoFocus, onCloseAutoFocus, id }, ref) => (
     <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
             ref={ref}
@@ -20,8 +20,17 @@ const PopoverContent = React.forwardRef<
                 "dark:bg-dark-surface dark:border-white/10 dark:text-gray-100",
                 className
             )}
-            {...props}
-        />
+            style={style}
+            onPointerDownOutside={onPointerDownOutside}
+            onFocusOutside={onFocusOutside}
+            onInteractOutside={onInteractOutside}
+            onEscapeKeyDown={onEscapeKeyDown}
+            onOpenAutoFocus={onOpenAutoFocus}
+            onCloseAutoFocus={onCloseAutoFocus}
+            id={id}
+        >
+            {children}
+        </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>
 ));
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;

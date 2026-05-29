@@ -1,5 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, ArrowRightLeft, LogOut, ChevronLeft, Terminal, Cpu, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ViewState } from '../types';
 import { cn } from '../utils/cn';
 
@@ -18,15 +19,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onClose,
     onLogout
 }) => {
+    const { t } = useTranslation();
     const [isCollapsed, setIsCollapsed] = React.useState(false);
 
     const navItems = [
-        { id: 'dashboard', label: 'PAINEL GERAL', icon: LayoutDashboard },
-        { id: 'calculator', label: 'CALCULADORA', icon: CalcIcon },
-        { id: 'assets', label: 'IMPRESSORAS E MATERIAIS', icon: Printer },
-        { id: 'comparator', label: 'COMPARAR CUSTOS', icon: ArrowRightLeft },
-        { id: 'history', label: 'HISTÓRICO', icon: HistoryIcon },
-        { id: 'profile', label: 'MEU PERFIL', icon: Settings },
+        { id: 'dashboard', label: t('title_dashboard'), icon: LayoutDashboard },
+        { id: 'calculator', label: t('title_calculator'), icon: CalcIcon },
+        { id: 'assets', label: t('title_assets'), icon: Printer },
+        { id: 'comparator', label: t('title_comparator'), icon: ArrowRightLeft },
+        { id: 'history', label: t('title_history'), icon: HistoryIcon },
+        { id: 'profile', label: t('title_profile'), icon: Settings },
     ];
 
     return (
@@ -65,9 +67,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {!isCollapsed && (
                         <div className="ml-4 overflow-hidden">
                             <span className="block font-technical font-black text-sm tracking-[0.2em] text-white whitespace-nowrap">
-                                GESTÃO 3D
+                                {t('gestao_3d', 'GESTÃO 3D')}
                             </span>
-                            <span className="block font-technical font-bold text-[8px] tracking-widest text-slate-600 uppercase mt-0.5">PAINEL DE CONTROLE</span>
+                            <span className="block font-technical font-bold text-[8px] tracking-widest text-slate-600 uppercase mt-0.5">{t('control_panel')}</span>
                         </div>
                     )}
                 </div>
@@ -121,13 +123,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {!isCollapsed && (
                         <div className="p-3 border border-slate-800 bg-slate-950/50 space-y-2">
                              <div className="flex items-center justify-between">
-                                <span className="text-[8px] font-technical font-black text-slate-700 uppercase tracking-widest">STATUS DO SISTEMA</span>
+                                <span className="text-[8px] font-technical font-black text-slate-700 uppercase tracking-widest">{t('system_status')}</span>
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
                              </div>
                              <div className="h-1 bg-slate-900 w-full">
                                 <div className="h-full bg-primary/20 w-[64%]" />
                              </div>
-                             <p className="text-[8px] font-technical text-slate-500 uppercase tracking-wider leading-tight">OPERAÇÕES: 1.429</p>
+                             <p className="text-[8px] font-technical text-slate-500 uppercase tracking-wider leading-tight">{t('operations_count')}</p>
                         </div>
                     )}
 
@@ -137,12 +139,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             "w-full flex items-center py-2.5 transition-all duration-200 group whitespace-nowrap border border-transparent hover:border-red-900/30 hover:bg-red-950/20",
                             isCollapsed ? "justify-center" : "gap-3 px-3"
                         )}
-                        title={isCollapsed ? "Sair da conta" : undefined}
+                        title={isCollapsed ? t('logout') : undefined}
                     >
                         <LogOut size={14} className="text-slate-700 group-hover:text-red-500 shrink-0" />
                         {!isCollapsed && (
                             <span className="font-technical text-[10px] font-black tracking-widest text-slate-700 group-hover:text-red-500 uppercase">
-                                SAIR
+                                {t('logout')}
                             </span>
                         )}
                     </button>

@@ -11,7 +11,10 @@ import { Auth } from './Auth';
 import { supabase } from '../services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
+import { useTranslation } from 'react-i18next';
+
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const [session, setSession] = useState<Session | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -46,17 +49,17 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (currentView) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={setCurrentView} />;
       case 'assets': return <AssetsManager />;
       case 'calculator': return <Calculator />;
       case 'comparator': return <Comparator />;
       case 'history': return <History />;
-      default: return <Dashboard />;
+      default: return <Dashboard onNavigate={setCurrentView} />;
     }
   };
 
   if (loadingSession) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">Carregando...</div>;
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-900">{t('loading')}</div>;
   }
 
   if (!session) {
@@ -120,7 +123,7 @@ const App: React.FC = () => {
         `}>
           <div className="h-16 flex items-center px-6 border-b border-gray-100">
             <div className="bg-blue-600 w-8 h-8 rounded flex items-center justify-center mr-3 font-bold text-white shadow-sm">3D</div>
-            <span className="font-bold text-xl tracking-tight text-gray-800">PrintCalc</span>
+            <span className="font-bold text-xl tracking-tight text-gray-800">{t('print_calc')}</span>
           </div>
 
           <nav className="p-4 space-y-2 flex-1">
@@ -149,14 +152,14 @@ const App: React.FC = () => {
           
           <div className="p-4 border-t border-gray-100 space-y-4">
             <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700 border border-blue-100">
-                <p>Dica: Mantenha seus custos de energia atualizados nas configurações.</p>
+                <p>{t('energy_cost_tip')}</p>
             </div>
             <button 
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
             >
                <LogOut size={20} />
-               <span className="font-medium">Sair</span>
+               <span className="font-medium">{t('logout')}</span>
             </button>
           </div>
         </aside>

@@ -13,8 +13,10 @@ import { supabase } from './services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 import { NotificationProvider } from './components/NotificationContext';
 import { ThemeProvider } from './components/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const [session, setSession] = useState<Session | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
   const [assetsInitialTab, setAssetsInitialTab] = useState<'printers' | 'materials' | 'settings'>('printers');
@@ -43,24 +45,24 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
-    toast((t) => (
+    toast((toastObj) => (
       <div className="flex flex-col items-center gap-4 p-2">
-        <span className="font-bold text-gray-800">Deseja realmente sair?</span>
+        <span className="font-bold text-gray-800">{t('confirm_logout')}</span>
         <div className="flex gap-3">
           <button
             onClick={async () => {
               await supabase.auth.signOut();
-              toast.dismiss(t.id);
+              toast.dismiss(toastObj.id);
             }}
             className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors"
           >
-            Sair
+            {t('logout')}
           </button>
           <button
-            onClick={() => toast.dismiss(t.id)}
+            onClick={() => toast.dismiss(toastObj.id)}
             className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
           >
-            Cancelar
+            {t('cancel')}
           </button>
         </div>
       </div>

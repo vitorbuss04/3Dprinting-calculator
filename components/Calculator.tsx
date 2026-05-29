@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Save, Calculator as CalcIcon, AlertTriangle, Loader2, Plus, Trash2, Package, Activity, Info, BarChart3, Settings2 } from 'lucide-react';
 import { Printer, Material, GlobalSettings, Project, CalculationResult, AdditionalItem, ProjectFolder } from '../types';
 import { StorageService } from '../services/storage';
@@ -16,6 +17,7 @@ interface UIAdditionalItem extends Omit<AdditionalItem, 'price' | 'quantity'> {
 }
 
 export const Calculator: React.FC = () => {
+  const { t } = useTranslation();
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ electricityCost: 0, currencySymbol: '$' });
@@ -41,6 +43,8 @@ export const Calculator: React.FC = () => {
   const [laborMinutes, setLaborMinutes] = useState('0');
   const [laborRate, setLaborRate] = useState('0');
   const [markup, setMarkup] = useState(100);
+  const [manualPrice, setManualPrice] = useState<string>('');
+  const [isEditingPrice, setIsEditingPrice] = useState(false);
 
   // Additional Items State
   const [additionalItems, setAdditionalItems] = useState<UIAdditionalItem[]>([]);
@@ -61,22 +65,64 @@ export const Calculator: React.FC = () => {
       setMaterials(m);
       setSettings(s);
       setFolders(f);
-      if (p.length > 0) setSelectedPrinterId(p[0].id);
 
-      // Select most recent folder by default if exists
-      if (f.length > 0) setSelectedFolderId(f[0].id);
-
-      const firstInStockMaterial = m.find(mat => (mat.currentStock || 0) > 0);
-      if (firstInStockMaterial) {
-        setSelectedMaterialId(firstInStockMaterial.id);
-      } else if (m.length > 0) {
-        setSelectedMaterialId(m[0].id);
+      const saved = localStorage.getItem('calculatorState');
+      let parsed = null;
+      if (saved) {
+        try { parsed = JSON.parse(saved); } catch (e) {}
       }
+
+      if (parsed) {
+        if (parsed.printHours !== undefined) setPrintHours(parsed.printHours);
+        if (parsed.printMinutes !== undefined) setPrintMinutes(parsed.printMinutes);
+        if (parsed.weight !== undefined) setWeight(parsed.weight);
+        if (parsed.failureRate !== undefined) setFailureRate(parsed.failureRate);
+        if (parsed.laborHours !== undefined) setLaborHours(parsed.laborHours);
+        if (parsed.laborMinutes !== undefined) setLaborMinutes(parsed.laborMinutes);
+        if (parsed.laborRate !== undefined) setLaborRate(parsed.laborRate);
+        if (parsed.markup !== undefined) setMarkup(parsed.markup);
+        if (parsed.additionalItems) setAdditionalItems(parsed.additionalItems);
+        if (parsed.partName !== undefined) setPartName(parsed.partName);
+        
+        if (parsed.selectedFolderId) setSelectedFolderId(parsed.selectedFolderId);
+        else if (f.length > 0) setSelectedFolderId(f[0].id);
+
+        if (parsed.selectedPrinterId && p.some(pr => pr.id === parsed.selectedPrinterId)) {
+          setSelectedPrinterId(parsed.selectedPrinterId);
+        } else if (p.length > 0) setSelectedPrinterId(p[0].id);
+
+        if (parsed.selectedMaterialId && m.some(ma => ma.id === parsed.selectedMaterialId)) {
+          setSelectedMaterialId(parsed.selectedMaterialId);
+        } else {
+          const firstInStockMaterial = m.find(mat => (mat.currentStock || 0) > 0);
+          if (firstInStockMaterial) setSelectedMaterialId(firstInStockMaterial.id);
+          else if (m.length > 0) setSelectedMaterialId(m[0].id);
+        }
+      } else {
+        if (p.length > 0) setSelectedPrinterId(p[0].id);
+        if (f.length > 0) setSelectedFolderId(f[0].id);
+
+        const firstInStockMaterial = m.find(mat => (mat.currentStock || 0) > 0);
+        if (firstInStockMaterial) {
+          setSelectedMaterialId(firstInStockMaterial.id);
+        } else if (m.length > 0) {
+          setSelectedMaterialId(m[0].id);
+        }
+      }
+
       setLoading(false);
     };
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      localStorage.setItem('calculatorState', JSON.stringify({
+        printHours, printMinutes, weight, failureRate, laborHours, laborMinutes, laborRate, markup, additionalItems, partName, selectedFolderId, selectedPrinterId, selectedMaterialId
+      }));
+    }
+  }, [printHours, printMinutes, weight, failureRate, laborHours, laborMinutes, laborRate, markup, additionalItems, partName, selectedFolderId, selectedPrinterId, selectedMaterialId, loading]);
 
   const handleAddAdditionalItem = () => {
     const newItem: UIAdditionalItem = {
@@ -149,7 +195,7 @@ export const Calculator: React.FC = () => {
 
   const saveProject = async () => {
     if (!partName.trim()) {
-      toast.error('Por favor, dê um nome para a peça/impressão.');
+      toast.error(t('toast_part_name_required'));
       return;
     }
 
@@ -157,7 +203,7 @@ export const Calculator: React.FC = () => {
 
     if (isCreatingFolder) {
       if (!newFolderName.trim()) {
-        toast.error('Por favor, digite o nome do novo projeto.');
+        toast.error(t('toast_folder_name_required'));
         return;
       }
       try {
@@ -167,11 +213,11 @@ export const Calculator: React.FC = () => {
         setIsCreatingFolder(false);
         setNewFolderName('');
       } catch (error) {
-        toast.error('Erro ao criar pasta do projeto.');
+        toast.error(t('toast_create_folder_error'));
         return;
       }
     } else if (!finalFolderId) {
-      toast.error('Selecione um projeto ou crie um novo.');
+      toast.error(t('toast_select_folder_required'));
       return;
     }
 
@@ -179,7 +225,7 @@ export const Calculator: React.FC = () => {
     const materialUsed = parseFloat(weight.toString().replace(',', '.')) || 0;
 
     if (!material || (material.currentStock || 0) < materialUsed) {
-      toast.error('Estoque de material insuficiente para este projeto.');
+      toast.error(t('toast_insufficient_stock'));
       return;
     }
 
@@ -219,26 +265,26 @@ export const Calculator: React.FC = () => {
       // Update state locally
       setMaterials(materials.map(m => m.id === selectedMaterialId ? updatedMaterial : m));
 
-      toast.success('Projeto salvo e estoque atualizado!');
+      toast.success(t('toast_project_saved'));
     } catch (error: any) {
       console.error(error);
-      toast.error('Não foi possível salvar o projeto. Tente novamente.');
+      toast.error(t('toast_save_project_error'));
     } finally {
       setIsSaving(false);
     }
   };
 
   const chartData = [
-    { name: 'Material', value: result.materialCost, color: '#FF5C00' },
-    { name: 'Máquina', value: result.machineTotalCost, color: '#475569' },
-    { name: 'Mão de Obra', value: result.laborCost, color: '#00E0FF' },
-    { name: 'Adicionais', value: result.additionalCost, color: '#94a3b8' },
+    { name: t('material_chart'), value: result.materialCost, color: '#FF5C00' },
+    { name: t('machine_chart'), value: result.machineTotalCost, color: '#475569' },
+    { name: t('labor_chart'), value: result.laborCost, color: '#00E0FF' },
+    { name: t('additional_chart'), value: result.additionalCost, color: '#94a3b8' },
   ].filter(d => d.value > 0);
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
       <Loader2 className="animate-spin text-primary" size={32} />
-      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO CALCULADORA...</span>
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_calculator')}</span>
     </div>
   );
 
@@ -248,10 +294,10 @@ export const Calculator: React.FC = () => {
         <div className="p-4 bg-primary/10 border border-primary/20 rounded-none mb-6">
           <AlertTriangle className="text-primary" size={32} />
         </div>
-        <h2 className="text-xl font-technical font-bold mb-2 text-white uppercase tracking-wider">EQUIPAMENTO NÃO CONFIGURADO</h2>
-        <p className="text-slate-500 max-w-sm mb-8 text-xs font-technical uppercase">Adicione impressoras e materiais antes de usar a calculadora.</p>
+        <h2 className="text-xl font-technical font-bold mb-2 text-white uppercase tracking-wider">{t('equipment_not_configured')}</h2>
+        <p className="text-slate-500 max-w-sm mb-8 text-xs font-technical uppercase">{t('add_printers_materials_warning')}</p>
         <Button variant="primary">
-          CONFIGURAR IMPRESSORAS E MATERIAIS
+          {t('configure_printers_materials')}
         </Button>
       </Card>
     );
@@ -259,7 +305,7 @@ export const Calculator: React.FC = () => {
 
   const materialOptions = materials.map(m => ({
     value: m.id,
-    label: `${m.name} // ${(m.currentStock || 0).toFixed(0)}g_REM`,
+    label: `${m.name} // ${t('g_rem_suffix', { count: (m.currentStock || 0).toFixed(0) })}`,
     disabled: (m.currentStock || 0) === 0
   }));
 
@@ -270,7 +316,7 @@ export const Calculator: React.FC = () => {
         <Card variant="industrial" className="relative">
           <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
             <Settings2 className="text-primary" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">IDENTIFICAÇÃO DO PROJETO</span>
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('project_identification')}</span>
           </div>
 
           <div className="space-y-6">
@@ -279,25 +325,25 @@ export const Calculator: React.FC = () => {
                 <div className="flex gap-2 items-end">
                   <div className="flex-grow">
                     <Input
-                      label="NOME DO NOVO PROJETO"
+                      label={t('new_project_folder_label')}
                       value={newFolderName}
                       onChange={(e) => setNewFolderName(e.target.value)}
-                      placeholder="Digite o nome..."
+                      placeholder={t('new_folder_placeholder')}
                     />
                   </div>
-                  <Button variant="secondary" onClick={() => setIsCreatingFolder(false)} className="mb-0 text-[10px]">CANCELAR</Button>
+                  <Button variant="secondary" onClick={() => setIsCreatingFolder(false)} className="mb-0 text-[10px]">{t('cancel')}</Button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">PASTA DO PROJETO</label>
+                    <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">{t('project_folder')}</label>
                     <button onClick={() => setIsCreatingFolder(true)} className="text-[9px] font-technical font-bold text-primary hover:underline flex items-center gap-1">
-                      <Plus size={10} /> CRIAR NOVO
+                      <Plus size={10} /> {t('create_new_label')}
                     </button>
                   </div>
                   <Select
                     label=""
-                    options={[{ value: '', label: 'Selecione um projeto...' }, ...folders.map(f => ({ value: f.id, label: f.name }))]}
+                    options={[{ value: '', label: t('select_folder_placeholder') }, ...folders.map(f => ({ value: f.id, label: f.name }))]}
                     value={selectedFolderId}
                     onChange={(val) => setSelectedFolderId(val)}
                   />
@@ -306,10 +352,10 @@ export const Calculator: React.FC = () => {
             </div>
 
             <Input 
-                label="NOME DA PEÇA" 
+                label={t('part_name_label')} 
                 value={partName} 
                 onChange={(e) => setPartName(e.target.value.toUpperCase())} 
-                placeholder="PEÇA_ALPHA" 
+                placeholder={t('part_name_placeholder')} 
                 className="font-technical tracking-widest"
             />
           </div>
@@ -319,20 +365,20 @@ export const Calculator: React.FC = () => {
         <Card variant="industrial">
           <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
             <Activity className="text-secondary" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">CONFIG. DA MÁQUINA</span>
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('machine_config')}</span>
           </div>
 
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Select label="IMPRESSORA" options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(val) => setSelectedPrinterId(val)} />
-              <Select label="MATERIAL" options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
+              <Select label={t('printer_label')} options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(val) => setSelectedPrinterId(val)} />
+              <Select label={t('material_label')} options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <Input label="HORAS" type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center text-primary" />
-              <Input label="MINUTOS" type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center text-primary" />
-              <Input label="PESO (g)" type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center text-secondary" />
-              <Input label="FALHA (%)" type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(e.target.value)} className="text-center text-red-500" />
+              <Input label={t('hours_label')} type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center text-primary" />
+              <Input label={t('minutes_label')} type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center text-primary" />
+              <Input label={t('weight_g_label')} type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center text-secondary" />
+              <Input label={t('failure_pct_label')} type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(e.target.value)} className="text-center text-red-500" />
             </div>
           </div>
         </Card>
@@ -341,34 +387,34 @@ export const Calculator: React.FC = () => {
         <Card variant="industrial">
           <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
             <Info className="text-slate-400" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">MÃO DE OBRA E NEGÓCIO</span>
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('labor_and_business')}</span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <Input label="HORAS TRABALHO" type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
-            <Input label="MINUTOS TRABALHO" type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
-            <Input label="VALOR POR HORA" type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
+            <Input label={t('labor_hours_label')} type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
+            <Input label={t('labor_minutes_label')} type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
+            <Input label={t('labor_rate_label')} type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
           </div>
 
           <div className="p-4 bg-slate-900/30 border border-slate-800">
             <div className="flex justify-between mb-4">
               <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">
-                MARGEM DE LUCRO <span className="text-primary ml-2">[{markup}%]</span>
+                {t('profit_margin_label')} <span className="text-primary ml-2">[{Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%]</span>
               </label>
             </div>
             <input 
                 type="range" 
                 min="0" 
                 max="500" 
-                step="5" 
+                step="any" 
                 value={markup} 
                 onChange={(e) => setMarkup(Number(e.target.value))} 
                 className="w-full h-1 bg-slate-800 rounded-none appearance-none cursor-pointer accent-primary" 
             />
             <div className="flex justify-between text-[8px] font-technical text-slate-600 uppercase mt-2 tracking-tighter">
-              <span>SEM MARGEM</span>
-              <span>MARGEM MÉDIA</span>
-              <span>MARGEM MÁXIMA</span>
+              <span>{t('no_margin')}</span>
+              <span>{t('average_margin')}</span>
+              <span>{t('max_margin')}</span>
             </div>
           </div>
         </Card>
@@ -378,20 +424,20 @@ export const Calculator: React.FC = () => {
           <div className="flex items-center justify-between mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
             <div className="flex items-center gap-3">
               <Package className="text-slate-400" size={16} />
-              <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">ITENS ADICIONAIS</span>
+              <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('additional_items')}</span>
             </div>
             <Button
               onClick={handleAddAdditionalItem}
               variant="secondary"
               className="py-1 px-3 text-[9px]"
             >
-              <Plus size={12} className="mr-1" /> ADICIONAR
+              <Plus size={12} className="mr-1" /> {t('add_action')}
             </Button>
           </div>
 
           {additionalItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 bg-slate-900/20 border border-dashed border-slate-800 text-slate-600">
-              <span className="text-[10px] font-technical uppercase">Nenhum item adicional</span>
+              <span className="text-[10px] font-technical uppercase">{t('no_additional_items')}</span>
             </div>
           ) : (
             <div className="space-y-2">
@@ -399,15 +445,15 @@ export const Calculator: React.FC = () => {
                 <div key={item.id} className="flex gap-2 items-end">
                   <div className="flex-1">
                     <Input
-                      label={index === 0 ? "NOME DO ITEM" : undefined}
+                      label={index === 0 ? t('item_name_label') : undefined}
                       value={item.name}
-                      placeholder="Nome do item"
+                      placeholder={t('item_name_placeholder')}
                       onChange={(e) => updateAdditionalItem(item.id, 'name', e.target.value)}
                     />
                   </div>
                   <div className="w-24">
                     <Input
-                      label={index === 0 ? "PREÇO UN." : undefined}
+                      label={index === 0 ? t('price_unit_label') : undefined}
                       type="number"
                       value={item.price}
                       onChange={(e) => updateAdditionalItem(item.id, 'price', e.target.value)}
@@ -415,7 +461,7 @@ export const Calculator: React.FC = () => {
                   </div>
                   <div className="w-16">
                     <Input
-                      label={index === 0 ? "QTD" : undefined}
+                      label={index === 0 ? t('qty_label') : undefined}
                       type="number"
                       value={item.quantity}
                       onChange={(e) => updateAdditionalItem(item.id, 'quantity', e.target.value)}
@@ -431,7 +477,7 @@ export const Calculator: React.FC = () => {
               ))}
               <div className="flex justify-end pt-4 mt-6 border-t border-slate-800">
                 <div className="bg-slate-900/80 px-4 py-2 border border-slate-800 flex items-center gap-6">
-                  <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">SUBTOTAL ADICIONAIS</span>
+                  <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">{t('additional_subtotal')}</span>
                   <span className="font-technical font-bold text-white text-lg">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span>
                 </div>
               </div>
@@ -448,20 +494,41 @@ export const Calculator: React.FC = () => {
           
           <div className="relative z-10">
             <h3 className="text-primary font-technical font-extrabold uppercase tracking-[0.3em] text-[10px] mb-6 flex items-center gap-2">
-                <Activity size={12} /> RESULTADO EM TEMPO REAL
+                <Activity size={12} /> {t('realtime_result')}
             </h3>
             
-            <div className="text-6xl font-technical font-bold mb-8 tracking-tighter text-white tabular-nums">
-              {settings.currencySymbol} {result.finalPrice.toFixed(2)}
+            <div className="flex items-center text-6xl font-technical font-bold mb-8 tracking-tighter text-white tabular-nums">
+              <span className="mr-2">{settings.currencySymbol}</span>
+              <input 
+                type="text"
+                value={isEditingPrice ? manualPrice : result.finalPrice.toFixed(2)}
+                onFocus={() => {
+                  setManualPrice(result.finalPrice.toFixed(2));
+                  setIsEditingPrice(true);
+                }}
+                onBlur={() => setIsEditingPrice(false)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^[0-9.,]*$/.test(val)) {
+                    setManualPrice(val);
+                    const numVal = parseFloat(val.replace(',', '.'));
+                    if (!isNaN(numVal) && result.totalProductionCost > 0) {
+                      const newMarkup = ((numVal / result.totalProductionCost) - 1) * 100;
+                      setMarkup(Number(newMarkup.toFixed(2)));
+                    }
+                  }
+                }}
+                className="bg-transparent border-b-2 border-transparent hover:border-slate-700 focus:border-primary outline-none w-full text-white transition-colors"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-slate-900 border border-slate-800">
-                <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest block mb-1">CUSTO DE PRODUÇÃO</span>
+                <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest block mb-1">{t('production_cost')}</span>
                 <span className="font-technical text-lg font-bold text-white tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
               </div>
               <div className="p-4 bg-slate-900 border border-slate-800">
-                <span className="text-[9px] font-technical font-bold text-secondary uppercase tracking-widest block mb-1">LUCRO LÍQUIDO</span>
+                <span className="text-[9px] font-technical font-bold text-secondary uppercase tracking-widest block mb-1">{t('net_profit')}</span>
                 <span className="font-technical text-lg font-bold text-secondary tabular-nums">{settings.currencySymbol}{result.profit.toFixed(2)}</span>
               </div>
             </div>
@@ -471,7 +538,7 @@ export const Calculator: React.FC = () => {
         <Card variant="industrial" className="flex flex-col">
           <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
             <BarChart3 className="text-primary" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">DISTRIBUIÇÃO DE CUSTOS</span>
+            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('cost_distribution')}</span>
           </div>
           
           {chartData.length > 0 ? (() => {
@@ -505,7 +572,7 @@ export const Calculator: React.FC = () => {
             );
           })() : (
             <div className="h-32 flex items-center justify-center text-slate-700">
-              <span className="text-[10px] font-technical uppercase">Aguardando dados</span>
+              <span className="text-[10px] font-technical uppercase">{t('awaiting_data')}</span>
             </div>
           )}
         </Card>
@@ -517,7 +584,7 @@ export const Calculator: React.FC = () => {
           disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
         >
           {isSaving ? <Loader2 className="animate-spin mr-2.5" size={16} /> : <Save size={16} className="mr-2.5" />}
-          <span>{isSaving ? 'SALVANDO...' : 'SALVAR PROJETO'}</span>
+          <span>{isSaving ? t('saving') : t('save_project')}</span>
         </Button>
       </div>
     </div>

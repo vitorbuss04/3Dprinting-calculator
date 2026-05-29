@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../services/supabaseClient';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
@@ -7,6 +8,7 @@ import { Mail, Lock, LogIn, UserPlus, AlertCircle, CheckCircle2, ShieldCheck, Da
 import toast from 'react-hot-toast';
 
 export const Auth: React.FC = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,10 +31,10 @@ export const Auth: React.FC = () => {
           password,
         });
         if (error) throw error;
-        toast.success('REGISTRO_PENDENTE: Verifique seu email para confirmação.');
+        toast.success(t('pending_registration'));
       }
     } catch (error: any) {
-      toast.error(error.message || 'FALHA_AUTH: Verifique credenciais ou conexão.');
+      toast.error(error.message || t('auth_failed'));
     } finally {
       setLoading(false);
     }
@@ -54,16 +56,16 @@ export const Auth: React.FC = () => {
             <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-primary" />
           </div>
 
-          <h1 className="text-xl font-technical font-black text-white tracking-[0.2em] uppercase">ÁREA DE LOGIN</h1>
-          <p className="text-[10px] font-technical text-slate-500 mt-2 uppercase tracking-widest">Sistema de cálculo e gestão de impressão 3D // V3.2</p>
+          <h1 className="text-xl font-technical font-black text-white tracking-[0.2em] uppercase">{t('login_area')}</h1>
+          <p className="text-[10px] font-technical text-slate-500 mt-2 uppercase tracking-widest">{t('system_desc')}</p>
         </div>
 
         <div className="p-8 space-y-8">
           <form onSubmit={handleAuth} className="space-y-6">
             <Input
-              label="SEU E-MAIL"
+              label={t('your_email_label')}
               type="email"
-              placeholder="operador@matrix.net"
+              placeholder={t('email_placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail size={14} className="text-primary" />}
@@ -71,7 +73,7 @@ export const Auth: React.FC = () => {
               required
             />
             <Input
-              label="SUA SENHA"
+              label={t('your_password_label')}
               type="password"
               placeholder="••••••••"
               value={password}
@@ -86,14 +88,14 @@ export const Auth: React.FC = () => {
               className="w-full h-12 text-sm font-technical font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(255,92,0,0.1)]"
               isLoading={loading}
             >
-              {isLogin ? 'ENTRAR' : 'CRIAR CONTA'}
+              {isLogin ? t('login_action') : t('register_action')}
             </Button>
           </form>
 
           <div className="text-center space-y-6">
             <div className="flex items-center gap-4">
               <div className="h-[1px] flex-1 bg-slate-900" />
-              <span className="text-[10px] font-technical font-bold text-slate-700 uppercase tracking-widest">OU</span>
+              <span className="text-[10px] font-technical font-bold text-slate-700 uppercase tracking-widest">{t('or_divider')}</span>
               <div className="h-[1px] flex-1 bg-slate-900" />
             </div>
 
@@ -102,9 +104,9 @@ export const Auth: React.FC = () => {
               className="text-[10px] font-technical font-black text-slate-500 hover:text-white uppercase tracking-[0.15em] transition-colors flex items-center justify-center w-full gap-2"
             >
               {isLogin ? (
-                <>Não tem conta? <span className="text-primary underline">Cadastre-se</span></>
+                <>{t('dont_have_account')} <span className="text-primary underline">{t('register')}</span></>
               ) : (
-                <>Já tem conta? <span className="text-primary underline">Faça login</span></>
+                <>{t('already_have_account')} <span className="text-primary underline">{t('do_login')}</span></>
               )}
             </button>
           </div>
@@ -113,9 +115,9 @@ export const Auth: React.FC = () => {
         <div className="p-4 border-t border-slate-900 bg-slate-900/10 flex justify-between items-center px-8">
             <div className="flex items-center gap-2">
                 <Database size={10} className="text-slate-600" />
-                <span className="text-[8px] font-technical font-bold text-slate-600 uppercase tracking-widest">SINCRONIZAÇÃO ATIVA</span>
+                <span className="text-[8px] font-technical font-bold text-slate-600 uppercase tracking-widest">{t('sync_active_caps')}</span>
             </div>
-            <span className="text-[8px] font-technical font-bold text-slate-700 uppercase tracking-widest leading-none">PRT_CALC.EXE_REF_44</span>
+            <span className="text-[8px] font-technical font-bold text-slate-700 uppercase tracking-widest leading-none">{t('system_ref_code')}</span>
         </div>
       </Card >
     </div >

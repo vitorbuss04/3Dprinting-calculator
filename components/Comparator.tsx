@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowRightLeft, Loader2, Zap, Wrench, TrendingDown, AlertCircle, Trophy, Scale, Package, ChevronRight } from 'lucide-react';
 import { Printer, GlobalSettings, Material } from '../types';
 import { StorageService } from '../services/storage';
@@ -9,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { cn } from '../utils/cn';
 
 export const Comparator: React.FC = () => {
+  const { t } = useTranslation();
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ electricityCost: 0, currencySymbol: '$' });
@@ -78,10 +80,10 @@ export const Comparator: React.FC = () => {
   const costB = useMemo(() => calculateCosts(printerBId, materialBId, hoursB, weightB), [printerBId, materialBId, hoursB, weightB, printers, materials, settings]);
 
   const comparisonData = [
-    { name: 'DEPREC.', 'CENÁRIO A': costA.depreciation, 'CENÁRIO B': costB.depreciation },
-    { name: 'ENERGIA', 'CENÁRIO A': costA.energy, 'CENÁRIO B': costB.energy },
-    { name: 'MANUT.', 'CENÁRIO A': costA.maintenance, 'CENÁRIO B': costB.maintenance },
-    { name: 'MATERIAL', 'CENÁRIO A': costA.material, 'CENÁRIO B': costB.material },
+    { name: t('deprec_chart'), [t('scenario_a')]: costA.depreciation, [t('scenario_b')]: costB.depreciation },
+    { name: t('energy_chart'), [t('scenario_a')]: costA.energy, [t('scenario_b')]: costB.energy },
+    { name: t('maintenance_chart'), [t('scenario_a')]: costA.maintenance, [t('scenario_b')]: costB.maintenance },
+    { name: t('material_chart'), [t('scenario_a')]: costA.material, [t('scenario_b')]: costB.material },
   ];
 
   const diff = Math.abs(costA.total - costB.total);
@@ -90,7 +92,7 @@ export const Comparator: React.FC = () => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
       <Loader2 className="animate-spin text-primary" size={32} />
-      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO COMPARADOR...</span>
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_comparator')}</span>
     </div>
   );
 
@@ -101,8 +103,8 @@ export const Comparator: React.FC = () => {
           <ArrowRightLeft size={24} />
         </div>
         <div>
-          <h2 className="text-xl font-technical font-extrabold text-white uppercase tracking-[0.2em]">COMPARAR CUSTOS</h2>
-          <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">Compare o custo operacional entre dois cenários diferentes</p>
+          <h2 className="text-xl font-technical font-extrabold text-white uppercase tracking-[0.2em]">{t('compare_costs')}</h2>
+          <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">{t('compare_costs_desc')}</p>
         </div>
       </div>
 
@@ -112,7 +114,7 @@ export const Comparator: React.FC = () => {
           <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/30">
             <h3 className="font-technical font-bold text-white flex items-center gap-3 uppercase tracking-widest">
               <span className="flex items-center justify-center w-8 h-8 border border-primary/50 text-primary font-black text-xs shadow-[0_0_10px_rgba(255,92,0,0.2)]">A</span>
-              CENÁRIO A
+              {t('scenario_a')}
             </h3>
             {winner === 'A' && <Trophy size={20} className="text-primary animate-pulse" />}
           </div>
@@ -120,18 +122,18 @@ export const Comparator: React.FC = () => {
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 gap-4 p-4 border border-slate-800 bg-slate-950/50">
               <Select
-                label="MÁQUINA"
+                label={t('printer_label')}
                 options={printers.map(p => ({ value: p.id, label: p.name }))}
                 value={printerAId}
                 onChange={(val) => setPrinterAId(val as string)}
                 className="font-technical uppercase text-[10px]"
               />
               <div className="grid grid-cols-2 gap-4">
-                <Input label="TEMPO (h)" type="number" min="0" value={hoursA} onChange={(e) => setHoursA(e.target.value)} className="font-technical" />
-                <Input label="PESO (g)" type="number" min="0" value={weightA} onChange={(e) => setWeightA(e.target.value)} className="font-technical" />
+                <Input label={t('time_hours_label')} type="number" min="0" value={hoursA} onChange={(e) => setHoursA(e.target.value)} className="font-technical" />
+                <Input label={t('weight_g_label')} type="number" min="0" value={weightA} onChange={(e) => setWeightA(e.target.value)} className="font-technical" />
               </div>
               <Select
-                label="MATERIAL"
+                label={t('material_label')}
                 options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})` }))}
                 value={materialAId}
                 onChange={(val) => setMaterialAId(val as string)}
@@ -140,14 +142,14 @@ export const Comparator: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <CostRow label="DEPRECIAÇÃO" value={costA.depreciation} icon={TrendingDown} color="text-slate-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.depreciation / costA.total) * 100 : 0} />
-              <CostRow label="ENERGIA" value={costA.energy} icon={Zap} color="text-amber-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.energy / costA.total) * 100 : 0} />
-              <CostRow label="MANUTENÇÃO" value={costA.maintenance} icon={Wrench} color="text-blue-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.maintenance / costA.total) * 100 : 0} />
-              <CostRow label="MATERIAL" value={costA.material} icon={Package} color="text-emerald-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.material / costA.total) * 100 : 0} />
+              <CostRow label={t('deprec_chart')} value={costA.depreciation} icon={TrendingDown} color="text-slate-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.depreciation / costA.total) * 100 : 0} />
+              <CostRow label={t('energy_chart')} value={costA.energy} icon={Zap} color="text-amber-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.energy / costA.total) * 100 : 0} />
+              <CostRow label={t('maintenance_chart')} value={costA.maintenance} icon={Wrench} color="text-blue-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.maintenance / costA.total) * 100 : 0} />
+              <CostRow label={t('material_chart')} value={costA.material} icon={Package} color="text-emerald-500" symbol={settings.currencySymbol} percentage={costA.total > 0 ? (costA.material / costA.total) * 100 : 0} />
             </div>
 
             <div className="pt-6 border-t border-slate-800">
-              <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">CUSTO TOTAL</span>
+              <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">{t('total_cost')}</span>
               <p className="text-3xl font-technical font-black text-white tracking-tighter mt-1">
                 <span className="text-primary mr-1 text-xl">{settings.currencySymbol}</span>
                 {costA.total.toFixed(2)}
@@ -161,7 +163,7 @@ export const Comparator: React.FC = () => {
           <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/30">
             <h3 className="font-technical font-bold text-white flex items-center gap-3 uppercase tracking-widest">
               <span className="flex items-center justify-center w-8 h-8 border border-secondary/50 text-secondary font-black text-xs shadow-[0_0_10px_rgba(0,224,255,0.2)]">B</span>
-              CENÁRIO B
+              {t('scenario_b')}
             </h3>
             {winner === 'B' && <Trophy size={20} className="text-secondary animate-pulse" />}
           </div>
@@ -169,18 +171,18 @@ export const Comparator: React.FC = () => {
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 gap-4 p-4 border border-slate-800 bg-slate-950/50">
               <Select
-                label="MÁQUINA"
+                label={t('printer_label')}
                 options={printers.map(p => ({ value: p.id, label: p.name }))}
                 value={printerBId}
                 onChange={(val) => setPrinterBId(val as string)}
                 className="font-technical uppercase text-[10px]"
               />
               <div className="grid grid-cols-2 gap-4">
-                <Input label="TEMPO (h)" type="number" min="0" value={hoursB} onChange={(e) => setHoursB(e.target.value)} className="font-technical" />
-                <Input label="PESO (g)" type="number" min="0" value={weightB} onChange={(e) => setWeightB(e.target.value)} className="font-technical" />
+                <Input label={t('time_hours_label')} type="number" min="0" value={hoursB} onChange={(e) => setHoursB(e.target.value)} className="font-technical" />
+                <Input label={t('weight_g_label')} type="number" min="0" value={weightB} onChange={(e) => setWeightB(e.target.value)} className="font-technical" />
               </div>
               <Select
-                label="FEEDSTOCK"
+                label={t('material_label')}
                 options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})` }))}
                 value={materialBId}
                 onChange={(val) => setMaterialBId(val as string)}
@@ -189,14 +191,14 @@ export const Comparator: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <CostRow label="DEPRECIAÇÃO" value={costB.depreciation} icon={TrendingDown} color="text-slate-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.depreciation / costB.total) * 100 : 0} />
-              <CostRow label="ENERGIA" value={costB.energy} icon={Zap} color="text-amber-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.energy / costB.total) * 100 : 0} />
-              <CostRow label="MANUTENÇÃO" value={costB.maintenance} icon={Wrench} color="text-blue-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.maintenance / costB.total) * 100 : 0} />
-              <CostRow label="MATERIAL" value={costB.material} icon={Package} color="text-emerald-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.material / costB.total) * 100 : 0} />
+              <CostRow label={t('deprec_chart')} value={costB.depreciation} icon={TrendingDown} color="text-slate-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.depreciation / costB.total) * 100 : 0} />
+              <CostRow label={t('energy_chart')} value={costB.energy} icon={Zap} color="text-amber-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.energy / costB.total) * 100 : 0} />
+              <CostRow label={t('maintenance_chart')} value={costB.maintenance} icon={Wrench} color="text-blue-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.maintenance / costB.total) * 100 : 0} />
+              <CostRow label={t('material_chart')} value={costB.material} icon={Package} color="text-emerald-500" symbol={settings.currencySymbol} percentage={costB.total > 0 ? (costB.material / costB.total) * 100 : 0} />
             </div>
 
             <div className="pt-6 border-t border-slate-800">
-              <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">CUSTO TOTAL</span>
+              <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">{t('total_cost')}</span>
               <p className="text-3xl font-technical font-black text-white tracking-tighter mt-1">
                 <span className="text-secondary mr-1 text-xl">{settings.currencySymbol}</span>
                 {costB.total.toFixed(2)}
@@ -223,20 +225,22 @@ export const Comparator: React.FC = () => {
         <div className="flex-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
             <span className="w-2 h-2 bg-primary animate-pulse" />
-            <h3 className="text-xs font-technical font-black text-white uppercase tracking-[0.3em]">RESULTADO DA COMPARAÇÃO</h3>
+            <h3 className="text-xs font-technical font-black text-white uppercase tracking-[0.3em]">{t('comparison_result')}</h3>
           </div>
           {diff < 0.05 ? (
-            <p className="text-sm font-technical text-slate-400 uppercase leading-relaxed">Os custos dos dois cenários são praticamente <span className="text-white font-bold">iguais</span>. Ambos são equivalentes.</p>
+            <p className="text-sm font-technical text-slate-400 uppercase leading-relaxed">
+              {t('costs_practically_equal_prefix')} <span className="text-white font-bold">{t('equal')}</span>. {t('costs_practically_equal_suffix')}
+            </p>
           ) : (
             <p className="text-sm font-technical text-slate-400 uppercase leading-relaxed max-w-2xl">
-              Cenário <span className={cn("px-2 py-0.5 font-bold mx-1 border", winner === 'A' ? 'border-primary/30 text-primary' : 'border-secondary/30 text-secondary')}>{winner}</span>
-              é identificado como caminho ótimo, com eficiência delta de <span className="text-emerald-500 font-black">{settings.currencySymbol} {diff.toFixed(2)}</span> por ciclo.
+              {t('optimal_scenario_prefix')} <span className={cn("px-2 py-0.5 font-bold mx-1 border", winner === 'A' ? 'border-primary/30 text-primary' : 'border-secondary/30 text-secondary')}>{winner}</span>
+              {t('optimal_scenario_body')} <span className="text-emerald-500 font-black">{settings.currencySymbol} {diff.toFixed(2)}</span> {t('optimal_scenario_suffix')}
             </p>
           )}
         </div>
         <div className="hidden md:block w-px h-16 bg-slate-800"></div>
         <div className="text-center md:text-right min-w-[140px]">
-          <div className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest mb-1">DIFERENÇA %</div>
+          <div className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest mb-1">{t('difference_percent')}</div>
           <div className={cn("text-2xl font-technical font-black", winner === 'Tie' ? 'text-slate-400' : winner === 'A' ? 'text-primary' : 'text-secondary')}>
             {costA.total > 0 && costB.total > 0
               ? `${(Math.abs((costA.total - costB.total) / Math.max(costA.total, costB.total)) * 100).toFixed(1)}%`
@@ -249,7 +253,7 @@ export const Comparator: React.FC = () => {
       <Card variant="industrial" className="p-8">
         <div className="flex items-center gap-2 mb-8">
           <div className="w-1.5 h-1.5 bg-primary" />
-          <h3 className="text-[10px] font-technical font-black text-slate-400 uppercase tracking-[0.3em]">COMPARAÇÃO DETALHADA POR CATEGORIA</h3>
+          <h3 className="text-[10px] font-technical font-black text-slate-400 uppercase tracking-[0.3em]">{t('detailed_comparison_category')}</h3>
         </div>
         <div className="h-96 w-full -ml-4">
           <ResponsiveContainer width="100%" height="100%">
@@ -290,7 +294,7 @@ export const Comparator: React.FC = () => {
                     textTransform: 'uppercase'
                 }}
                 formatter={(value: number, name: string) => [
-                  <span className={cn("font-technical text-[11px] font-bold", name === 'CENÁRIO A' ? 'text-primary' : 'text-secondary')}>{settings.currencySymbol}{value.toFixed(2)}</span>,
+                  <span className={cn("font-technical text-[11px] font-bold", name === t('scenario_a') ? 'text-primary' : 'text-secondary')}>{settings.currencySymbol}{value.toFixed(2)}</span>,
                   <span className="text-slate-500 font-technical text-[9px] uppercase">{name}</span>
                 ]}
               />
@@ -299,8 +303,8 @@ export const Comparator: React.FC = () => {
                 iconType="rect"
                 formatter={(value) => <span className="text-slate-500 font-bold ml-1">{value}</span>}
               />
-              <Bar dataKey="CENÁRIO A" name="CENÁRIO A" fill="#FF5C00" radius={0} />
-              <Bar dataKey="CENÁRIO B" name="CENÁRIO B" fill="#00E0FF" radius={0} />
+              <Bar dataKey={t('scenario_a')} name={t('scenario_a')} fill="#FF5C00" radius={0} />
+              <Bar dataKey={t('scenario_b')} name={t('scenario_b')} fill="#00E0FF" radius={0} />
             </BarChart>
           </ResponsiveContainer>
         </div>

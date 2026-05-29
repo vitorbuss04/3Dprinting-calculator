@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StorageService } from '../services/storage';
 import { Project, GlobalSettings, ViewState } from '../types';
 import { Card } from './ui/Card';
@@ -14,6 +15,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [folders, setFolders] = useState<ProjectFolder[]>([]);
   const [settings, setSettings] = useState<GlobalSettings>({ currencySymbol: '$', electricityCost: 0 });
@@ -47,21 +49,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const totalProfit  = concludedProjects.reduce((acc, curr) => acc + curr.result.profit, 0);
   const totalPrints  = concludedFolderIds.length;
 
+  const gastoLabel = t('production_cost');
+  const lucroLabel = t('net_profit');
+  const faturamentoLabel = t('total_value');
+
   const concludedFolders = folders.filter(f => f.status === 'concluido').slice(0, 5);
   const chartData = concludedFolders.map(f => {
     const folderProjects = projects.filter(p => p.folderId === f.id);
     return {
       name: f.name.length > 8 ? f.name.substring(0, 8) : f.name,
-      Gasto: folderProjects.reduce((acc, p) => acc + p.result.totalProductionCost, 0),
-      Lucro: folderProjects.reduce((acc, p) => acc + p.result.profit, 0),
-      Faturamento: folderProjects.reduce((acc, p) => acc + p.result.finalPrice, 0),
+      [gastoLabel]: folderProjects.reduce((acc, p) => acc + p.result.totalProductionCost, 0),
+      [lucroLabel]: folderProjects.reduce((acc, p) => acc + p.result.profit, 0),
+      [faturamentoLabel]: folderProjects.reduce((acc, p) => acc + p.result.finalPrice, 0),
     };
   }).reverse();
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
       <Loader2 className="animate-spin text-primary" size={32} />
-      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">CARREGANDO DADOS...</span>
+      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_data')}</span>
     </div>
   );
 
@@ -99,8 +105,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   );
 
   // Trend data for sparklines — only concluded projects (folders)
-  const last5Revenue = chartData.map(d => ({ val: d.Faturamento }));
-  const last5Profit  = chartData.map(d => ({ val: d.Lucro }));
+  const last5Revenue = chartData.map(d => ({ val: d[faturamentoLabel] }));
+  const last5Profit  = chartData.map(d => ({ val: d[lucroLabel] }));
   const last5Prints  = chartData.map((_, i) => ({ val: i + 1 }));
 
   return (
@@ -108,31 +114,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       {/* System Status Banner */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-900/30 border border-slate-800 text-[9px] font-technical text-slate-500 uppercase">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5"><Zap size={10} className="text-primary" /> SISTEMA PRONTO</span>
-          <span className="flex items-center gap-1.5"><Cpu size={10} className="text-secondary" /> SINCRONIZADO</span>
+          <span className="flex items-center gap-1.5"><Zap size={10} className="text-primary" /> {t('system_ready')}</span>
+          <span className="flex items-center gap-1.5"><Cpu size={10} className="text-secondary" /> {t('synchronized')}</span>
         </div>
         <div className="flex items-center gap-2">
-            Operando: <span className="text-white">00:42:15</span>
+            {t('operating_label')}<span className="text-white">00:42:15</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatBlock
-          title="RECEITA TOTAL"
+          title={t('revenue_title')}
           value={`${settings.currencySymbol}${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={TrendingUp}
           colorClass="text-primary"
           data={last5Revenue}
         />
         <StatBlock
-          title="LUCRO LÍQUIDO"
+          title={t('net_profit')}
           value={`${settings.currencySymbol}${totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={DollarSign}
           colorClass="text-secondary"
           data={last5Profit}
         />
         <StatBlock
-          title="TOTAL DE PROJETOS"
+          title={t('total_projects')}
           value={totalPrints.toString().padStart(2, '0')}
           icon={Box}
           colorClass="text-white"
@@ -148,12 +154,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="flex justify-between items-start mb-8">
             <div>
               <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                <Activity size={14} className="text-primary" /> GRÁFICO FINANCEIRO
+                <Activity size={14} className="text-primary" /> {t('financial_chart')}
               </h3>
-              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">Métricas de produção dos últimos projetos // Moeda: {settings.currencySymbol}</p>
+              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">{t('production_metrics', { currency: settings.currencySymbol })}</p>
             </div>
             <div className="flex gap-2">
-                <div className="px-2 py-1 bg-slate-950 border border-slate-800 text-[9px] font-technical text-slate-400 uppercase">ÚLTIMOS 5</div>
+                <div className="px-2 py-1 bg-slate-950 border border-slate-800 text-[9px] font-technical text-slate-400 uppercase">{t('last_5')}</div>
             </div>
           </div>
 
@@ -190,16 +196,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     wrapperStyle={{ paddingBottom: '30px', fontSize: '9px', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase', color: '#64748B' }}
                   />
 
-                  <Line type="stepAfter" dataKey="Faturamento" stroke="#FF5C00" strokeWidth={2} dot={{ r: 3, stroke: '#FF5C00', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
-                  <Line type="stepAfter" dataKey="Lucro" stroke="#00E0FF" strokeWidth={2} dot={{ r: 3, stroke: '#00E0FF', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
-                  <Line type="stepAfter" dataKey="Gasto" stroke="#475569" strokeWidth={2} dot={{ r: 3, stroke: '#475569', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey={faturamentoLabel} stroke="#FF5C00" strokeWidth={2} dot={{ r: 3, stroke: '#FF5C00', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey={lucroLabel} stroke="#00E0FF" strokeWidth={2} dot={{ r: 3, stroke: '#00E0FF', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey={gastoLabel} stroke="#475569" strokeWidth={2} dot={{ r: 3, stroke: '#475569', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center flex-1 border border-dashed border-slate-800 text-slate-600">
               <Box size={24} className="mb-3 opacity-30" />
-              <p className="text-[10px] font-technical uppercase italic">Nenhum projeto ainda</p>
+              <p className="text-[10px] font-technical uppercase italic">{t('no_projects_yet')}</p>
             </div>
           )}
         </Card>
@@ -208,8 +214,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <Card variant="industrial" className="flex flex-col p-0 overflow-hidden border-l-0 lg:border-l border-slate-800">
           <div className="p-6 pb-3 bg-slate-950/50 border-b border-slate-800 space-y-3">
             <div>
-              <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest">PROJETOS POR STATUS</h3>
-              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">Filtre por fase de produção // Máx. 4</p>
+              <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest">{t('projects_by_status')}</h3>
+              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">{t('filter_by_production_phase')}</p>
             </div>
             {/* Filter Dropdown */}
             <div className="relative">
@@ -218,11 +224,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
                 className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer"
               >
-                <option value="all">🔹 TODOS OS STATUS</option>
-                <option value="aguardando">⏳ AGUARDANDO</option>
-                <option value="em_producao">⚙️ EM PRODUÇÃO</option>
-                <option value="concluido">✅ CONCLUÍDO</option>
-                <option value="cancelado">✖ CANCELADO</option>
+                <option value="all">{t('all_status_option')}</option>
+                <option value="aguardando">{t('status_waiting_option')}</option>
+                <option value="em_producao">{t('status_production_option')}</option>
+                <option value="concluido">{t('status_completed_option')}</option>
+                <option value="cancelado">{t('status_cancelled_option')}</option>
               </select>
               <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
             </div>
@@ -241,17 +247,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               cancelado:   'text-red-400',
             };
             const STATUS_LABELS: Record<string, string> = {
-              aguardando:  'AGUARDANDO',
-              em_producao: 'EM PRODUÇÃO',
-              concluido:   'CONCLUÍDO',
-              cancelado:   'CANCELADO',
+              aguardando:  t('status_waiting'),
+              em_producao: t('status_production'),
+              concluido:   t('status_completed'),
+              cancelado:   t('status_cancelled'),
             };
 
             return (
               <div className="overflow-y-auto custom-scrollbar flex-1">
                 {filteredFolders.length === 0 ? (
                   <div className="p-8 text-center text-slate-600">
-                    <p className="text-[9px] font-technical uppercase">Nenhum projeto neste status</p>
+                    <p className="text-[9px] font-technical uppercase">{t('no_projects_this_status')}</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-800/50">
@@ -296,7 +302,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             className="w-full p-3 bg-slate-950 border-t border-slate-800 text-[10px] font-technical font-bold text-slate-500 hover:text-white transition-colors flex items-center justify-center gap-2"
             onClick={() => onNavigate('history')}
           >
-            VER HISTÓRICO COMPLETO <TrendingUp size={12} />
+            {t('view_full_history')} <TrendingUp size={12} />
           </button>
         </Card>
       </div >

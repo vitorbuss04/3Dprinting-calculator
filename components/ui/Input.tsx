@@ -15,7 +15,23 @@ export const Input: React.FC<InputProps> = ({
     error,
     icon,
     id,
-    ...props
+    type = 'text',
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    required,
+    min,
+    max,
+    step,
+    defaultValue,
+    onKeyDown,
+    onKeyUp,
+    onFocus,
+    onBlur,
+    name,
+    readOnly,
+    autoComplete,
 }) => {
     return (
         <div className={cn("w-full space-y-1", containerClassName)}>
@@ -41,10 +57,27 @@ export const Input: React.FC<InputProps> = ({
                         error && "border-red-500 focus:border-red-500",
                         className
                     )}
-                    {...props}
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    required={required}
+                    min={min}
+                    max={max}
+                    step={step}
+                    defaultValue={defaultValue}
+                    onKeyDown={onKeyDown}
+                    onKeyUp={onKeyUp}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    name={name}
+                    readOnly={readOnly}
+                    autoComplete={autoComplete}
                 />
             </div>
             {error && <p className="text-[10px] font-technical text-red-500 mt-1">{error}</p>}
         </div>
     );
 };
+

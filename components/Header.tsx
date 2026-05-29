@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell, Check, Sun, Moon, Activity, Wifi, ShieldCheck, Database } from 'lucide-react';
+import { Menu, Bell, Check, Sun, Moon, Activity, Wifi, ShieldCheck, Database, Languages } from 'lucide-react';
 import { ViewState } from '../types';
 import { Session } from '@supabase/supabase-js';
 import { cn } from '../utils/cn';
@@ -7,7 +7,7 @@ import { useNotifications } from './NotificationContext';
 import { useTheme } from './ThemeContext';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/Popover';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
     currentView: ViewState;
@@ -24,17 +24,26 @@ export const Header: React.FC<HeaderProps> = ({
     onProfileClick,
     onViewChange
 }) => {
-    const titles: Record<string, string> = {
-        dashboard: 'PAINEL GERAL',
-        calculator: 'CALCULADORA',
-        assets: 'IMPRESSORAS E MATERIAIS',
-        comparator: 'COMPARAR CUSTOS',
-        history: 'HISTÓRICO',
-        profile: 'MEU PERFIL'
-    };
-
+    const { t, i18n } = useTranslation();
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
     const { theme, toggleTheme } = useTheme();
+
+    const getHeaderTitle = (view: ViewState): string => {
+        switch (view) {
+            case 'dashboard': return 'title_dashboard';
+            case 'calculator': return 'title_calculator';
+            case 'assets': return 'title_assets';
+            case 'comparator': return 'title_comparator';
+            case 'history': return 'title_history';
+            case 'profile': return 'title_profile';
+            default: return 'system';
+        }
+    };
+
+    const toggleLanguage = () => {
+        const nextLang = i18n.language === 'pt' ? 'en' : 'pt';
+        i18n.changeLanguage(nextLang);
+    };
 
     return (
         <header className="h-16 bg-slate-950 border-b border-slate-900 sticky top-0 z-50 px-6 flex items-center justify-between">
@@ -53,10 +62,10 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <div>
                         <h1 className="text-sm font-technical font-black text-white uppercase tracking-[0.25em] leading-none">
-                            {titles[currentView] || 'SISTEMA'}
+                            {t(getHeaderTitle(currentView))}
                         </h1>
                         <p className="text-[9px] font-technical text-slate-600 uppercase tracking-widest mt-1.5 hidden sm:flex items-center gap-2">
-                             SESSÃO ATIVA // <span className="text-slate-400">{format(new Date(), "yyyy-MM-dd HH:mm")}</span> // SISTEMA ESTÁVEL
+                             {t('active_session')} // <span className="text-slate-400">{format(new Date(), "yyyy-MM-dd HH:mm")}</span> // {t('system_stable')}
                         </p>
                     </div>
                 </div>
@@ -66,24 +75,37 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-2">
                 <div className="hidden lg:flex items-center gap-6 px-6 border-r border-slate-900 h-8 self-center">
                     <div className="flex flex-col items-end">
-                        <span className="text-[8px] font-technical font-black text-slate-600 uppercase tracking-widest">REDE</span>
+                        <span className="text-[8px] font-technical font-black text-slate-600 uppercase tracking-widest">{t('network')}</span>
                         <span className="text-[9px] font-technical font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1.5">
-                            <Wifi size={10} /> CONECTADO
+                            <Wifi size={10} /> {t('connected')}
                         </span>
                     </div>
                     <div className="flex flex-col items-end">
-                        <span className="text-[8px] font-technical font-black text-slate-600 uppercase tracking-widest">SEGURANÇA</span>
+                        <span className="text-[8px] font-technical font-black text-slate-600 uppercase tracking-widest">{t('security')}</span>
                         <span className="text-[9px] font-technical font-black text-primary uppercase tracking-widest flex items-center gap-1.5">
-                            <ShieldCheck size={10} /> PROTEGIDO
+                            <ShieldCheck size={10} /> {t('protected')}
                         </span>
                     </div>
                 </div>
+
+                {/* Language Switcher Button */}
+                <button
+                    onClick={toggleLanguage}
+                    className="w-10 h-10 border border-slate-900 bg-slate-950 text-slate-600 hover:text-white hover:border-slate-800 transition-all flex flex-col items-center justify-center relative group"
+                    title={i18n.language === 'pt' ? 'Mudar para Inglês' : 'Switch to Portuguese'}
+                >
+                    <Languages size={13} />
+                    <span className="text-[8px] font-technical font-black uppercase tracking-wider mt-0.5">
+                        {i18n.language === 'pt' ? 'EN' : 'PT'}
+                    </span>
+                    <div className="absolute top-0 right-0 w-1 h-1 bg-slate-800 group-hover:bg-primary" />
+                </button>
 
                 {/* Theme Toggle (Mechanical Look) */}
                 <button
                     onClick={toggleTheme}
                     className="w-10 h-10 border border-slate-900 bg-slate-950 text-slate-600 hover:text-white hover:border-slate-800 transition-all flex items-center justify-center relative group"
-                    title="Alternar tema claro/escuro"
+                    title={theme === 'dark' ? 'Alternar tema claro/escuro' : 'Toggle light/dark theme'}
                 >
                     {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                     <div className="absolute top-0 right-0 w-1 h-1 bg-slate-800 group-hover:bg-primary" />
@@ -103,15 +125,15 @@ export const Header: React.FC<HeaderProps> = ({
                     <PopoverContent className="w-80 p-0 mr-4 bg-slate-950 border-slate-800 rounded-none shadow-2xl" align="end">
                         <div className="p-4 border-b border-slate-900 bg-slate-900/30 flex justify-between items-center">
                             <div>
-                                <h4 className="text-[10px] font-technical font-black text-white uppercase tracking-[0.2em]">NOTIFICAÇÕES</h4>
-                                <p className="text-[9px] font-technical text-slate-600 uppercase tracking-wider">{unreadCount} não lida(s)</p>
+                                <h4 className="text-[10px] font-technical font-black text-white uppercase tracking-[0.2em]">{t('notifications')}</h4>
+                                <p className="text-[9px] font-technical text-slate-600 uppercase tracking-wider">{t('unread_notifications', { count: unreadCount })}</p>
                             </div>
                             {unreadCount > 0 && (
                                 <button
                                     onClick={markAllAsRead}
                                     className="text-[9px] font-technical font-black text-primary hover:text-orange-400 uppercase tracking-widest border border-primary/20 px-2 py-1"
                                 >
-                                    MARCAR TUDO COMO LIDO
+                                    {t('mark_all_read')}
                                 </button>
                             )}
                         </div>
@@ -121,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({
                                     <div className="w-8 h-8 border border-slate-900 mx-auto flex items-center justify-center mb-4">
                                         <Database size={14} />
                                     </div>
-                                    <p className="text-[9px] font-technical uppercase tracking-widest">NENHUMA NOTIFICAÇÃO</p>
+                                    <p className="text-[9px] font-technical uppercase tracking-widest">{t('no_notifications')}</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-slate-900">
@@ -186,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <p className="text-[10px] font-technical font-black text-white group-hover:text-primary transition-colors uppercase tracking-[0.1em] truncate max-w-[120px]">
                             {session.user.email?.split('@')[0]}
                         </p>
-                        <p className="text-[8px] font-technical font-black text-slate-700 uppercase tracking-[0.2em] mt-0.5">CONTA ATIVA</p>
+                        <p className="text-[8px] font-technical font-black text-slate-700 uppercase tracking-[0.2em] mt-0.5">{t('active_account')}</p>
                     </div>
                     <div className="w-10 h-10 bg-slate-950 border border-slate-900 flex items-center justify-center text-slate-400 font-technical font-black text-xs group-hover:border-primary group-hover:text-primary transition-all relative overflow-hidden">
                         {session.user.email?.charAt(0).toUpperCase()}
