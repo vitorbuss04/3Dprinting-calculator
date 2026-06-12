@@ -4,7 +4,7 @@ import { supabase } from '../services/supabaseClient';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
-import { Mail, Lock, LogIn, UserPlus, AlertCircle, CheckCircle2, ShieldCheck, Database } from 'lucide-react';
+import { Mail, ShieldCheck, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Auth: React.FC = () => {
@@ -41,35 +41,26 @@ export const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Grids */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-      <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
-           style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 0), linear-gradient(90deg, #fff 1px, transparent 0)', backgroundSize: '160px 160px' }} />
-
-      <Card variant="industrial" className="w-full max-w-md relative z-10 p-0 overflow-hidden border-t-2 border-t-primary">
-        <div className="p-8 border-b border-slate-900 bg-slate-900/30 text-center">
-          <div className="w-14 h-14 border-2 border-primary mx-auto flex items-center justify-center mb-6 relative group shadow-[0_0_15px_rgba(255,92,0,0.1)]">
-            <span className="text-white font-technical font-black text-2xl">3D</span>
-            <div className="absolute -top-1 -left-1 w-2 h-2 bg-primary" />
-            <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-primary" />
+    <div className="min-h-screen bg-surface-soft flex items-center justify-center p-4 relative overflow-hidden">
+      <Card variant="default" className="w-full max-w-md relative z-10 p-0 overflow-hidden border border-hairline shadow-md">
+        <div className="p-8 border-b border-hairline bg-surface-soft text-center">
+          <div className="w-12 h-12 bg-primary rounded-2xl mx-auto flex items-center justify-center mb-4 text-white font-sans font-bold text-lg shadow-sm">
+            3D
           </div>
 
-          <h1 className="text-xl font-technical font-black text-white tracking-[0.2em] uppercase">{t('login_area')}</h1>
-          <p className="text-[10px] font-technical text-slate-500 mt-2 uppercase tracking-widest">{t('system_desc')}</p>
+          <h1 className="text-xl font-sans font-medium text-ink tracking-tight">{t('login_area')}</h1>
+          <p className="text-xs font-sans text-muted mt-2">{t('system_desc')}</p>
         </div>
 
-        <div className="p-8 space-y-8">
-          <form onSubmit={handleAuth} className="space-y-6">
+        <div className="p-8 space-y-6">
+          <form onSubmit={handleAuth} className="space-y-4">
             <Input
               label={t('your_email_label')}
               type="email"
               placeholder={t('email_placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              icon={<Mail size={14} className="text-primary" />}
-              className="font-technical uppercase text-[10px]"
+              icon={<Mail size={16} className="text-muted" />}
               required
             />
             <Input
@@ -78,48 +69,47 @@ export const Auth: React.FC = () => {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              icon={<ShieldCheck size={14} className="text-secondary" />}
-              className="font-technical uppercase text-[10px]"
+              icon={<ShieldCheck size={16} className="text-muted" />}
               required
             />
 
             <Button
               type="submit"
-              className="w-full h-12 text-sm font-technical font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(255,92,0,0.1)]"
+              className="w-full h-11 text-sm font-sans font-medium mt-6"
               isLoading={loading}
             >
               {isLogin ? t('login_action') : t('register_action')}
             </Button>
           </form>
 
-          <div className="text-center space-y-6">
+          <div className="text-center space-y-4">
             <div className="flex items-center gap-4">
-              <div className="h-[1px] flex-1 bg-slate-900" />
-              <span className="text-[10px] font-technical font-bold text-slate-700 uppercase tracking-widest">{t('or_divider')}</span>
-              <div className="h-[1px] flex-1 bg-slate-900" />
+              <div className="h-[1px] flex-1 bg-hairline" />
+              <span className="text-xs font-sans font-medium text-muted uppercase tracking-wider">{t('or_divider')}</span>
+              <div className="h-[1px] flex-1 bg-hairline" />
             </div>
 
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-[10px] font-technical font-black text-slate-500 hover:text-white uppercase tracking-[0.15em] transition-colors flex items-center justify-center w-full gap-2"
+              className="text-xs font-sans text-muted hover:text-ink transition-colors flex items-center justify-center w-full gap-1"
             >
               {isLogin ? (
-                <>{t('dont_have_account')} <span className="text-primary underline">{t('register')}</span></>
+                <>{t('dont_have_account')} <span className="text-primary hover:underline font-medium">{t('register')}</span></>
               ) : (
-                <>{t('already_have_account')} <span className="text-primary underline">{t('do_login')}</span></>
+                <>{t('already_have_account')} <span className="text-primary hover:underline font-medium">{t('do_login')}</span></>
               )}
             </button>
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-900 bg-slate-900/10 flex justify-between items-center px-8">
+        <div className="p-4 border-t border-hairline bg-surface-soft flex justify-between items-center px-8 text-[11px] font-sans text-muted">
             <div className="flex items-center gap-2">
-                <Database size={10} className="text-slate-600" />
-                <span className="text-[8px] font-technical font-bold text-slate-600 uppercase tracking-widest">{t('sync_active_caps')}</span>
+                <Database size={12} />
+                <span>{t('sync_active_caps')}</span>
             </div>
-            <span className="text-[8px] font-technical font-bold text-slate-700 uppercase tracking-widest leading-none">{t('system_ref_code')}</span>
+            <span>{t('system_ref_code')}</span>
         </div>
       </Card >
-    </div >
+    </div>
   );
 };

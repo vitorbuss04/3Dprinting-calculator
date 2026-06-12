@@ -24,7 +24,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex overflow-hidden font-technical selection:bg-primary selection:text-white">
+        <div className="min-h-screen bg-canvas text-body flex overflow-hidden font-sans selection:bg-primary/20 selection:text-primary">
             <Sidebar
                 currentView={currentView}
                 onViewChange={onViewChange}
@@ -34,10 +34,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             />
 
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-                {/* Technical background elements */}
-                <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
-                     style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                
                 <Header
                     currentView={currentView}
                     onMenuClick={() => setIsSidebarOpen(true)}
@@ -53,17 +49,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 </div>
 
                 {/* System Status Line at Footer */}
-                <div className="hidden lg:flex h-6 border-t border-slate-900 bg-slate-950 px-6 items-center justify-between text-[8px] font-technical font-black text-slate-700 uppercase tracking-[0.3em] z-10">
+                <div className="hidden lg:flex h-6 border-t border-hairline bg-surface-soft px-6 items-center justify-between text-[10px] font-sans font-medium text-muted z-10">
                     <div className="flex items-center gap-4">
-                        <span className="text-slate-500">{t('secured_data')}</span>
-                        <span className="text-slate-500">{t('sync_active')}</span>
+                        <span>{t('secured_data')}</span>
+                        <span>{t('sync_active')}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="text-emerald-900/50">{t('server_online')}</span>
-                        <span className="animate-pulse text-primary/30">{t('system_stable')}</span>
+                        <span className="text-green/70">{t('server_online')}</span>
+                        <span className="text-primary/70">{t('system_stable')}</span>
                     </div>
                 </div>
             </main>
         </div>
     );
 };
+

@@ -59,95 +59,93 @@ export const Profile: React.FC = () => {
     if (loading) return (
         <div className="flex flex-col items-center justify-center p-20 gap-4">
             <Loader2 className="animate-spin text-primary" size={32} />
-            <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_profile')}</span>
+            <span className="font-sans text-xs text-muted uppercase tracking-wider">{t('loading_profile')}</span>
         </div>
     );
     
     if (!user) return (
         <div className="p-20 text-center">
-            <div className="w-12 h-12 border border-red-900 mx-auto flex items-center justify-center mb-4 text-red-500">
+            <div className="w-12 h-12 border border-red mx-auto flex items-center justify-center mb-4 text-red">
                 <Shield size={24} />
             </div>
-            <h2 className="font-technical font-black text-white uppercase tracking-[0.2em]">{t('access_denied')}</h2>
-            <p className="font-technical text-[10px] text-slate-500 uppercase mt-2">{t('no_active_session')}</p>
+            <h2 className="font-sans font-semibold text-ink">{t('access_denied')}</h2>
+            <p className="font-sans text-xs text-muted mt-2">{t('no_active_session')}</p>
         </div>
     );
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in duration-500 pb-20">
+        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
             {/* Header: User Identification Unit */}
-            <div className="bg-slate-950 border border-slate-900 p-8 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 text-slate-700 group-hover:text-primary transition-colors">
+            <div className="bg-canvas border border-hairline rounded-2xl p-8 relative overflow-hidden group shadow-sm">
+                <div className="absolute top-0 right-0 p-4 opacity-5 text-muted group-hover:text-primary transition-colors">
                     <Fingerprint size={120} strokeWidth={1} />
                 </div>
                 
                 <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                    <div className="w-24 h-24 bg-slate-900 border border-slate-800 flex items-center justify-center text-white text-3xl font-black font-technical relative overflow-hidden">
+                    <div className="w-20 h-20 bg-surface-soft border border-hairline rounded-full flex items-center justify-center text-muted text-3xl font-sans font-semibold relative overflow-hidden">
                         {user.email?.charAt(0).toUpperCase()}
-                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-slate-700" />
-                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-slate-700" />
                     </div>
                     
                     <div className="text-center md:text-left">
                         <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
-                             <h2 className="text-2xl font-technical font-black text-white uppercase tracking-[0.2em]">{t('my_profile')}</h2>
-                             <span className="px-2 py-0.5 border border-emerald-900/30 text-emerald-500 text-[10px] font-technical font-black uppercase tracking-widest bg-emerald-500/5">
+                             <h2 className="text-2xl font-sans font-semibold text-ink">{t('my_profile')}</h2>
+                             <span className="px-3 py-1 border border-green/20 text-green text-[11px] font-sans font-medium rounded-full bg-green/5">
                                 {t('active_session')}
                              </span>
                         </div>
-                        <p className="font-technical text-slate-400 text-sm tracking-wide mb-4">{user.email}</p>
+                        <p className="font-sans text-muted text-sm mb-4">{user.email}</p>
                         
-                        <div className="flex flex-wrap gap-4 justify-center md:justify-start text-[9px] font-technical text-slate-600 uppercase tracking-widest">
+                        <div className="flex flex-wrap gap-4 justify-center md:justify-start text-xs font-sans text-muted">
                             <span className="flex items-center gap-2">
-                                <Activity size={10} className="text-primary" /> {t('role_operator')}
+                                <Activity size={12} className="text-primary" /> {t('role_operator')}
                             </span>
                             <span className="flex items-center gap-2">
-                                <Database size={10} className="text-secondary" /> {t('data_synchronized')}
+                                <Database size={12} className="text-green" /> {t('data_synchronized')}
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Section: System Metadata */}
                 <div className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
-                          <span className="w-1.5 h-1.5 bg-secondary" />
-                          <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">{t('account_data')}</h3>
+                    <div className="flex items-center gap-3 border-b border-hairline pb-3">
+                          <span className="w-1.5 h-1.5 bg-green rounded-full" />
+                          <h3 className="font-sans font-medium text-xs text-muted uppercase tracking-wider">{t('account_data')}</h3>
                     </div>
                     
                     <div className="space-y-4">
-                        <div className="p-4 border border-slate-900 bg-slate-900/10 flex gap-4">
-                            <div className="w-10 h-10 border border-slate-800 bg-slate-950 flex items-center justify-center text-slate-600">
+                        <div className="p-4 border border-hairline bg-surface-soft rounded-2xl flex gap-4">
+                            <div className="w-10 h-10 border border-hairline bg-canvas rounded-lg flex items-center justify-center text-muted">
                                 <Mail size={16} />
                             </div>
                             <div>
-                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">{t('email')}</p>
-                                <p className="text-xs font-technical font-bold text-white uppercase tracking-wider">{user.email}</p>
+                                <p className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider mb-1">{t('email')}</p>
+                                <p className="text-sm font-sans font-medium text-ink">{user.email}</p>
                             </div>
                         </div>
 
-                        <div className="p-4 border border-slate-900 bg-slate-900/10 flex gap-4">
-                            <div className="w-10 h-10 border border-slate-800 bg-slate-950 flex items-center justify-center text-slate-600">
+                        <div className="p-4 border border-hairline bg-surface-soft rounded-2xl flex gap-4">
+                            <div className="w-10 h-10 border border-hairline bg-canvas rounded-lg flex items-center justify-center text-muted">
                                 <Fingerprint size={16} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">{t('account_id')}</p>
-                                <p className="text-[10px] font-technical font-bold text-slate-500 bg-slate-950 border border-slate-900 px-2 py-1.5 truncate">
+                                <p className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider mb-1">{t('account_id')}</p>
+                                <p className="text-xs font-sans text-muted bg-canvas border border-hairline px-3 py-1.5 rounded-lg truncate">
                                     {user.id}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="p-4 border border-slate-900 bg-slate-900/10 flex gap-4">
-                            <div className="w-10 h-10 border border-slate-800 bg-slate-950 flex items-center justify-center text-slate-600">
+                        <div className="p-4 border border-hairline bg-surface-soft rounded-2xl flex gap-4">
+                            <div className="w-10 h-10 border border-hairline bg-canvas rounded-lg flex items-center justify-center text-muted">
                                 <Calendar size={16} />
                             </div>
                             <div>
-                                <p className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest mb-1.5">{t('registration_date')}</p>
-                                <p className="text-xs font-technical font-bold text-white uppercase tracking-wider">
-                                    {new Date(user.created_at).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
+                                <p className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider mb-1">{t('registration_date')}</p>
+                                <p className="text-sm font-sans font-medium text-ink">
+                                    {new Date(user.created_at).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })}
                                 </p>
                             </div>
                         </div>
@@ -156,27 +154,26 @@ export const Profile: React.FC = () => {
 
                 {/* Section: Security Purge / Update */}
                 <div className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
-                          <span className="w-1.5 h-1.5 bg-primary" />
-                          <h3 className="font-technical font-black text-[11px] text-white uppercase tracking-[0.25em]">{t('change_password')}</h3>
+                    <div className="flex items-center gap-3 border-b border-hairline pb-3">
+                          <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+                          <h3 className="font-sans font-medium text-xs text-muted uppercase tracking-wider">{t('change_password')}</h3>
                     </div>
 
-                    <Card variant="industrial" className="border-primary/20 p-8 space-y-8 bg-slate-950">
-                        <div className="p-4 border border-primary/20 bg-primary/5 flex gap-4">
+                    <Card variant="default" className="p-8 space-y-6 border border-hairline">
+                        <div className="p-4 border border-primary/20 bg-primary-soft/30 rounded-xl flex gap-4">
                             <Shield size={18} className="text-primary shrink-0 mt-0.5" />
-                            <p className="text-[10px] font-technical font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
+                            <p className="text-xs font-sans text-muted leading-relaxed">
                                 {t('fill_fields_new_password')}
                             </p>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <Input
                                 label={t('new_password')}
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="font-technical"
                             />
                             <Input
                                 label={t('confirm_password')}
@@ -184,14 +181,13 @@ export const Profile: React.FC = () => {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="font-technical"
                             />
 
-                            <div className="pt-4">
+                            <div className="pt-2">
                                 <Button 
                                     onClick={handleUpdatePassword} 
                                     disabled={isUpdating} 
-                                    className="w-full font-technical font-black text-[11px] tracking-[0.2em]" 
+                                    className="w-full text-sm h-11" 
                                     variant="primary"
                                 >
                                     {isUpdating ? (

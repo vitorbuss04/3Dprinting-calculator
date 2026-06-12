@@ -67,26 +67,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
       <Loader2 className="animate-spin text-primary" size={32} />
-      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_data')}</span>
+      <span className="font-sans text-xs text-muted uppercase tracking-wider">{t('loading_data')}</span>
     </div>
   );
 
   const StatBlock = ({ title, value, icon: Icon, colorClass, data }: any) => (
-    <Card variant="industrial" className="flex flex-col gap-4 relative overflow-hidden group">
+    <Card variant="default" className="flex flex-col gap-4 relative overflow-hidden group">
       <div className="flex justify-between items-start z-10">
         <div>
-          <p className="text-slate-500 text-[10px] font-technical font-bold uppercase tracking-widest mb-1">{title}</p>
-          <p className={cn("text-2xl font-technical font-bold tracking-tighter", colorClass)}>
+          <p className="text-muted text-[10px] font-sans font-medium uppercase tracking-wider mb-1">{title}</p>
+          <p className="text-2xl font-sans font-semibold tracking-tight text-ink">
             {value}
           </p>
         </div>
-        <div className={cn("p-2 bg-slate-950 border border-slate-800", colorClass)}>
+        <div className={cn("p-2 bg-surface-soft border border-hairline rounded-lg", colorClass)}>
           <Icon size={16} />
         </div>
       </div>
       
       {/* Sparkline integration */}
-      <div className="h-10 w-full opacity-50 group-hover:opacity-100 transition-opacity">
+      <div className="h-10 w-full opacity-60 group-hover:opacity-100 transition-opacity">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <Area 
@@ -94,7 +94,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               dataKey="val" 
               stroke="currentColor" 
               fill="currentColor" 
-              fillOpacity={0.1} 
+              fillOpacity={0.05} 
               strokeWidth={1.5}
               className={colorClass}
             />
@@ -112,13 +112,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* System Status Banner */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/30 border border-slate-800 text-[9px] font-technical text-slate-500 uppercase">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-surface-soft border border-hairline text-xs font-sans text-muted rounded-xl">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5"><Zap size={10} className="text-primary" /> {t('system_ready')}</span>
-          <span className="flex items-center gap-1.5"><Cpu size={10} className="text-secondary" /> {t('synchronized')}</span>
+          <span className="flex items-center gap-1.5"><Zap size={12} className="text-primary" /> {t('system_ready')}</span>
+          <span className="flex items-center gap-1.5"><Cpu size={12} className="text-green" /> {t('synchronized')}</span>
         </div>
         <div className="flex items-center gap-2">
-            {t('operating_label')}<span className="text-white">00:42:15</span>
+            {t('operating_label')}<span className="text-ink font-semibold">00:42:15</span>
         </div>
       </div>
 
@@ -134,14 +134,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           title={t('net_profit')}
           value={`${settings.currencySymbol}${totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={DollarSign}
-          colorClass="text-secondary"
+          colorClass="text-green"
           data={last5Profit}
         />
         <StatBlock
           title={t('total_projects')}
           value={totalPrints.toString().padStart(2, '0')}
           icon={Box}
-          colorClass="text-white"
+          colorClass="text-muted"
           data={last5Prints}
         />
       </div>
@@ -150,16 +150,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chart Section */}
-        <Card variant="industrial" className="lg:col-span-2 flex flex-col p-6 min-h-[400px]">
+        <Card variant="default" className="lg:col-span-2 flex flex-col p-6 min-h-[400px]">
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                <Activity size={14} className="text-primary" /> {t('financial_chart')}
+              <h3 className="text-sm font-sans font-medium text-ink flex items-center gap-2">
+                <Activity size={16} className="text-primary" /> {t('financial_chart')}
               </h3>
-              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">{t('production_metrics', { currency: settings.currencySymbol })}</p>
+              <p className="text-xs font-sans text-muted mt-1">{t('production_metrics', { currency: settings.currencySymbol })}</p>
             </div>
             <div className="flex gap-2">
-                <div className="px-2 py-1 bg-slate-950 border border-slate-800 text-[9px] font-technical text-slate-400 uppercase">{t('last_5')}</div>
+                <div className="px-3 py-1 bg-surface-soft border border-hairline text-xs font-sans text-muted rounded-full">{t('last_5')}</div>
             </div>
           </div>
 
@@ -167,25 +167,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div className="flex-1 w-full min-h-0">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--color-hairline)" />
                   <XAxis
                     dataKey="name"
-                    stroke="#475569"
-                    tick={{ fontSize: 9, fontFamily: 'IBM Plex Mono', fontWeight: 600 }}
+                    stroke="var(--color-muted)"
+                    tick={{ fontSize: 10, fontFamily: 'Outfit, Roboto, sans-serif', fontWeight: 500 }}
                     axisLine={false}
                     tickLine={false}
                     dy={10}
                   />
                   <YAxis
-                    stroke="#475569"
-                    tick={{ fontSize: 9, fontFamily: 'IBM Plex Mono', fontWeight: 600 }}
+                    stroke="var(--color-muted)"
+                    tick={{ fontSize: 10, fontFamily: 'Outfit, Roboto, sans-serif', fontWeight: 500 }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '0px', fontSize: '10px', fontFamily: 'IBM Plex Mono', color: '#F8FAFC' }}
-                    itemStyle={{ padding: '0px', color: '#F8FAFC' }}
-                    cursor={{ stroke: '#FF5C00', strokeWidth: 1 }}
+                    contentStyle={{ backgroundColor: 'var(--color-surface-elevated)', border: '1px solid var(--color-hairline)', borderRadius: '8px', fontSize: '12px', fontFamily: 'Outfit, Roboto, sans-serif', color: 'var(--color-ink)' }}
+                    itemStyle={{ padding: '0px', color: 'var(--color-ink)' }}
+                    cursor={{ stroke: 'var(--color-primary)', strokeWidth: 1 }}
                     formatter={(value: number) => settings.currencySymbol + ' ' + value.toFixed(2)}
                   />
                   <Legend
@@ -193,36 +193,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     align="right"
                     iconType="rect"
                     iconSize={10}
-                    wrapperStyle={{ paddingBottom: '30px', fontSize: '9px', fontFamily: 'IBM Plex Mono', textTransform: 'uppercase', color: '#64748B' }}
+                    wrapperStyle={{ paddingBottom: '30px', fontSize: '11px', fontFamily: 'Outfit, Roboto, sans-serif', textTransform: 'uppercase', color: 'var(--color-muted)' }}
                   />
 
-                  <Line type="stepAfter" dataKey={faturamentoLabel} stroke="#FF5C00" strokeWidth={2} dot={{ r: 3, stroke: '#FF5C00', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
-                  <Line type="stepAfter" dataKey={lucroLabel} stroke="#00E0FF" strokeWidth={2} dot={{ r: 3, stroke: '#00E0FF', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
-                  <Line type="stepAfter" dataKey={gastoLabel} stroke="#475569" strokeWidth={2} dot={{ r: 3, stroke: '#475569', strokeWidth: 2, fill: '#020617' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey={faturamentoLabel} stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, stroke: 'var(--color-primary)', strokeWidth: 2, fill: 'var(--color-canvas)' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey={lucroLabel} stroke="var(--color-green)" strokeWidth={2} dot={{ r: 3, stroke: 'var(--color-green)', strokeWidth: 2, fill: 'var(--color-canvas)' }} activeDot={{ r: 5 }} />
+                  <Line type="stepAfter" dataKey={gastoLabel} stroke="var(--color-red)" strokeWidth={2} dot={{ r: 3, stroke: 'var(--color-red)', strokeWidth: 2, fill: 'var(--color-canvas)' }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center flex-1 border border-dashed border-slate-800 text-slate-600">
+            <div className="flex flex-col items-center justify-center flex-1 border border-dashed border-hairline text-muted rounded-xl">
               <Box size={24} className="mb-3 opacity-30" />
-              <p className="text-[10px] font-technical uppercase italic">{t('no_projects_yet')}</p>
+              <p className="text-xs font-sans uppercase italic">{t('no_projects_yet')}</p>
             </div>
           )}
         </Card>
 
         {/* Side: Status Panel */}
-        <Card variant="industrial" className="flex flex-col p-0 overflow-hidden border-l-0 lg:border-l border-slate-800">
-          <div className="p-6 pb-3 bg-slate-950/50 border-b border-slate-800 space-y-3">
+        <Card variant="default" className="flex flex-col p-0 overflow-hidden border border-hairline">
+          <div className="p-6 pb-3 bg-surface-soft border-b border-hairline space-y-3">
             <div>
-              <h3 className="text-xs font-technical font-bold text-white uppercase tracking-widest">{t('projects_by_status')}</h3>
-              <p className="text-[10px] font-technical text-slate-500 uppercase mt-1">{t('filter_by_production_phase')}</p>
+              <h3 className="text-sm font-sans font-medium text-ink">{t('projects_by_status')}</h3>
+              <p className="text-xs font-sans text-muted mt-1">{t('filter_by_production_phase')}</p>
             </div>
             {/* Filter Dropdown */}
             <div className="relative">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
-                className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer"
+                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-lg cursor-pointer"
               >
                 <option value="all">{t('all_status_option')}</option>
                 <option value="aguardando">{t('status_waiting_option')}</option>
@@ -230,7 +230,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <option value="concluido">{t('status_completed_option')}</option>
                 <option value="cancelado">{t('status_cancelled_option')}</option>
               </select>
-              <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500" />
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted" />
             </div>
           </div>
 
@@ -241,10 +241,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             ).slice(0, 4);
 
             const STATUS_COLORS: Record<string, string> = {
-              aguardando:  'text-amber-400',
-              em_producao: 'text-cyan-400',
-              concluido:   'text-emerald-400',
-              cancelado:   'text-red-400',
+              aguardando:  'text-yellow',
+              em_producao: 'text-primary',
+              concluido:   'text-green',
+              cancelado:   'text-red',
             };
             const STATUS_LABELS: Record<string, string> = {
               aguardando:  t('status_waiting'),
@@ -256,11 +256,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             return (
               <div className="overflow-y-auto custom-scrollbar flex-1">
                 {filteredFolders.length === 0 ? (
-                  <div className="p-8 text-center text-slate-600">
-                    <p className="text-[9px] font-technical uppercase">{t('no_projects_this_status')}</p>
+                  <div className="p-8 text-center text-muted">
+                    <p className="text-xs font-sans uppercase">{t('no_projects_this_status')}</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-800/50">
+                  <div className="divide-y divide-hairline">
                     {filteredFolders.map(folder => {
                       const st = folder.status || 'aguardando';
                       const folderProjects = projects.filter(prj => prj.folderId === folder.id);
@@ -269,25 +269,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       return (
                         <div
                           key={folder.id}
-                          className="flex justify-between items-center p-4 hover:bg-slate-900 group transition-colors cursor-pointer"
+                          className="flex justify-between items-center p-4 hover:bg-surface-soft group transition-colors cursor-pointer"
                           onClick={() => onNavigate('history')}
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-500 group-hover:border-primary group-hover:text-primary transition-colors shrink-0">
+                            <div className="w-8 h-8 bg-surface-soft border border-hairline rounded-lg flex items-center justify-center text-muted group-hover:border-primary group-hover:text-primary transition-colors shrink-0">
                               <Box size={14} />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[11px] font-technical font-bold text-slate-200 group-hover:text-white transition-colors uppercase truncate">{folder.name}</p>
-                              <p className={cn('text-[8px] font-technical font-black uppercase mt-0.5', STATUS_COLORS[st])}>
+                              <p className="text-xs font-sans font-medium text-ink group-hover:text-primary transition-colors truncate">{folder.name}</p>
+                              <p className={cn('text-[10px] font-sans font-semibold uppercase mt-0.5', STATUS_COLORS[st])}>
                                 {STATUS_LABELS[st]}
                               </p>
                             </div>
                           </div>
                           <div className="text-right shrink-0 ml-2">
-                            <p className="text-[10px] font-technical font-bold text-primary">
+                            <p className="text-xs font-sans font-semibold text-primary">
                               +{settings.currencySymbol}{folderTotal.toFixed(2)}
                             </p>
-                            <p className="text-[8px] font-technical text-slate-600 uppercase mt-0.5">{format(new Date(folder.createdAt), "yy.MM.dd")}</p>
+                            <p className="text-[10px] font-sans text-muted mt-0.5">{format(new Date(folder.createdAt), "yyyy-MM-dd")}</p>
                           </div>
                         </div>
                       );
@@ -299,7 +299,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           })()}
 
           <button
-            className="w-full p-3 bg-slate-950 border-t border-slate-800 text-[10px] font-technical font-bold text-slate-500 hover:text-white transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-surface-soft border-t border-hairline text-xs font-sans font-medium text-primary hover:text-primary-hover hover:bg-surface-strong transition-colors flex items-center justify-center gap-2"
             onClick={() => onNavigate('history')}
           >
             {t('view_full_history')} <TrendingUp size={12} />
@@ -308,4 +308,4 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </div >
     </div >
   );
-};
+};

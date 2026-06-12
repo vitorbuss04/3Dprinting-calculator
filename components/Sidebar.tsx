@@ -41,41 +41,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <aside className={cn(
-                "fixed md:static inset-y-0 left-0 z-50 bg-slate-950 border-r border-slate-900 transform transition-all duration-300 ease-in-out flex flex-col",
+                "fixed md:static inset-y-0 left-0 z-50 bg-canvas border-r border-hairline transform transition-all duration-300 ease-in-out flex flex-col",
                 isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
                 isCollapsed ? 'md:w-16' : 'w-64'
             )}>
                 {/* Toggle Button (Desktop Only) */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="hidden md:flex absolute -right-3 top-20 w-6 h-6 bg-slate-950 border border-slate-800 items-center justify-center text-slate-600 hover:text-primary z-50 transition-all active:bg-slate-900 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+                    className="hidden md:flex absolute -right-3 top-20 w-6 h-6 bg-canvas border border-hairline rounded-full items-center justify-center text-muted hover:text-primary z-50 transition-all active:bg-surface-soft shadow-sm"
                 >
                     <ChevronLeft size={10} className={cn("transition-transform duration-300", isCollapsed && "rotate-180")} />
                 </button>
 
                 {/* Brand Unit */}
                 <div className={cn(
-                    "h-16 flex items-center border-b border-slate-900 transition-all duration-300 bg-slate-900/10",
+                    "h-16 flex items-center border-b border-hairline transition-all duration-300",
                     isCollapsed ? "justify-center" : "px-6"
                 )}>
-                    <div className="w-8 h-8 shrink-0 flex items-center justify-center border-2 border-primary relative group">
-                        <span className="font-technical font-black text-xs text-white">3DP</span>
-                        <div className="absolute top-0 right-0 w-1 h-1 bg-primary" />
-                        <div className="absolute bottom-0 left-0 w-1 h-1 bg-primary" />
+                    <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-primary rounded-lg text-white font-sans font-bold text-xs">
+                        3D
                     </div>
 
                     {!isCollapsed && (
-                        <div className="ml-4 overflow-hidden">
-                            <span className="block font-technical font-black text-sm tracking-[0.2em] text-white whitespace-nowrap">
-                                {t('gestao_3d', 'GESTÃO 3D')}
+                        <div className="ml-3 overflow-hidden">
+                            <span className="block font-sans font-bold text-sm tracking-wide text-ink whitespace-nowrap">
+                                {t('gestao_3d', 'Gestão 3D')}
                             </span>
-                            <span className="block font-technical font-bold text-[8px] tracking-widest text-slate-600 uppercase mt-0.5">{t('control_panel')}</span>
+                            <span className="block font-sans text-[10px] text-muted tracking-wider mt-0.5">{t('control_panel')}</span>
                         </div>
                     )}
                 </div>
 
                 {/* Navigation Hub */}
-                <nav className="p-3 space-y-1.5 flex-1 overflow-y-auto custom-scrollbar mt-4">
+                <nav className="px-3 py-4 space-y-1 flex-1 overflow-y-auto mt-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = currentView === item.id;
@@ -87,28 +85,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     onClose();
                                 }}
                                 className={cn(
-                                    "w-full flex items-center py-3 transition-all duration-150 relative group whitespace-nowrap rounded-none",
-                                    isCollapsed ? "justify-center" : "gap-3 px-3",
+                                    "w-full flex items-center py-2.5 transition-all duration-150 relative group whitespace-nowrap rounded-xl",
+                                    isCollapsed ? "justify-center" : "gap-3 px-4",
                                     isActive
-                                        ? "text-white bg-slate-900/50 border border-slate-800 shadow-[inset_0_0_10px_rgba(255,92,0,0.03)]"
-                                        : "text-slate-600 hover:text-slate-300 hover:bg-slate-900/20"
+                                        ? "text-primary bg-primary-soft"
+                                        : "text-muted hover:text-ink hover:bg-surface-strong"
                                 )}
                                 title={isCollapsed ? item.label : undefined}
                             >
-                                {isActive && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary shadow-[0_0_10px_rgba(255,92,0,0.5)]" />
-                                )}
                                 <Icon
-                                    size={16}
+                                    size={18}
                                     className={cn(
                                         "relative z-10 transition-colors shrink-0",
-                                        isActive ? "text-primary" : "text-slate-700 group-hover:text-slate-500"
+                                        isActive ? "text-primary" : "text-muted group-hover:text-ink"
                                     )}
                                 />
                                 {!isCollapsed && (
                                     <span className={cn(
-                                        "relative z-10 font-technical text-[10px] font-black tracking-[0.15em] transition-all",
-                                        isActive ? "text-white" : "text-slate-600 group-hover:text-slate-400"
+                                        "relative z-10 font-sans text-sm font-medium transition-all",
+                                        isActive ? "text-primary" : "text-muted group-hover:text-ink"
                                     )}>
                                         {item.label}
                                     </span>
@@ -119,41 +114,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </nav>
 
                 {/* Footer Utility */}
-                <div className="p-4 border-t border-slate-900 space-y-4 bg-slate-900/10">
+                <div className="p-4 border-t border-hairline space-y-3">
                     {!isCollapsed && (
-                        <div className="p-3 border border-slate-800 bg-slate-950/50 space-y-2">
+                        <div className="p-3 border border-hairline bg-surface-soft rounded-xl space-y-2">
                              <div className="flex items-center justify-between">
-                                <span className="text-[8px] font-technical font-black text-slate-700 uppercase tracking-widest">{t('system_status')}</span>
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+                                <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('system_status')}</span>
+                                <div className="w-2.5 h-2.5 rounded-full bg-green/20 flex items-center justify-center">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green" />
+                                </div>
                              </div>
-                             <div className="h-1 bg-slate-900 w-full">
-                                <div className="h-full bg-primary/20 w-[64%]" />
+                             <div className="h-1.5 bg-surface-strong w-full rounded-full overflow-hidden">
+                                <div className="h-full bg-primary/20 w-[64%] rounded-full" />
                              </div>
-                             <p className="text-[8px] font-technical text-slate-500 uppercase tracking-wider leading-tight">{t('operations_count')}</p>
+                             <p className="text-[10px] font-sans text-muted leading-tight">{t('operations_count')}</p>
                         </div>
                     )}
 
                     <button
                         onClick={onLogout}
                         className={cn(
-                            "w-full flex items-center py-2.5 transition-all duration-200 group whitespace-nowrap border border-transparent hover:border-red-900/30 hover:bg-red-950/20",
-                            isCollapsed ? "justify-center" : "gap-3 px-3"
+                            "w-full flex items-center py-2.5 transition-all duration-200 group whitespace-nowrap rounded-xl border border-transparent hover:bg-red/10",
+                            isCollapsed ? "justify-center" : "gap-3 px-4"
                         )}
                         title={isCollapsed ? t('logout') : undefined}
                     >
-                        <LogOut size={14} className="text-slate-700 group-hover:text-red-500 shrink-0" />
+                        <LogOut size={16} className="text-muted group-hover:text-red shrink-0" />
                         {!isCollapsed && (
-                            <span className="font-technical text-[10px] font-black tracking-widest text-slate-700 group-hover:text-red-500 uppercase">
+                            <span className="font-sans text-sm font-medium text-muted group-hover:text-red">
                                 {t('logout')}
                             </span>
                         )}
                     </button>
                 </div>
-                
-                {/* Visual Accent */}
-                {!isCollapsed && (
-                   <div className="h-1 bg-gradient-to-r from-transparent via-slate-900 to-transparent opacity-50" />
-                )}
             </aside>
         </>
     );

@@ -9,11 +9,11 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 const getVariantStyles = (variant: 'industrial' | 'outline' | 'default') => {
     switch (variant) {
         case 'default':
-            return "bg-slate-900 border border-slate-800";
+            return "bg-surface-card border border-hairline shadow-sm";
         case 'industrial':
-            return "bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-colors duration-200";
+            return "bg-surface-card border border-hairline hover:border-border-strong hover:shadow-md transition-all duration-200 shadow-sm";
         case 'outline':
-            return "bg-transparent border border-slate-800";
+            return "bg-transparent border border-hairline";
         default:
             return "";
     }
@@ -33,7 +33,7 @@ export const Card: React.FC<CardProps> = ({
     return (
         <div
             className={cn(
-                "rounded-none p-6",
+                "rounded-2xl p-6",
                 getVariantStyles(variant),
                 className
             )}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Project, ProjectStatus } from '../types';
-import { X, Printer, PackageOpen, Clock, Scaling, Activity, Hammer, Zap, Coins, Calculator, Layers, Tag, Calendar, PiggyBank, Briefcase, FileCode, CircleDot } from 'lucide-react';
+import { X, Printer, PackageOpen, Clock, Scaling, Activity, Hammer, Zap, Calculator, Layers, Tag, Calendar, PiggyBank, Briefcase, FileCode, CircleDot } from 'lucide-react';
 import { StorageService } from '../services/storage';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
@@ -36,17 +36,17 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
         const Icon = iconData?.icon;
         return (
             <div className={cn(
-                "flex items-center justify-between py-2 border-b border-slate-900 transition-colors hover:bg-slate-900/40 px-2",
-                isTotal && "border-t-2 border-b-0 border-primary/30 pt-4 mt-2 bg-primary/5",
-                isSub && "pl-8 text-[10px]"
+                "flex items-center justify-between py-2.5 border-b border-hairline transition-colors hover:bg-surface-soft px-3 rounded-lg",
+                isTotal && "border-t border-hairline border-b-0 pt-4 mt-3 bg-primary-soft/30",
+                isSub && "pl-8 text-[11px]"
             )}>
                 <div className="flex items-center gap-3">
                     {Icon && (
-                        <Icon size={12} className={cn("shrink-0", iconData?.color || "text-slate-500")} />
+                        <Icon size={14} className={cn("shrink-0", iconData?.color || "text-muted")} />
                     )}
-                    <span className={cn("font-technical uppercase tracking-widest text-[10px]", isTotal ? 'font-black text-white' : 'text-slate-500 font-bold')}>{label}</span>
+                    <span className={cn("font-sans text-xs", isTotal ? 'font-semibold text-ink' : 'text-muted')}>{label}</span>
                 </div>
-                <span className={cn("font-technical font-black", isTotal ? 'text-primary text-base' : 'text-white text-[11px]')}>
+                <span className={cn("font-sans font-semibold", isTotal ? 'text-primary text-base' : 'text-ink text-xs')}>
                     {typeof value === 'number' ? `${currencySymbol} ${value.toFixed(2)}` : value}
                 </span>
             </div>
@@ -56,109 +56,98 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
     if (typeof document === 'undefined') return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-slate-950 w-full max-w-3xl flex flex-col overflow-hidden border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-300 relative">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-canvas w-full max-w-3xl flex flex-col overflow-hidden border border-hairline rounded-2xl shadow-xl animate-in zoom-in-95 duration-300 relative">
                 
-                {/* Decorative Elements */}
-                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary" />
-                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-primary" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-primary" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary" />
-
                 {/* Header */}
-                <div className="border-b border-slate-800 p-6 flex justify-between items-start bg-slate-900/30">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 sm:gap-6">
-                            <div className="flex items-center gap-2 px-2 py-1 bg-slate-950 border border-slate-800">
-                                <Calendar size={10} className="text-primary" />
-                                <span className="text-[9px] font-technical font-black text-slate-400 uppercase tracking-widest">{new Date(project.date).toLocaleDateString()}</span>
+                <div className="border-b border-hairline p-6 flex justify-between items-start bg-surface-soft">
+                    <div className="space-y-3 flex-1 min-w-0 pr-6">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-canvas border border-hairline rounded-full text-muted">
+                                <Calendar size={12} className="text-primary" />
+                                <span className="text-[10px] font-sans font-medium">{new Date(project.date).toLocaleDateString()}</span>
                             </div>
-                            <div className="flex items-center gap-2 px-2 py-1 bg-slate-950 border border-slate-800">
-                                <Clock size={10} className="text-secondary" />
-                                <span className="text-[9px] font-technical font-black text-slate-400 uppercase tracking-widest">{new Date(project.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-canvas border border-hairline rounded-full text-muted">
+                                <Clock size={12} className="text-green" />
+                                <span className="text-[10px] font-sans font-medium">{new Date(project.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
-                            <div className="hidden sm:flex items-center gap-2 px-2 py-1 bg-slate-950 border border-slate-800">
-                                <FileCode size={10} className="text-slate-500" />
-                                <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest">ID: {project.id.substring(0, 8)}</span>
+                            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 bg-canvas border border-hairline rounded-full text-muted">
+                                <FileCode size={12} />
+                                <span className="text-[10px] font-sans font-medium">ID: {project.id.substring(0, 8)}</span>
                             </div>
                             {(() => {
                               const STATUS_CFG: Record<string, { label: string; cls: string }> = {
-                                aguardando:  { label: t('status_waiting'),  cls: 'border-amber-500/50 text-amber-400 bg-amber-500/10' },
-                                em_producao: { label: t('status_production'), cls: 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10' },
-                                concluido:   { label: t('status_completed'),   cls: 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' },
-                                cancelado:   { label: t('status_cancelled'),   cls: 'border-red-500/50 text-red-400 bg-red-500/10' },
+                                aguardando:  { label: t('status_waiting'),  cls: 'border-yellow/20 text-yellow bg-yellow/5' },
+                                em_producao: { label: t('status_production'), cls: 'border-primary/20 text-primary bg-primary-soft' },
+                                concluido:   { label: t('status_completed'),   cls: 'border-green/20 text-green bg-green/5' },
+                                cancelado:   { label: t('status_cancelled'),   cls: 'border-red/20 text-red bg-red/5' },
                               };
                               const s = folderStatus || 'aguardando';
                               const cfg = STATUS_CFG[s] || STATUS_CFG['aguardando'];
                               return (
-                                <div className={cn('flex items-center gap-1.5 px-2 py-1 border text-[9px] font-technical font-black uppercase tracking-widest', cfg.cls)}>
-                                  <CircleDot size={9} />
+                                <div className={cn('flex items-center gap-1.5 px-2.5 py-0.5 border text-[10px] font-sans font-medium rounded-full uppercase tracking-wider shadow-sm', cfg.cls)}>
+                                  <CircleDot size={10} />
                                   {cfg.label}
                                 </div>
                               );
                             })()}
                         </div>
-                        <h2 className="text-xl font-technical font-extrabold text-white leading-tight tracking-[0.15em] uppercase">{project.name}</h2>
+                        <h2 className="text-lg font-sans font-semibold text-ink leading-tight truncate">{project.name}</h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center border border-slate-700 bg-slate-900 text-slate-500 hover:text-white hover:border-primary/50 transition-all duration-200"
+                        className="w-8 h-8 flex items-center justify-center border border-hairline bg-canvas rounded-full text-muted hover:text-ink hover:bg-surface-soft transition-all duration-150 shrink-0"
                     >
-                        <X size={18} />
+                        <X size={16} />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 bg-slate-950/50">
-
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 bg-canvas">
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border border-slate-800 overflow-hidden">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border border-hairline p-4 rounded-2xl bg-surface-soft">
                         <StatCard icon={Printer} label={t('printer_label')} value={printerName || project.printerId.substring(0, 8)} color="primary" />
-                        <StatCard icon={PackageOpen} label={t('material_label')} value={materialName || project.materialId.substring(0, 8)} color="secondary" />
+                        <StatCard icon={PackageOpen} label={t('material_label')} value={materialName || project.materialId.substring(0, 8)} color="green" />
                         <StatCard icon={Clock} label={t('print_time_label')} value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} color="primary" />
-                        <StatCard icon={Scaling} label={t('model_weight_label')} value={`${project.modelWeight}g`} color="secondary" />
+                        <StatCard icon={Scaling} label={t('model_weight_label')} value={`${project.modelWeight}g`} color="green" />
                     </div>
 
                     {/* Content Columns */}
-                    <div className="flex flex-col lg:flex-row gap-8">
-
+                    <div className="flex flex-col lg:flex-row gap-6">
                         {/* Financials Column */}
-                        <div className="flex-1 bg-slate-950 border border-slate-800 p-6 relative overflow-hidden">
-                            {/* Accent line */}
-                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                            
-                            <h3 className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                                <div className="w-1.5 h-1.5 bg-primary" /> {t('cost_analysis_label')}
+                        <div className="flex-1 bg-canvas border border-hairline rounded-2xl p-6 relative overflow-hidden">
+                            <h3 className="text-xs font-sans font-semibold text-ink uppercase tracking-wider flex items-center gap-2 mb-4">
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary" /> {t('cost_analysis_label')}
                             </h3>
                             <div className="space-y-0.5">
-                                <CostRow label={t('energy_cost_label')} value={project.result.energyCost} iconData={{ icon: Zap, color: 'text-amber-500' }} />
-                                <CostRow label={t('material_label')} value={project.result.materialCost} iconData={{ icon: PackageOpen, color: 'text-purple-500' }} />
-                                <CostRow label={t('depreciation_label')} value={project.result.depreciationCost} iconData={{ icon: Activity, color: 'text-slate-500' }} />
-                                <CostRow label={t('maintenance_label')} value={project.result.maintenanceCost} iconData={{ icon: Hammer, color: 'text-blue-500' }} />
-                                <CostRow label={t('labor_label')} value={project.result.laborCost} iconData={{ icon: Briefcase, color: 'text-indigo-500' }} />
+                                <CostRow label={t('energy_cost_label')} value={project.result.energyCost} iconData={{ icon: Zap, color: 'text-yellow' }} />
+                                <CostRow label={t('material_label')} value={project.result.materialCost} iconData={{ icon: PackageOpen, color: 'text-primary' }} />
+                                <CostRow label={t('depreciation_label')} value={project.result.depreciationCost} iconData={{ icon: Activity, color: 'text-muted' }} />
+                                <CostRow label={t('maintenance_label')} value={project.result.maintenanceCost} iconData={{ icon: Hammer, color: 'text-muted' }} />
+                                <CostRow label={t('labor_label')} value={project.result.laborCost} iconData={{ icon: Briefcase, color: 'text-muted' }} />
                                 {project.result.additionalCost > 0 && (
-                                    <CostRow label={t('additional_items')} value={project.result.additionalCost} iconData={{ icon: Layers, color: 'text-emerald-500' }} />
+                                    <CostRow label={t('additional_items')} value={project.result.additionalCost} iconData={{ icon: Layers, color: 'text-muted' }} />
                                 )}
 
-                                <div className="mt-4 border-t border-slate-800/50 pt-2" />
-                                <CostRow label={t('production_cost')} value={project.result.totalProductionCost} iconData={{ icon: Calculator, color: 'text-slate-400' }} />
+                                <div className="mt-4 border-t border-hairline pt-2" />
+                                <CostRow label={t('production_cost')} value={project.result.totalProductionCost} iconData={{ icon: Calculator, color: 'text-muted' }} />
 
                                 <CostRow label={t('final_price_label')} value={project.result.finalPrice} iconData={{ icon: Tag, color: 'text-primary' }} isTotal />
                                 
-                                <div className="flex justify-between items-center p-3 mt-4 bg-emerald-500/5 border border-emerald-500/20">
+                                <div className="flex justify-between items-center p-3 mt-4 bg-green/5 border border-green/20 rounded-xl">
                                     <div className="flex items-center gap-2">
-                                        <PiggyBank size={14} className="text-emerald-500" />
-                                        <span className="text-[10px] font-technical font-black text-emerald-500 uppercase tracking-widest">{t('projected_net_profit')}</span>
+                                        <PiggyBank size={16} className="text-green" />
+                                        <span className="text-xs font-sans font-medium text-green uppercase tracking-wider">{t('projected_net_profit')}</span>
                                     </div>
-                                    <span className="font-technical font-black text-emerald-500 text-lg">{currencySymbol} {project.result.profit.toFixed(2)}</span>
+                                    <span className="font-sans font-semibold text-green text-lg">{currencySymbol} {project.result.profit.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Parameters Column */}
                         <div className="flex-1 space-y-6">
-                            <div className="bg-slate-950 border border-slate-800 p-6">
-                                <h3 className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                                    <div className="w-1.5 h-1.5 bg-secondary" /> {t('part_parameters_label')}
+                            <div className="bg-canvas border border-hairline rounded-2xl p-6">
+                                <h3 className="text-xs font-sans font-semibold text-ink uppercase tracking-wider flex items-center gap-2 mb-4">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green" /> {t('part_parameters_label')}
                                 </h3>
                                 <div className="space-y-1">
                                     <ParameterRow label={t('failure_rate_label')} value={`${project.failureRate}%`} />
@@ -170,18 +159,18 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
 
                             {/* Additional items */}
                             {project.additionalItems && project.additionalItems.length > 0 && (
-                                <div className="bg-slate-950 border border-slate-800 p-6">
-                                    <h3 className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6">
-                                        <div className="w-1.5 h-1.5 bg-slate-500" /> {t('extra_components_label')}
+                                <div className="bg-canvas border border-hairline rounded-2xl p-6">
+                                    <h3 className="text-xs font-sans font-semibold text-ink uppercase tracking-wider flex items-center gap-2 mb-4">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-muted" /> {t('extra_components_label')}
                                     </h3>
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {project.additionalItems.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between border-b border-slate-900 pb-3 last:border-0 last:pb-0">
+                                            <div key={idx} className="flex justify-between border-b border-hairline pb-2.5 last:border-0 last:pb-0">
                                                 <div className="space-y-1">
-                                                    <span className="font-technical font-black text-white text-[10px] block uppercase truncate max-w-[140px]">{item.name}</span>
-                                                    <span className="text-[9px] font-technical font-bold text-slate-600 uppercase tracking-widest">{t('qty_label')}{item.quantity}</span>
+                                                    <span className="font-sans font-medium text-ink text-xs block truncate max-w-[140px]">{item.name}</span>
+                                                    <span className="text-[10px] font-sans text-muted uppercase tracking-wider">{t('qty_label')}{item.quantity}</span>
                                                 </div>
-                                                <span className="font-technical font-black text-slate-300 text-[11px]">{currencySymbol} {(item.price * item.quantity).toFixed(2)}</span>
+                                                <span className="font-sans font-semibold text-ink text-xs">{currencySymbol} {(item.price * item.quantity).toFixed(2)}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -192,15 +181,15 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-slate-800 p-6 flex justify-between items-center bg-slate-900/30">
+                <div className="border-t border-hairline p-6 flex justify-between items-center bg-surface-soft">
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                             <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest font-mono">{t('system_stable')}</span>
+                             <div className="w-2 h-2 rounded-full bg-green animate-pulse" />
+                             <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('system_stable')}</span>
                         </div>
-                        <span className="text-[9px] font-technical text-slate-700 uppercase tracking-[0.3em] hidden sm:block">{t('read_only_record')}</span>
+                        <span className="text-[10px] font-sans text-muted uppercase tracking-wider hidden sm:block">{t('read_only_record')}</span>
                     </div>
-                    <Button onClick={onClose} variant="ghost" className="px-8 h-10 border-slate-700 hover:bg-slate-800 text-slate-300 font-technical uppercase text-xs tracking-widest">
+                    <Button onClick={onClose} variant="ghost" className="px-6 h-10 text-xs font-sans font-medium">
                         {t('close_details_label')}
                     </Button>
                 </div>
@@ -210,12 +199,12 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
     );
 };
 
-const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: string, value: string, color: 'primary' | 'secondary' }) => {
+const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: string, value: string, color: 'primary' | 'green' }) => {
     return (
-        <div className="p-4 border-r last:border-r-0 border-slate-800 flex flex-col items-center justify-center text-center transition-colors hover:bg-slate-900/40">
-            <Icon size={16} className={cn("mb-3", color === 'primary' ? 'text-primary' : 'text-secondary')} />
-            <div className="text-[8px] font-technical font-black text-slate-600 uppercase tracking-[0.3em] mb-2">{label}</div>
-            <div className="text-[11px] font-technical font-black text-white truncate w-full px-1 uppercase" title={String(value)}>
+        <div className="p-4 flex flex-col items-center justify-center text-center rounded-xl bg-canvas border border-hairline">
+            <Icon size={16} className={cn("mb-2", color === 'primary' ? 'text-primary' : 'text-green')} />
+            <div className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider mb-1">{label}</div>
+            <div className="text-xs font-sans font-semibold text-ink truncate w-full px-1 uppercase" title={String(value)}>
                 {value}
             </div>
         </div>
@@ -223,8 +212,8 @@ const StatCard = ({ icon: Icon, label, value, color }: { icon: any, label: strin
 };
 
 const ParameterRow = ({ label, value }: { label: string, value: string }) => (
-    <div className="flex justify-between items-center p-2 border border-transparent hover:border-slate-800 transition-all">
-        <span className="text-[10px] font-technical font-black text-slate-500 uppercase tracking-widest">{label}</span>
-        <span className="font-technical font-black text-white text-[11px]">{value}</span>
+    <div className="flex justify-between items-center py-2 border-b border-hairline last:border-0">
+        <span className="text-xs font-sans text-muted">{label}</span>
+        <span className="font-sans font-semibold text-ink text-xs">{value}</span>
     </div>
 );

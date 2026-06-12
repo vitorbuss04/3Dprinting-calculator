@@ -9,6 +9,7 @@ import { History } from './components/History';
 import { Auth } from './components/Auth';
 import { Profile } from './components/Profile';
 import { AppLayout } from './components/AppLayout';
+import { Button } from './components/ui/Button';
 import { supabase } from './services/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 import { NotificationProvider } from './components/NotificationContext';
@@ -46,24 +47,27 @@ const App: React.FC = () => {
 
   const handleLogout = () => {
     toast((toastObj) => (
-      <div className="flex flex-col items-center gap-4 p-2">
-        <span className="font-bold text-gray-800">{t('confirm_logout')}</span>
-        <div className="flex gap-3">
-          <button
+      <div className="flex flex-col items-center gap-4 p-2 text-center">
+        <span className="font-sans font-semibold text-sm text-ink">{t('confirm_logout')}</span>
+        <div className="flex gap-2.5">
+          <Button
+            size="sm"
             onClick={async () => {
               await supabase.auth.signOut();
               toast.dismiss(toastObj.id);
             }}
-            className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors"
+            className="bg-red hover:bg-red/90 text-white border-none text-xs px-4 h-8"
           >
             {t('logout')}
-          </button>
-          <button
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
             onClick={() => toast.dismiss(toastObj.id)}
-            className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="text-xs px-4 h-8"
           >
             {t('cancel')}
-          </button>
+          </Button>
         </div>
       </div>
     ), {
@@ -86,8 +90,8 @@ const App: React.FC = () => {
 
   if (loadingSession) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-t-primary border-hairline"></div>
       </div>
     );
   }
@@ -119,3 +123,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

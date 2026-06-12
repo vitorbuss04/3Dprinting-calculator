@@ -36,27 +36,27 @@ export const Input: React.FC<InputProps> = ({
     return (
         <div className={cn("w-full space-y-1", containerClassName)}>
             {label && (
-                <label htmlFor={id} className="block text-[10px] font-technical font-bold uppercase tracking-widest text-slate-500 ml-0.5">
+                <label htmlFor={id} className="block text-xs font-sans font-medium text-muted ml-0.5">
                     {label}
                 </label>
             )}
             <div className="relative group">
                 {icon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-primary transition-colors">
                         {icon}
                     </div>
                 )}
                 <input
-                    id={id}
-                    className={cn(
-                        "w-full bg-slate-900 border border-slate-800 rounded-none px-4 py-2 outline-none transition-all duration-150",
-                        "font-technical text-sm",
-                        "focus:border-primary focus:bg-slate-800/50",
-                        "placeholder:text-slate-700 text-slate-200",
-                        icon && "pl-10",
-                        error && "border-red-500 focus:border-red-500",
-                        className
-                    )}
+                     id={id}
+                     className={cn(
+                         "w-full bg-canvas border border-hairline rounded-lg px-4 py-2.5 outline-none transition-all duration-150",
+                         "font-sans text-sm text-ink",
+                         "focus:border-primary focus:ring-1 focus:ring-primary focus:bg-canvas",
+                         "placeholder:text-muted-soft",
+                         icon && "pl-10",
+                         error && "border-red focus:border-red focus:ring-red",
+                         className
+                     )}
                     type={type}
                     value={value}
                     onChange={onChange}
@@ -76,7 +76,7 @@ export const Input: React.FC<InputProps> = ({
                     autoComplete={autoComplete}
                 />
             </div>
-            {error && <p className="text-[10px] font-technical text-red-500 mt-1">{error}</p>}
+            {error && <p className="text-xs font-sans text-red mt-1">{error}</p>}
         </div>
     );
 };

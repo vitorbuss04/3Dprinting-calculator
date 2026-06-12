@@ -3,7 +3,7 @@ import { Project, Printer, Material, GlobalSettings, ProjectFolder, ProjectStatu
 import { StorageService } from '../services/storage';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { Trash2, Check, X, Loader2, AlertTriangle, PackageOpen, Tag, Calendar, Scaling, PiggyBank, Briefcase, Layers, Clock, FolderOpen, FolderInput, Info, Search, Filter, ShieldAlert, Calculator } from 'lucide-react';
+import { Trash2, Loader2, PackageOpen, Tag, Layers, Clock, FolderOpen, FolderInput, Info, ChevronDown, Trash, ShieldAlert } from 'lucide-react';
 import { ProjectDetailsModal } from './ProjectDetailsModal';
 import toast from 'react-hot-toast';
 import { cn } from '../utils/cn';
@@ -133,7 +133,7 @@ export const History: React.FC = () => {
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
       <Loader2 className="animate-spin text-primary" size={32} />
-      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_history')}</span>
+      <span className="font-sans text-xs text-muted uppercase tracking-wider">{t('loading_history')}</span>
     </div>
   );
 
@@ -161,17 +161,17 @@ export const History: React.FC = () => {
   if (projects.length === 0 && Object.keys(folders).length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
-        <div className="w-16 h-16 border border-slate-800 flex items-center justify-center mb-6">
-          <FolderOpen size={24} className="text-slate-600" />
+        <div className="w-16 h-16 border border-hairline rounded-full flex items-center justify-center mb-6 text-muted">
+          <FolderOpen size={24} />
         </div>
-        <h2 className="text-sm font-technical font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{t('no_projects')}</h2>
-        <p className="text-[10px] font-technical text-slate-600 uppercase max-w-xs">{t('no_operational_data_desc')}</p>
+        <h2 className="text-sm font-sans font-semibold text-ink mb-2">{t('no_projects')}</h2>
+        <p className="text-xs font-sans text-muted max-w-xs">{t('no_operational_data_desc')}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-16 animate-in fade-in duration-500 pb-20">
+    <div className="space-y-12 animate-in fade-in duration-500 pb-20">
       {sortedFolderIds.map((folderId) => {
         const isUncategorized = folderId === 'uncategorized';
         const folderObj = isUncategorized ? null : Reflect.get(folders, folderId);
@@ -189,58 +189,59 @@ export const History: React.FC = () => {
 
         return (
           <div key={folderId} className="space-y-6">
-            {/* Mission Manifest Header */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-slate-800 pb-6 gap-6">
-              <div className="space-y-4">
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-hairline pb-4 gap-4">
+              <div className="space-y-2.5">
                 <div className="flex items-center gap-3">
-                  <div className={cn("p-2 border", isUncategorized ? "border-slate-700 text-slate-500" : "border-primary/50 text-primary bg-primary/5")}>
+                  <div className={cn("p-2 border rounded-xl", isUncategorized ? "border-hairline text-muted bg-surface-soft" : "border-primary/20 text-primary bg-primary-soft")}>
                     {isUncategorized ? <PackageOpen size={18} /> : <FolderOpen size={18} />}
                   </div>
-                  <h2 className="text-lg font-technical font-black text-white tracking-[0.1em] uppercase">{folderName}</h2>
+                  <h2 className="text-base font-sans font-semibold text-ink">{folderName}</h2>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-2 text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest bg-slate-900 px-2 py-1 border border-slate-800">
-                    <Layers size={10} />
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="flex items-center gap-1.5 text-xs font-sans text-muted bg-surface-soft px-3 py-1 rounded-full border border-hairline">
+                    <Layers size={12} />
                     {folderProjects.length} {t('records_count_suffix')}
                   </span>
                   {!isUncategorized && (
-                    <div className="flex items-center gap-4">
-                      <div className="w-48">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="w-40 relative">
                         <select
                           value={folderObj?.status || 'aguardando'}
                           onChange={(e) => handleFolderStatusChange(folderId, e.target.value as ProjectStatus)}
                           disabled={updatingStatusId === folderId}
-                          className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-1 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer disabled:opacity-50"
+                          className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-1.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-lg cursor-pointer disabled:opacity-50"
                         >
                           <option value="aguardando">⏳ {t('status_waiting')}</option>
                           <option value="em_producao">⚙️ {t('status_production')}</option>
                           <option value="concluido">✅ {t('status_completed')}</option>
                           <option value="cancelado">✖ {t('status_cancelled')}</option>
                         </select>
+                        <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted" />
                       </div>
                       <StatusBadge status={folderObj?.status || 'aguardando'} />
                       <button
                         onClick={() => setDeletingFolderId(folderId)}
-                        className="text-[10px] font-technical font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5"
+                        className="text-xs font-sans font-medium text-red hover:text-red/80 transition-colors flex items-center gap-1"
                       >
-                        <Trash2 size={10} /> {t('delete_folder')}
+                        <Trash2 size={12} /> {t('delete_folder')}
                       </button>
                     </div>
                   )}
                 </div>
 
-                {/* PURGE OVERLAY */}
+                {/* DELETE CONFIRM OVERLAY */}
                 {deletingFolderId === folderId && (
-                  <div className="p-4 border border-red-500/30 bg-red-500/5 mt-4 max-w-md animate-in slide-in-from-left-4">
+                  <div className="p-4 border border-red/20 bg-red/5 rounded-2xl mt-4 max-w-md animate-in slide-in-from-left-4">
                     <div className="flex items-start gap-4">
-                      <ShieldAlert className="text-red-500 shrink-0" size={16} />
+                      <ShieldAlert className="text-red shrink-0" size={18} />
                       <div>
-                        <p className="font-technical text-[10px] font-black text-red-500 uppercase tracking-widest">{t('confirm_deletion')}</p>
-                        <p className="text-[10px] font-technical text-slate-400 uppercase mt-1 mb-3">{t('folder_delete_warning')}</p>
+                        <p className="font-sans text-sm font-semibold text-red">{t('confirm_deletion')}</p>
+                        <p className="text-xs font-sans text-muted mt-1 mb-3">{t('folder_delete_warning')}</p>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" className="h-7 text-[9px] border-slate-700 hover:bg-slate-800 font-technical uppercase" onClick={() => setDeletingFolderId(null)}>{t('cancel')}</Button>
-                          <Button size="sm" variant="primary" className="h-7 text-[9px] bg-red-600 hover:bg-red-700 font-technical uppercase border-none" onClick={() => handleDeleteFolder(folderId)}>{t('execute')}</Button>
+                          <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setDeletingFolderId(null)}>{t('cancel')}</Button>
+                          <Button size="sm" className="h-8 text-xs bg-red hover:bg-red/90 text-white" onClick={() => handleDeleteFolder(folderId)}>{t('execute')}</Button>
                         </div>
                       </div>
                     </div>
@@ -249,34 +250,34 @@ export const History: React.FC = () => {
               </div>
 
               {folderProjects.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-950 p-4 border border-slate-800">
-                  <div className="px-4 border-l border-primary/30">
-                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_time')}</span>
-                    <span className="font-technical font-black text-white text-base flex items-center gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-surface-soft p-4 border border-hairline rounded-2xl">
+                  <div className="px-4 border-l-2 border-primary">
+                    <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-0.5">{t('total_time')}</span>
+                    <span className="font-sans font-semibold text-ink text-sm flex items-center gap-1">
                       <Clock size={12} className="text-primary" />
                       {Math.floor(folderTotalTime)}h {Math.round((folderTotalTime % 1) * 60)}m
                     </span>
                   </div>
-                  <div className="px-4 border-l border-red-500/30">
-                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_cost')}</span>
-                    <span className="font-technical font-black text-red-400 text-base">{currency} {folderTotalProdCost.toFixed(2)}</span>
+                  <div className="px-4 border-l-2 border-red">
+                    <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-0.5">{t('total_cost')}</span>
+                    <span className="font-sans font-semibold text-red text-sm">{currency} {folderTotalProdCost.toFixed(2)}</span>
                   </div>
-                  <div className="px-4 border-l border-emerald-500/30">
-                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_profit')}</span>
-                    <span className="font-technical font-black text-emerald-500 text-base">{currency} {folderTotalProfit.toFixed(2)}</span>
+                  <div className="px-4 border-l-2 border-green">
+                    <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-0.5">{t('total_profit')}</span>
+                    <span className="font-sans font-semibold text-green text-sm">{currency} {folderTotalProfit.toFixed(2)}</span>
                   </div>
-                  <div className="px-4 border-l border-indigo-500/30 border-t sm:border-t-0 pt-4 sm:pt-0">
-                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_value')}</span>
-                    <span className="font-technical font-black text-white text-xl">{currency} {folderTotalCost.toFixed(2)}</span>
+                  <div className="px-4 border-l-2 border-primary-hover">
+                    <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-0.5">{t('total_value')}</span>
+                    <span className="font-sans font-semibold text-ink text-sm">{currency} {folderTotalCost.toFixed(2)}</span>
                   </div>
                 </div>
               )}
             </div>
 
             {folderProjects.length === 0 ? (
-              <div className="p-12 border border-dashed border-slate-800 flex flex-col items-center justify-center">
-                <FolderOpen size={24} className="text-slate-800 mb-2" />
-                <p className="text-[10px] font-technical text-slate-700 uppercase tracking-widest">{t('folder_without_projects')}</p>
+              <div className="p-8 border border-dashed border-hairline rounded-2xl flex flex-col items-center justify-center text-muted">
+                <FolderOpen size={24} className="mb-2 opacity-50" />
+                <p className="text-xs font-sans italic">{t('folder_without_projects')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -319,25 +320,25 @@ export const History: React.FC = () => {
 };
 
 const HistoryDetail = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color?: string }) => (
-  <div className="flex items-center justify-between p-2 border border-slate-900 bg-slate-900/30">
+  <div className="flex items-center justify-between p-2.5 border border-hairline bg-surface-soft rounded-lg">
     <div className="flex items-center gap-2">
-      <div className="text-slate-600">{icon}</div>
-      <span className="text-[9px] font-technical font-black text-slate-500 uppercase tracking-widest">{label}</span>
+      <div className="text-muted">{icon}</div>
+      <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{label}</span>
     </div>
-    <span className={cn("text-[10px] font-technical font-black text-slate-200 truncate max-w-[140px]", color)}>{value}</span>
+    <span className={cn("text-xs font-sans font-medium text-ink truncate max-w-[140px]", color)}>{value}</span>
   </div>
 );
 
 const getStatusConfig = (status: string, t: any) => {
   switch (status) {
     case 'em_producao':
-      return { label: t('status_production'), color: 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10' };
+      return { label: t('status_production'), color: 'border-primary/20 text-primary bg-primary-soft' };
     case 'concluido':
-      return { label: t('status_completed'), color: 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10' };
+      return { label: t('status_completed'), color: 'border-green/20 text-green bg-green/5' };
     case 'cancelado':
-      return { label: t('status_cancelled'), color: 'border-red-500/50 text-red-400 bg-red-500/10' };
+      return { label: t('status_cancelled'), color: 'border-red/20 text-red bg-red/5' };
     default:
-      return { label: t('status_waiting'), color: 'border-amber-500/50 text-amber-400 bg-amber-500/10' };
+      return { label: t('status_waiting'), color: 'border-yellow/20 text-yellow bg-yellow/5' };
   }
 };
 
@@ -345,25 +346,25 @@ const StatusBadge = ({ status }: { status: string }) => {
   const { t } = useTranslation();
   const cfg = getStatusConfig(status, t);
   return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 border text-[8px] font-technical font-black uppercase tracking-widest shrink-0', cfg.color)}>
+    <span className={cn('inline-flex items-center px-2.5 py-0.5 border text-[10px] font-sans font-medium rounded-full uppercase tracking-wider shrink-0 shadow-sm', cfg.color)}>
       {cfg.label}
     </span>
   );
 };
 
 const EditableHistoryDetail = ({ icon, label, value, color, currency, onChange }: { icon: React.ReactNode; label: string; value: string; color?: string; currency: string; onChange: (val: string) => void }) => (
-  <div className="flex items-center justify-between p-2 border border-slate-900 bg-slate-900/30">
+  <div className="flex items-center justify-between p-2.5 border border-hairline bg-surface-soft rounded-lg">
     <div className="flex items-center gap-2">
-      <div className="text-slate-600">{icon}</div>
-      <span className="text-[9px] font-technical font-black text-slate-500 uppercase tracking-widest">{label}</span>
+      <div className="text-muted">{icon}</div>
+      <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{label}</span>
     </div>
     <div className="flex items-center justify-end">
-      <span className={cn("text-[10px] font-technical font-black mr-1", color)}>{currency}</span>
+      <span className={cn("text-xs font-sans font-medium mr-1", color)}>{currency}</span>
       <input 
         type="number" 
         value={value} 
         onChange={(e) => onChange(e.target.value)} 
-        className={cn("bg-transparent border-b border-dashed border-slate-700 hover:border-slate-500 p-0 text-right focus:outline-none focus:border-primary text-[10px] font-technical font-black w-20 transition-colors", color)}
+        className={cn("bg-transparent border-b border-dashed border-hairline hover:border-muted p-0 text-right focus:outline-none focus:border-primary text-xs font-sans font-semibold w-20 transition-colors", color)}
         step="any"
       />
     </div>
@@ -455,36 +456,33 @@ const ProjectCard = ({
 
   return (
     <Card
-      variant="industrial"
+      variant="default"
       className={cn(
-        "flex flex-col relative p-0 group transition-all duration-300",
-        deletingId === project.id && "border-red-900 shadow-[0_0_20px_rgba(220,38,38,0.1)]",
-        movingProjectId === project.id && "border-primary/40 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
+        "flex flex-col relative p-6 group transition-all duration-300 border border-hairline",
+        deletingId === project.id && "border-red shadow-md",
+        movingProjectId === project.id && "border-primary shadow-md"
       )}
     >
-      <div className={cn("transition-all duration-300 p-6", (deletingId === project.id || movingProjectId === project.id) && "opacity-20 blur-sm pointer-events-none")}>
-        <div className="flex justify-between items-start mb-6">
-          <div className="space-y-1 flex-1 min-w-0 pr-2">
-            <h3 className="font-technical font-black text-sm text-white uppercase tracking-wider line-clamp-1">{project.name}</h3>
+      <div className={cn("transition-all duration-300", (deletingId === project.id || movingProjectId === project.id) && "opacity-10 blur-sm pointer-events-none")}>
+        <div className="flex justify-between items-start mb-4">
+          <div className="space-y-1 flex-1 min-w-0 pr-12">
+            <h3 className="font-sans font-semibold text-sm text-ink truncate">{project.name}</h3>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-primary/40" />
-              <p className="text-[9px] font-technical text-slate-500 uppercase tracking-widest">{t('date_label')}{new Date(project.date).toLocaleDateString()}</p>
+              <span className="w-1.5 h-1.5 bg-primary rounded-full shrink-0" />
+              <p className="text-[10px] font-sans text-muted">{t('date_label')}{new Date(project.date).toLocaleDateString()}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-4 mb-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-8 h-8 opacity-5">
-              <div className="absolute top-0 right-0 border-t-8 border-r-8 border-t-white border-r-transparent rotate-180" />
-          </div>
-          <p className="text-[9px] font-technical font-black text-slate-500 uppercase tracking-[0.2em] mb-1">{t('part_value')}</p>
-          <div className="text-3xl font-technical font-black text-white tracking-tighter flex items-center">
-              <span className="text-primary mr-1 bg-primary/10 px-1">{currency}</span>
+        <div className="bg-surface-soft border border-hairline rounded-xl p-4 mb-4 relative overflow-hidden">
+          <p className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider mb-1">{t('part_value')}</p>
+          <div className="text-2xl font-sans font-semibold text-ink tracking-tight flex items-center">
+              <span className="text-primary mr-1">{currency}</span>
               <input
                 type="number"
                 value={localFinalPrice}
                 onChange={(e) => updateValues('finalPrice', e.target.value)}
-                className="bg-transparent border-b-2 border-dashed border-slate-700 hover:border-slate-500 focus:border-primary text-white focus:outline-none w-32 transition-colors px-1"
+                className="bg-transparent border-b border-dashed border-hairline hover:border-muted focus:border-primary text-ink focus:outline-none w-32 transition-colors px-1"
                 step="any"
               />
           </div>
@@ -495,75 +493,75 @@ const ProjectCard = ({
           <HistoryDetail icon={<PackageOpen size={12} />} label={t('material_label')} value={(Reflect.get(materials, project.materialId) as string) || 'N/A'} />
           <div className="grid grid-cols-2 gap-2">
             <HistoryDetail icon={<Clock size={12} />} label={t('time_label')} value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} />
-            <HistoryDetail icon={<Scaling size={12} />} label={t('weight_label')} value={`${project.modelWeight}g`} />
+            <HistoryDetail icon={<Layers size={12} />} label={t('weight_label')} value={`${project.modelWeight}g`} />
           </div>
           <EditableHistoryDetail 
-            icon={<Calculator size={12} />} 
+            icon={<Clock size={12} />} 
             label={t('production_cost')} 
             value={localCost} 
-            color="text-slate-400" 
+            color="text-muted" 
             currency={currency}
             onChange={(v) => updateValues('totalProductionCost', v)}
           />
           <EditableHistoryDetail 
-            icon={<PiggyBank size={12} />} 
+            icon={<Clock size={12} />} 
             label={t('profit_label')} 
             value={localProfit} 
-            color="text-emerald-500" 
+            color="text-green" 
             currency={currency}
             onChange={(v) => updateValues('profit', v)}
           />
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="absolute top-4 right-4 flex gap-1 bg-canvas border border-hairline rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={() => {
             setMovingProjectId(project.id);
             setSelectedFolderId(project.folderId || '');
           }}
-          className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-primary hover:border-primary/50 transition-colors flex items-center justify-center"
+          className="w-7 h-7 rounded-full text-muted hover:text-primary hover:bg-surface-soft transition-colors flex items-center justify-center"
           title={t('move_to_project')}
         >
           <FolderInput size={14} />
         </button>
         <button
           onClick={() => setDetailsProject(project)}
-          className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-primary/50 transition-colors flex items-center justify-center"
+          className="w-7 h-7 rounded-full text-muted hover:text-ink hover:bg-surface-soft transition-colors flex items-center justify-center"
           title="Ver detalhes"
         >
           <Info size={14} />
         </button>
         <button
           onClick={() => setDeletingId(project.id)}
-          className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-red-500 hover:border-red-900/50 transition-colors flex items-center justify-center"
+          className="w-7 h-7 rounded-full text-muted hover:text-red hover:bg-surface-soft transition-colors flex items-center justify-center"
           title="Excluir"
         >
-          <Trash2 size={14} />
+          <Trash size={14} />
         </button>
       </div>
 
       {deletingId === project.id && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 bg-slate-950/90">
-          <ShieldAlert className="text-red-500 mb-4" size={32} />
-          <h4 className="font-technical font-black text-xs text-white uppercase tracking-[0.2em] mb-4">{t('delete_this_project_q')}</h4>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 bg-canvas/95 rounded-2xl border border-hairline">
+          <ShieldAlert className="text-red mb-3" size={28} />
+          <h4 className="font-sans font-semibold text-xs text-ink mb-4">{t('delete_this_project_q')}</h4>
           <div className="flex gap-2 w-full max-w-[200px]">
-            <Button size="sm" variant="ghost" className="flex-1 h-8 text-[10px] font-technical uppercase border-slate-700 hover:bg-slate-800" onClick={() => setDeletingId(null)}>{t('cancel')}</Button>
-            <Button size="sm" variant="primary" className="flex-1 h-8 text-[10px] font-technical uppercase bg-red-600 hover:bg-red-700 border-none" onClick={() => handleDeleteProject(project.id)}>{t('confirm')}</Button>
+            <Button size="sm" variant="ghost" className="flex-1 h-8 text-xs font-sans" onClick={() => setDeletingId(null)}>{t('cancel')}</Button>
+            <Button size="sm" className="flex-1 h-8 text-xs font-sans bg-red hover:bg-red/90 text-white border-none" onClick={() => handleDeleteProject(project.id)}>{t('confirm')}</Button>
           </div>
         </div>
       )}
 
       {movingProjectId === project.id && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 bg-slate-950/95 border border-primary/20">
-          <FolderOpen className="text-primary mb-3" size={32} />
-          <h4 className="font-technical font-black text-xs text-white uppercase tracking-[0.2em] mb-3">{t('move_to_project')}</h4>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 bg-canvas/95 border border-primary/20 rounded-2xl">
+          <FolderOpen className="text-primary mb-3" size={28} />
+          <h4 className="font-sans font-semibold text-xs text-ink mb-3">{t('move_to_project')}</h4>
           <div className="w-full max-w-[200px] space-y-3">
             <div className="relative">
               <select
                 value={selectedFolderId || ''}
                 onChange={(e) => setSelectedFolderId(e.target.value || null)}
-                className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer"
+                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-lg cursor-pointer"
               >
                 <option value="">{t('uncategorized_folder_name')}</option>
                 {Object.values(folders).map((folder) => (
@@ -572,13 +570,11 @@ const ProjectCard = ({
                   </option>
                 ))}
               </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-slate-500">
-                ▼
-              </div>
+              <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted" />
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="ghost" className="flex-1 h-8 text-[9px] font-technical uppercase border-slate-700 hover:bg-slate-800" onClick={() => setMovingProjectId(null)}>{t('cancel')}</Button>
-              <Button size="sm" variant="primary" className="flex-1 h-8 text-[9px] font-technical uppercase bg-primary hover:bg-primary-hover border-none" onClick={() => handleMoveProject(project.id, selectedFolderId)}>{t('confirm')}</Button>
+              <Button size="sm" variant="ghost" className="flex-1 h-8 text-xs font-sans" onClick={() => setMovingProjectId(null)}>{t('cancel')}</Button>
+              <Button size="sm" className="flex-1 h-8 text-xs font-sans bg-primary hover:bg-primary-hover text-white border-none" onClick={() => handleMoveProject(project.id, selectedFolderId)}>{t('confirm')}</Button>
             </div>
           </div>
         </div>

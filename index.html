@@ -7,7 +7,7 @@
   <title>3DPrint Calc Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Roboto+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -15,84 +15,119 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['IBM Plex Mono', 'monospace'],
+            sans: ['Outfit', 'Roboto', 'sans-serif'],
+            mono: ['Roboto Mono', 'monospace'],
           },
           colors: {
-            industrial: {
-              orange: '#FF5C00', // Safety Orange
-              blue: '#00E0FF',   // Electric Blue
-              slate: {
-                50: '#F8FAFC',
-                400: '#94A3B8',
-                500: '#64748B',
-                600: '#475569',
-                700: '#334155',
-                800: '#1e293b',
-                850: '#141E2F',
-                900: '#0F172A',
-                950: '#020617',
-              }
+            primary: {
+              DEFAULT: 'var(--color-primary)',
+              hover: 'var(--color-primary-hover)',
+              soft: 'var(--color-primary-soft)',
             },
-            primary: '#FF5C00',
-            secondary: '#00E0FF',
+            canvas: 'var(--color-canvas)',
+            red: 'var(--color-red)',
+            yellow: 'var(--color-yellow)',
+            green: 'var(--color-green)',
+            ink: 'var(--color-ink)',
+            body: 'var(--color-body)',
+            muted: 'var(--color-muted)',
+            'muted-soft': 'var(--color-muted-soft)',
+            hairline: 'var(--color-hairline)',
+            'hairline-soft': 'var(--color-hairline-soft)',
+            'border-strong': 'var(--color-border-strong)',
+            surface: {
+              soft: 'var(--color-surface-soft)',
+              card: 'var(--color-surface-card)',
+              strong: 'var(--color-surface-strong)',
+              elevated: 'var(--color-surface-elevated)',
+            },
+            'on-primary': 'var(--color-on-primary)',
           }
         }
       }
     }
   </script>
   <style>
+    :root {
+      --color-primary: #1a73e8;
+      --color-primary-hover: #1558b0;
+      --color-primary-soft: #e8f0fe;
+      --color-red: #ea4335;
+      --color-yellow: #fbbc04;
+      --color-green: #34a853;
+      --color-ink: #202124;
+      --color-body: #3c4043;
+      --color-muted: #5f6368;
+      --color-muted-soft: #80868b;
+      --color-hairline: #dadce0;
+      --color-hairline-soft: #e8eaed;
+      --color-border-strong: #c4c7c5;
+      --color-canvas: #ffffff;
+      --color-surface-soft: #f8f9fa;
+      --color-surface-card: #ffffff;
+      --color-surface-strong: #f1f3f4;
+      --color-surface-elevated: #ffffff;
+      --color-on-primary: #ffffff;
+    }
+
+    .dark {
+      --color-primary: #8ab4f8;
+      --color-primary-hover: #aecbfa;
+      --color-primary-soft: #1a233a;
+      --color-red: #f28b82;
+      --color-yellow: #fdd663;
+      --color-green: #81c995;
+      --color-ink: #e8eaed;
+      --color-body: #c4c7c5;
+      --color-muted: #9aa0a6;
+      --color-muted-soft: #80868b;
+      --color-hairline: #3c4043;
+      --color-hairline-soft: #303030;
+      --color-border-strong: #5f6368;
+      --color-canvas: #1f1f1f;
+      --color-surface-soft: #121212;
+      --color-surface-card: #2d2d2d;
+      --color-surface-strong: #3c4043;
+      --color-surface-elevated: #2d2d2d;
+      --color-on-primary: #202124;
+    }
+
     body {
-      background-color: #020617; /* Slate-950 */
-      color: #F8FAFC; /* Slate-50 */
-      font-family: 'Inter', sans-serif;
+      background-color: var(--color-canvas);
+      color: var(--color-body);
+      font-family: 'Outfit', 'Roboto', sans-serif;
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Industrial Borders */
-    .industrial-border {
-      border: 1px solid #1e293b;
-    }
-
-    .industrial-border-accent {
-      border: 1px solid #FF5C00;
-    }
-
-    /* Precision Typography */
-    .font-technical {
-      font-family: 'IBM Plex Mono', monospace;
-      letter-spacing: -0.02em;
-    }
-
-    /* Scrollbars (Machinist Style) */
+    /* Scrollbars (Google Style) */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
     }
 
     ::-webkit-scrollbar-track {
-      background: #020617;
+      background: transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 0;
+      background: var(--color-hairline);
+      border-radius: 8px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #FF5C00;
+      background: var(--color-muted);
     }
 
-    /* Mechanical Focus */
+    /* Focus */
     *:focus {
-      outline: 2px solid #FF5C00;
+      outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
   </style>
 
 </head>
 
-<body class="dark overflow-x-hidden selection:bg-primary selection:text-white">
+<body class="dark overflow-x-hidden selection:bg-primary/20 selection:text-primary">
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
 </body>

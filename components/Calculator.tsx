@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { Save, Calculator as CalcIcon, AlertTriangle, Loader2, Plus, Trash2, Package, Activity, Info, BarChart3, Settings2 } from 'lucide-react';
+import { Save, AlertTriangle, Loader2, Plus, Trash2, Package, Activity, Info, BarChart3, Settings2 } from 'lucide-react';
 import { Printer, Material, GlobalSettings, Project, CalculationResult, AdditionalItem, ProjectFolder } from '../types';
 import { StorageService } from '../services/storage';
 import { Card } from './ui/Card';
@@ -10,7 +10,6 @@ import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { cn } from '../utils/cn';
 
-// Interface local para UI que permite strings nos inputs
 interface UIAdditionalItem extends Omit<AdditionalItem, 'price' | 'quantity'> {
   price: string | number;
   quantity: string | number;
@@ -275,27 +274,27 @@ export const Calculator: React.FC = () => {
   };
 
   const chartData = [
-    { name: t('material_chart'), value: result.materialCost, color: '#FF5C00' },
-    { name: t('machine_chart'), value: result.machineTotalCost, color: '#475569' },
-    { name: t('labor_chart'), value: result.laborCost, color: '#00E0FF' },
-    { name: t('additional_chart'), value: result.additionalCost, color: '#94a3b8' },
+    { name: t('material_chart'), value: result.materialCost, color: 'var(--color-primary)' },
+    { name: t('machine_chart'), value: result.machineTotalCost, color: 'var(--color-muted)' },
+    { name: t('labor_chart'), value: result.laborCost, color: 'var(--color-green)' },
+    { name: t('additional_chart'), value: result.additionalCost, color: 'var(--color-yellow)' },
   ].filter(d => d.value > 0);
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 gap-4">
       <Loader2 className="animate-spin text-primary" size={32} />
-      <span className="font-technical text-[10px] text-slate-500 uppercase tracking-widest">{t('loading_calculator')}</span>
+      <span className="font-sans text-xs text-muted uppercase tracking-wider">{t('loading_calculator')}</span>
     </div>
   );
 
   if (printers.length === 0 || materials.length === 0) {
     return (
-      <Card variant="industrial" className="flex flex-col items-center justify-center h-96 text-center border-dashed">
-        <div className="p-4 bg-primary/10 border border-primary/20 rounded-none mb-6">
-          <AlertTriangle className="text-primary" size={32} />
+      <Card variant="default" className="flex flex-col items-center justify-center h-96 text-center border border-dashed border-hairline">
+        <div className="w-12 h-12 bg-primary-soft text-primary flex items-center justify-center rounded-2xl mb-4">
+          <AlertTriangle size={24} />
         </div>
-        <h2 className="text-xl font-technical font-bold mb-2 text-white uppercase tracking-wider">{t('equipment_not_configured')}</h2>
-        <p className="text-slate-500 max-w-sm mb-8 text-xs font-technical uppercase">{t('add_printers_materials_warning')}</p>
+        <h2 className="text-lg font-sans font-semibold mb-2 text-ink">{t('equipment_not_configured')}</h2>
+        <p className="text-muted max-w-sm mb-6 text-xs font-sans">{t('add_printers_materials_warning')}</p>
         <Button variant="primary">
           {t('configure_printers_materials')}
         </Button>
@@ -305,7 +304,7 @@ export const Calculator: React.FC = () => {
 
   const materialOptions = materials.map(m => ({
     value: m.id,
-    label: `${m.name} // ${t('g_rem_suffix', { count: (m.currentStock || 0).toFixed(0) })}`,
+    label: `${m.name} // ${t('g_rem_suffix', { count: Number((m.currentStock || 0).toFixed(0)) })}`,
     disabled: (m.currentStock || 0) === 0
   }));
 
@@ -313,14 +312,14 @@ export const Calculator: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-300">
       <div className="lg:col-span-7 space-y-6">
         {/* Module: Project Identification */}
-        <Card variant="industrial" className="relative">
-          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+        <Card variant="default" className="relative border border-hairline">
+          <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
             <Settings2 className="text-primary" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('project_identification')}</span>
+            <span className="font-sans font-medium text-sm text-ink">{t('project_identification')}</span>
           </div>
 
           <div className="space-y-6">
-            <div className="bg-slate-900/50 p-4 border border-slate-800/50">
+            <div className="bg-surface-soft p-4 border border-hairline rounded-2xl">
               {isCreatingFolder ? (
                 <div className="flex gap-2 items-end">
                   <div className="flex-grow">
@@ -331,14 +330,14 @@ export const Calculator: React.FC = () => {
                       placeholder={t('new_folder_placeholder')}
                     />
                   </div>
-                  <Button variant="secondary" onClick={() => setIsCreatingFolder(false)} className="mb-0 text-[10px]">{t('cancel')}</Button>
+                  <Button variant="secondary" onClick={() => setIsCreatingFolder(false)} className="mb-0 text-xs py-2 h-10">{t('cancel')}</Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">{t('project_folder')}</label>
-                    <button onClick={() => setIsCreatingFolder(true)} className="text-[9px] font-technical font-bold text-primary hover:underline flex items-center gap-1">
-                      <Plus size={10} /> {t('create_new_label')}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-xs font-sans font-medium text-muted">{t('project_folder')}</label>
+                    <button onClick={() => setIsCreatingFolder(true)} className="text-xs font-sans font-medium text-primary hover:underline flex items-center gap-1">
+                      <Plus size={12} /> {t('create_new_label')}
                     </button>
                   </div>
                   <Select
@@ -354,52 +353,51 @@ export const Calculator: React.FC = () => {
             <Input 
                 label={t('part_name_label')} 
                 value={partName} 
-                onChange={(e) => setPartName(e.target.value.toUpperCase())} 
+                onChange={(e) => setPartName(e.target.value)} 
                 placeholder={t('part_name_placeholder')} 
-                className="font-technical tracking-widest"
             />
           </div>
         </Card>
 
         {/* Module: Machine Parameters */}
-        <Card variant="industrial">
-          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
-            <Activity className="text-secondary" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('machine_config')}</span>
+        <Card variant="default" className="border border-hairline">
+          <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
+            <Activity className="text-green" size={16} />
+            <span className="font-sans font-medium text-sm text-ink">{t('machine_config')}</span>
           </div>
 
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select label={t('printer_label')} options={printers.map(p => ({ value: p.id, label: p.name }))} value={selectedPrinterId} onChange={(val) => setSelectedPrinterId(val)} />
               <Select label={t('material_label')} options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <Input label={t('hours_label')} type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center text-primary" />
-              <Input label={t('minutes_label')} type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center text-primary" />
-              <Input label={t('weight_g_label')} type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center text-secondary" />
-              <Input label={t('failure_pct_label')} type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(e.target.value)} className="text-center text-red-500" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Input label={t('hours_label')} type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center" />
+              <Input label={t('minutes_label')} type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center" />
+              <Input label={t('weight_g_label')} type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center" />
+              <Input label={t('failure_pct_label')} type="number" min="0" value={failureRate} onChange={(e) => setFailureRate(e.target.value)} className="text-center" />
             </div>
           </div>
         </Card>
 
         {/* Module: Human & Business Parameters */}
-        <Card variant="industrial">
-          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
-            <Info className="text-slate-400" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('labor_and_business')}</span>
+        <Card variant="default" className="border border-hairline">
+          <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
+            <Info className="text-muted" size={16} />
+            <span className="font-sans font-medium text-sm text-ink">{t('labor_and_business')}</span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <Input label={t('labor_hours_label')} type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
             <Input label={t('labor_minutes_label')} type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
             <Input label={t('labor_rate_label')} type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
           </div>
 
-          <div className="p-4 bg-slate-900/30 border border-slate-800">
+          <div className="p-4 bg-surface-soft border border-hairline rounded-2xl">
             <div className="flex justify-between mb-4">
-              <label className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">
-                {t('profit_margin_label')} <span className="text-primary ml-2">[{Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%]</span>
+              <label className="text-xs font-sans font-medium text-muted">
+                {t('profit_margin_label')} <span className="text-primary ml-2 font-semibold">[{Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%]</span>
               </label>
             </div>
             <input 
@@ -409,9 +407,9 @@ export const Calculator: React.FC = () => {
                 step="any" 
                 value={markup} 
                 onChange={(e) => setMarkup(Number(e.target.value))} 
-                className="w-full h-1 bg-slate-800 rounded-none appearance-none cursor-pointer accent-primary" 
+                className="w-full h-1 bg-surface-strong rounded-full appearance-none cursor-pointer accent-primary" 
             />
-            <div className="flex justify-between text-[8px] font-technical text-slate-600 uppercase mt-2 tracking-tighter">
+            <div className="flex justify-between text-[10px] font-sans text-muted mt-2">
               <span>{t('no_margin')}</span>
               <span>{t('average_margin')}</span>
               <span>{t('max_margin')}</span>
@@ -420,27 +418,27 @@ export const Calculator: React.FC = () => {
         </Card>
 
         {/* Additional Items Section */}
-        <Card variant="industrial">
-          <div className="flex items-center justify-between mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+        <Card variant="default" className="border border-hairline">
+          <div className="flex items-center justify-between mb-6 border-b border-hairline pb-4">
             <div className="flex items-center gap-3">
-              <Package className="text-slate-400" size={16} />
-              <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('additional_items')}</span>
+              <Package className="text-muted" size={16} />
+              <span className="font-sans font-medium text-sm text-ink">{t('additional_items')}</span>
             </div>
             <Button
               onClick={handleAddAdditionalItem}
               variant="secondary"
-              className="py-1 px-3 text-[9px]"
+              className="py-1 px-3 text-xs h-8"
             >
               <Plus size={12} className="mr-1" /> {t('add_action')}
             </Button>
           </div>
 
           {additionalItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 bg-slate-900/20 border border-dashed border-slate-800 text-slate-600">
-              <span className="text-[10px] font-technical uppercase">{t('no_additional_items')}</span>
+            <div className="flex flex-col items-center justify-center p-8 bg-surface-soft border border-dashed border-hairline text-muted rounded-2xl">
+              <span className="text-xs font-sans italic">{t('no_additional_items')}</span>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {additionalItems.map((item, index) => (
                 <div key={item.id} className="flex gap-2 items-end">
                   <div className="flex-1">
@@ -469,16 +467,16 @@ export const Calculator: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleRemoveAdditionalItem(item.id)}
-                    className="p-2.5 text-slate-600 hover:text-red-500 transition-colors border border-transparent hover:border-red-900/50"
+                    className="p-2.5 text-muted hover:text-red transition-colors border border-transparent rounded-full hover:bg-surface-soft"
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
-              <div className="flex justify-end pt-4 mt-6 border-t border-slate-800">
-                <div className="bg-slate-900/80 px-4 py-2 border border-slate-800 flex items-center gap-6">
-                  <span className="text-[10px] font-technical font-bold text-slate-500 uppercase tracking-widest">{t('additional_subtotal')}</span>
-                  <span className="font-technical font-bold text-white text-lg">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span>
+              <div className="flex justify-end pt-4 mt-6 border-t border-hairline">
+                <div className="bg-surface-soft px-4 py-2 border border-hairline rounded-xl flex items-center gap-6">
+                  <span className="text-xs font-sans font-medium text-muted uppercase tracking-wider">{t('additional_subtotal')}</span>
+                  <span className="font-sans font-semibold text-ink text-base">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -488,17 +486,14 @@ export const Calculator: React.FC = () => {
 
       {/* Right Column: Results Cockpit */}
       <div className="lg:col-span-5 flex flex-col gap-6 sticky top-0" style={{ maxHeight: 'calc(100vh - 10rem)', overflowY: 'auto' }}>
-        <div className="bg-slate-950 border border-slate-700 p-8 relative overflow-hidden text-white shadow-2xl">
-          {/* Decorative Corner */}
-          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary translate-x-2 -translate-y-2" />
-          
+        <Card variant="default" className="border-t-4 border-t-primary p-6 relative overflow-hidden shadow-md">
           <div className="relative z-10">
-            <h3 className="text-primary font-technical font-extrabold uppercase tracking-[0.3em] text-[10px] mb-6 flex items-center gap-2">
-                <Activity size={12} /> {t('realtime_result')}
+            <h3 className="text-primary font-sans font-medium uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
+                <Activity size={14} /> {t('realtime_result')}
             </h3>
             
-            <div className="flex items-center text-6xl font-technical font-bold mb-8 tracking-tighter text-white tabular-nums">
-              <span className="mr-2">{settings.currencySymbol}</span>
+            <div className="flex items-center text-5xl font-sans font-semibold mb-6 tracking-tight text-ink tabular-nums">
+              <span className="mr-2 text-primary">{settings.currencySymbol}</span>
               <input 
                 type="text"
                 value={isEditingPrice ? manualPrice : result.finalPrice.toFixed(2)}
@@ -518,50 +513,50 @@ export const Calculator: React.FC = () => {
                     }
                   }
                 }}
-                className="bg-transparent border-b-2 border-transparent hover:border-slate-700 focus:border-primary outline-none w-full text-white transition-colors"
+                className="bg-transparent border-b border-dashed border-hairline hover:border-muted focus:border-primary outline-none w-full text-ink transition-colors"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-900 border border-slate-800">
-                <span className="text-[9px] font-technical font-bold text-slate-500 uppercase tracking-widest block mb-1">{t('production_cost')}</span>
-                <span className="font-technical text-lg font-bold text-white tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
+              <div className="p-4 bg-surface-soft border border-hairline rounded-xl">
+                <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">{t('production_cost')}</span>
+                <span className="font-sans text-base font-semibold text-ink tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
               </div>
-              <div className="p-4 bg-slate-900 border border-slate-800">
-                <span className="text-[9px] font-technical font-bold text-secondary uppercase tracking-widest block mb-1">{t('net_profit')}</span>
-                <span className="font-technical text-lg font-bold text-secondary tabular-nums">{settings.currencySymbol}{result.profit.toFixed(2)}</span>
+              <div className="p-4 bg-surface-soft border border-hairline rounded-xl">
+                <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">{t('net_profit')}</span>
+                <span className="font-sans text-base font-semibold text-green tabular-nums">{settings.currencySymbol}{result.profit.toFixed(2)}</span>
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <Card variant="industrial" className="flex flex-col">
-          <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4 -mx-6 px-6">
+        <Card variant="default" className="flex flex-col border border-hairline">
+          <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
             <BarChart3 className="text-primary" size={16} />
-            <span className="font-technical font-extrabold text-[10px] tracking-[0.2em] text-white">{t('cost_distribution')}</span>
+            <span className="font-sans font-medium text-sm text-ink">{t('cost_distribution')}</span>
           </div>
           
           {chartData.length > 0 ? (() => {
             const total = chartData.reduce((sum, item) => sum + item.value, 0);
             return (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {chartData.map(item => {
                   const pct = total > 0 ? (item.value / total) * 100 : 0;
                   return (
                     <div key={item.name}>
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-[9px] font-technical font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-xs font-sans font-medium text-muted flex items-center gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                           {item.name}
                         </span>
-                        <span className="font-technical font-bold text-white text-[10px] tabular-nums">
+                        <span className="font-sans font-semibold text-ink text-xs tabular-nums">
                           {settings.currencySymbol}{item.value.toFixed(2)}
-                          <span className="text-slate-600 ml-1.5 text-[8px]">{pct.toFixed(0)}%</span>
+                          <span className="text-muted ml-1.5 text-[10px] font-medium">{pct.toFixed(0)}%</span>
                         </span>
                       </div>
-                      <div className="w-full bg-slate-800/60 h-[3px]">
+                      <div className="w-full bg-surface-strong h-[4px] rounded-full overflow-hidden">
                         <div
-                          className="h-full transition-all duration-500"
+                          className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${pct}%`, backgroundColor: item.color }}
                         />
                       </div>
@@ -571,8 +566,8 @@ export const Calculator: React.FC = () => {
               </div>
             );
           })() : (
-            <div className="h-32 flex items-center justify-center text-slate-700">
-              <span className="text-[10px] font-technical uppercase">{t('awaiting_data')}</span>
+            <div className="h-32 flex items-center justify-center text-muted">
+              <span className="text-xs font-sans italic">{t('awaiting_data')}</span>
             </div>
           )}
         </Card>
@@ -580,10 +575,10 @@ export const Calculator: React.FC = () => {
         <Button
           onClick={saveProject}
           variant="primary"
-          className="w-full py-3.5 text-sm font-technical !tracking-[0.4em]"
+          className="w-full py-3 h-11 text-sm font-sans font-medium"
           disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
         >
-          {isSaving ? <Loader2 className="animate-spin mr-2.5" size={16} /> : <Save size={16} className="mr-2.5" />}
+          {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
           <span>{isSaving ? t('saving') : t('save_project')}</span>
         </Button>
       </div>

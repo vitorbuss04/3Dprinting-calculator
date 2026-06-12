@@ -12,13 +12,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const getVariantStyles = (variant: 'primary' | 'secondary' | 'ghost' | 'outline') => {
     switch (variant) {
         case 'primary':
-            return "bg-primary text-white hover:bg-orange-600 border border-primary active:bg-orange-700";
+            return "bg-primary text-white hover:bg-primary-hover border border-transparent active:opacity-90";
         case 'secondary':
-            return "bg-secondary text-slate-950 hover:bg-cyan-400 border border-secondary active:bg-cyan-500";
+            return "bg-canvas text-primary hover:bg-surface-strong border border-hairline active:bg-surface-strong";
         case 'ghost':
-            return "bg-transparent text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent";
+            return "bg-transparent text-muted hover:text-ink hover:bg-surface-strong border border-transparent";
         case 'outline':
-            return "bg-transparent text-white border border-slate-700 hover:border-primary hover:text-primary";
+            return "bg-transparent text-body border border-hairline hover:bg-surface-soft hover:text-ink";
         default:
             return "";
     }
@@ -27,11 +27,11 @@ const getVariantStyles = (variant: 'primary' | 'secondary' | 'ghost' | 'outline'
 const getSizeStyles = (size: 'sm' | 'md' | 'lg') => {
     switch (size) {
         case 'sm':
-            return "px-3 py-1.5 text-[10px]";
+            return "px-4 py-1.5 text-xs h-8";
         case 'md':
-            return "px-5 py-2.5 text-xs";
+            return "px-6 py-2.5 text-sm h-10";
         case 'lg':
-            return "px-8 py-3.5 text-sm";
+            return "px-8 py-3.5 text-base h-12";
         default:
             return "";
     }
@@ -55,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
     tabIndex,
     form,
 }) => {
-    const baseStyles = "inline-flex items-center justify-center font-technical font-bold uppercase tracking-wider transition-all duration-150 rounded-none focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-[1px]";
+    const baseStyles = "inline-flex items-center justify-center font-sans font-medium transition-all duration-150 rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
 
     return (
         <button
