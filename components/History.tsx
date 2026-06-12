@@ -3,7 +3,7 @@ import { Project, Printer, Material, GlobalSettings, ProjectFolder, ProjectStatu
 import { StorageService } from '../services/storage';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
-import { Trash2, Check, X, Loader2, AlertTriangle, PackageOpen, Tag, Calendar, Scaling, PiggyBank, Briefcase, Layers, Clock, FolderOpen, Info, Search, Filter, ShieldAlert, Calculator } from 'lucide-react';
+import { Trash2, Check, X, Loader2, AlertTriangle, PackageOpen, Tag, Calendar, Scaling, PiggyBank, Briefcase, Layers, Clock, FolderOpen, FolderInput, Info, Search, Filter, ShieldAlert, Calculator } from 'lucide-react';
 import { ProjectDetailsModal } from './ProjectDetailsModal';
 import toast from 'react-hot-toast';
 import { cn } from '../utils/cn';
@@ -21,6 +21,8 @@ export const History: React.FC = () => {
   const [deletingFolderId, setDeletingFolderId] = useState<string | null>(null);
   const [detailsProject, setDetailsProject] = useState<Project | null>(null);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [movingProjectId, setMovingProjectId] = useState<string | null>(null);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const hasFetched = useRef(false);
 
   const fetchData = async () => {
@@ -69,6 +71,22 @@ export const History: React.FC = () => {
         return t('deleting_record_success');
       },
       error: t('deleting_record_error')
+    });
+  };
+
+  const handleMoveProject = async (projectId: string, targetFolderId: string | null) => {
+    setMovingProjectId(null);
+    const proj = projects.find(p => p.id === projectId);
+    if (!proj) return;
+    const updated = { ...proj, folderId: targetFolderId };
+
+    toast.promise(StorageService.updateProject(projectId, updated), {
+      loading: t('moving_project_loading'),
+      success: () => {
+        setProjects(prev => prev.map(p => p.id === projectId ? updated : p));
+        return t('moving_project_success');
+      },
+      error: t('moving_project_error')
     });
   };
 
@@ -164,6 +182,7 @@ export const History: React.FC = () => {
 
         const folderTotalCost = folderProjects.reduce((sum, p) => sum + p.result.finalPrice, 0);
         const folderTotalProfit = folderProjects.reduce((sum, p) => sum + p.result.profit, 0);
+        const folderTotalProdCost = folderProjects.reduce((sum, p) => sum + p.result.totalProductionCost, 0);
         const folderTotalTime = folderProjects.reduce((sum, p) => sum + (p.printTimeHours + p.printTimeMinutes / 60), 0);
 
         if (folderProjects.length === 0 && isUncategorized) return null;
@@ -230,7 +249,7 @@ export const History: React.FC = () => {
               </div>
 
               {folderProjects.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-950 p-4 border border-slate-800">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-950 p-4 border border-slate-800">
                   <div className="px-4 border-l border-primary/30">
                     <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_time')}</span>
                     <span className="font-technical font-black text-white text-base flex items-center gap-1.5">
@@ -238,11 +257,15 @@ export const History: React.FC = () => {
                       {Math.floor(folderTotalTime)}h {Math.round((folderTotalTime % 1) * 60)}m
                     </span>
                   </div>
+                  <div className="px-4 border-l border-red-500/30">
+                    <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_cost')}</span>
+                    <span className="font-technical font-black text-red-400 text-base">{currency} {folderTotalProdCost.toFixed(2)}</span>
+                  </div>
                   <div className="px-4 border-l border-emerald-500/30">
                     <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_profit')}</span>
                     <span className="font-technical font-black text-emerald-500 text-base">{currency} {folderTotalProfit.toFixed(2)}</span>
                   </div>
-                  <div className="px-4 border-l border-indigo-500/30 col-span-2 sm:col-span-1 border-t sm:border-t-0 pt-4 sm:pt-0">
+                  <div className="px-4 border-l border-indigo-500/30 border-t sm:border-t-0 pt-4 sm:pt-0">
                     <span className="text-[9px] font-technical font-black text-slate-600 uppercase tracking-widest block mb-1">{t('total_value')}</span>
                     <span className="font-technical font-black text-white text-xl">{currency} {folderTotalCost.toFixed(2)}</span>
                   </div>
@@ -269,6 +292,12 @@ export const History: React.FC = () => {
                     setDeletingId={setDeletingId}
                     handleDeleteProject={handleDeleteProject}
                     onUpdateProject={handleUpdateProject}
+                    movingProjectId={movingProjectId}
+                    setMovingProjectId={setMovingProjectId}
+                    selectedFolderId={selectedFolderId}
+                    setSelectedFolderId={setSelectedFolderId}
+                    folders={folders}
+                    handleMoveProject={handleMoveProject}
                   />
                 ))}
               </div>
@@ -350,7 +379,13 @@ const ProjectCard = ({
   setDetailsProject, 
   setDeletingId, 
   handleDeleteProject,
-  onUpdateProject
+  onUpdateProject,
+  movingProjectId,
+  setMovingProjectId,
+  selectedFolderId,
+  setSelectedFolderId,
+  folders,
+  handleMoveProject
 }: {
   project: Project;
   currency: string;
@@ -361,6 +396,12 @@ const ProjectCard = ({
   setDeletingId: (id: string | null) => void;
   handleDeleteProject: (id: string) => void;
   onUpdateProject: (id: string, newResult: any) => void;
+  movingProjectId: string | null;
+  setMovingProjectId: (id: string | null) => void;
+  selectedFolderId: string | null;
+  setSelectedFolderId: (id: string | null) => void;
+  folders: Record<string, ProjectFolder>;
+  handleMoveProject: (projectId: string, targetFolderId: string | null) => void;
 }) => {
   const { t } = useTranslation();
   const [localFinalPrice, setLocalFinalPrice] = useState(Number(project.result.finalPrice).toFixed(2));
@@ -417,10 +458,11 @@ const ProjectCard = ({
       variant="industrial"
       className={cn(
         "flex flex-col relative p-0 group transition-all duration-300",
-        deletingId === project.id && "border-red-900 shadow-[0_0_20px_rgba(220,38,38,0.1)]"
+        deletingId === project.id && "border-red-900 shadow-[0_0_20px_rgba(220,38,38,0.1)]",
+        movingProjectId === project.id && "border-primary/40 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
       )}
     >
-      <div className={cn("transition-all duration-300 p-6", deletingId === project.id && "opacity-20 blur-sm pointer-events-none")}>
+      <div className={cn("transition-all duration-300 p-6", (deletingId === project.id || movingProjectId === project.id) && "opacity-20 blur-sm pointer-events-none")}>
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1 flex-1 min-w-0 pr-2">
             <h3 className="font-technical font-black text-sm text-white uppercase tracking-wider line-clamp-1">{project.name}</h3>
@@ -476,6 +518,16 @@ const ProjectCard = ({
 
       <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
+          onClick={() => {
+            setMovingProjectId(project.id);
+            setSelectedFolderId(project.folderId || '');
+          }}
+          className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-primary hover:border-primary/50 transition-colors flex items-center justify-center"
+          title={t('move_to_project')}
+        >
+          <FolderInput size={14} />
+        </button>
+        <button
           onClick={() => setDetailsProject(project)}
           className="w-8 h-8 border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-primary/50 transition-colors flex items-center justify-center"
           title="Ver detalhes"
@@ -498,6 +550,36 @@ const ProjectCard = ({
           <div className="flex gap-2 w-full max-w-[200px]">
             <Button size="sm" variant="ghost" className="flex-1 h-8 text-[10px] font-technical uppercase border-slate-700 hover:bg-slate-800" onClick={() => setDeletingId(null)}>{t('cancel')}</Button>
             <Button size="sm" variant="primary" className="flex-1 h-8 text-[10px] font-technical uppercase bg-red-600 hover:bg-red-700 border-none" onClick={() => handleDeleteProject(project.id)}>{t('confirm')}</Button>
+          </div>
+        </div>
+      )}
+
+      {movingProjectId === project.id && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-200 bg-slate-950/95 border border-primary/20">
+          <FolderOpen className="text-primary mb-3" size={32} />
+          <h4 className="font-technical font-black text-xs text-white uppercase tracking-[0.2em] mb-3">{t('move_to_project')}</h4>
+          <div className="w-full max-w-[200px] space-y-3">
+            <div className="relative">
+              <select
+                value={selectedFolderId || ''}
+                onChange={(e) => setSelectedFolderId(e.target.value || null)}
+                className="w-full bg-slate-900 border border-slate-800 text-[10px] font-technical text-slate-200 uppercase px-3 py-2 appearance-none focus:outline-none focus:border-slate-600 rounded-none cursor-pointer"
+              >
+                <option value="">{t('uncategorized_folder_name')}</option>
+                {Object.values(folders).map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-slate-500">
+                ▼
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" className="flex-1 h-8 text-[9px] font-technical uppercase border-slate-700 hover:bg-slate-800" onClick={() => setMovingProjectId(null)}>{t('cancel')}</Button>
+              <Button size="sm" variant="primary" className="flex-1 h-8 text-[9px] font-technical uppercase bg-primary hover:bg-primary-hover border-none" onClick={() => handleMoveProject(project.id, selectedFolderId)}>{t('confirm')}</Button>
+            </div>
           </div>
         </div>
       )}

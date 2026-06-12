@@ -186,6 +186,26 @@ export const StorageService = {
     if (error) throw error;
   },
 
+  updateProject: async (id: string, project: Project) => {
+    const payload = {
+      name: project.name,
+      printer_id: project.printerId,
+      material_id: project.materialId,
+      print_time_hours: project.printTimeHours,
+      print_time_minutes: project.printTimeMinutes,
+      model_weight: project.modelWeight,
+      failure_rate: project.failureRate,
+      labor_time_hours: project.laborTimeHours,
+      labor_time_minutes: project.laborTimeMinutes,
+      labor_hourly_rate: project.laborHourlyRate,
+      markup: project.markup,
+      result: project.result,
+      folder_id: project.folderId
+    };
+    const { error } = await supabase.from('projects').update(payload).eq('id', id);
+    if (error) throw error;
+  },
+
   updateFolderStatus: async (id: string, status: ProjectStatus): Promise<void> => {
     const { error } = await supabase.from('project_folders').update({ status }).eq('id', id);
     if (error) throw error;
