@@ -10,7 +10,8 @@ import { Auth } from './components/Auth';
 import { Profile } from './components/Profile';
 import { AppLayout } from './components/AppLayout';
 import { Button } from './components/ui/Button';
-import { supabase } from './services/supabaseClient';
+import { supabase, isConfigured } from './services/supabaseClient';
+import { ConfigRequiredScreen } from './components/ConfigRequiredScreen';
 import { Session } from '@supabase/supabase-js';
 import { NotificationProvider } from './components/NotificationContext';
 import { ThemeProvider } from './components/ThemeContext';
@@ -24,6 +25,11 @@ const App: React.FC = () => {
   const [loadingSession, setLoadingSession] = useState(true);
 
   useEffect(() => {
+    if (!isConfigured) {
+      setLoadingSession(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoadingSession(false);
@@ -87,6 +93,14 @@ const App: React.FC = () => {
       default: return <Dashboard onNavigate={handleNavigate} />;
     }
   };
+
+  if (!isConfigured) {
+    return (
+      <ThemeProvider>
+        <ConfigRequiredScreen />
+      </ThemeProvider>
+    );
+  }
 
   if (loadingSession) {
     return (
