@@ -125,10 +125,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         >
                             <span className="text-[10px] font-sans font-semibold text-primary uppercase tracking-wider flex items-center gap-1.5">
                                 <CalcIcon size={10} />
-                                {t('new_calculation', 'Nova Calculação')}
+                                {t('new_calculation', 'Novo Cálculo')}
                             </span>
                             <p className="text-[10px] font-sans text-muted leading-tight group-hover:text-body transition-colors">
-                                {t('new_calculation_hint', 'Calcule o custo de uma nova peça agora')}
+                                {t('new_calculation_hint', 'Calcule o custo de uma nova peça')}
                             </p>
                         </button>
                     )}
