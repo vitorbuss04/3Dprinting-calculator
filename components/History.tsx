@@ -59,7 +59,11 @@ export const History: React.FC = () => {
     if (!proj) return;
     const updated = { ...proj, result: newResult };
     setProjects(prev => prev.map(p => p.id === id ? updated : p));
-    StorageService.updateProject(id, updated).catch(console.error);
+    StorageService.updateProject(id, updated).catch(() => {
+      // Rollback optimistic update on failure
+      setProjects(prev => prev.map(p => p.id === id ? proj : p));
+      toast.error(t('update_project_error'));
+    });
   };
 
   const handleDeleteProject = async (id: string) => {

@@ -98,6 +98,7 @@
   "deleting_folder_error": "Error deleting folder",
   "status_update_success": "Project status updated",
   "status_update_error": "Error updating status",
+  "update_project_error": "Failed to save project changes.",
   "uncategorized_folder_name": "UNGROUPED PROJECTS",
   "unknown_folder_name": "UNKNOWN FOLDER",
   "records_count_suffix": "RECORDS",

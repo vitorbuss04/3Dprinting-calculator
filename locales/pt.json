@@ -98,6 +98,7 @@
   "deleting_folder_error": "Erro ao excluir pasta",
   "status_update_success": "Status do projeto atualizado",
   "status_update_error": "Erro ao atualizar status",
+  "update_project_error": "Erro ao salvar alterações no projeto.",
   "uncategorized_folder_name": "PROJETOS SEM PASTA",
   "unknown_folder_name": "PASTA DESCONHECIDA",
   "records_count_suffix": "REGISTROS",

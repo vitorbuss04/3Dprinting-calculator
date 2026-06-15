@@ -26,6 +26,8 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                 if (settings) {
                     setCurrencySymbol(settings.currencySymbol);
                 }
+            }).catch(() => {
+                // Falls back to default '$' symbol — non-critical
             });
         }
     }, [isOpen]);

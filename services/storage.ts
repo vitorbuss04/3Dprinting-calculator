@@ -127,7 +127,7 @@ export const StorageService = {
   // --- SETTINGS ---
   getSettings: async (): Promise<GlobalSettings> => {
     const { data, error } = await supabase.from('global_settings').select('*').maybeSingle();
-    if (error) console.warn("Erro ao buscar configurações, usando padrões.", error);
+    if (error) throw error;
     if (!data) {
       return DEFAULT_SETTINGS;
     }
