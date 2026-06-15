@@ -256,5 +256,21 @@
   "diameter_label": "DIÂMETRO (mm)",
   "print_temp_label": "TEMP. BICO (°C)",
   "bed_temp_label": "TEMP. MESA (°C)",
-  "technical_specs_section": "ESPECIFICAÇÕES TÉCNICAS"
+  "technical_specs_section": "ESPECIFICAÇÕES TÉCNICAS",
+  "folder_payments_title": "Controle de Pagamentos",
+  "total_paid": "Total Pago",
+  "amount_remaining": "Restante",
+  "add_payment": "Adicionar Pagamento",
+  "payment_date": "Data",
+  "payment_amount": "Valor",
+  "payment_description": "Descrição / Nome",
+  "general_notes": "Anotações Gerais",
+  "notes_placeholder": "Digite anotações gerais sobre a pasta...",
+  "saving_notes": "Salvando notas...",
+  "notes_saved": "Anotações salvas!",
+  "payment_added": "Pagamento adicionado",
+  "payment_deleted": "Pagamento removido",
+  "payment_updated": "Pagamento atualizado",
+  "open_folder": "Abrir Pasta",
+  "back_to_folders": "Voltar para as pastas"
 }

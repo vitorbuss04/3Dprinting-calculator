@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Printer, Material, GlobalSettings, Project, ProjectFolder, ProjectStatus } from '../types';
+import { Printer, Material, GlobalSettings, Project, ProjectFolder, ProjectStatus, Payment } from '../types';
 
 // Helper to get current user ID
 const getUserId = async () => {
@@ -94,9 +94,9 @@ export const StorageService = {
       spool_weight: material.spoolWeight,
       current_stock: material.currentStock,
       manufacturer: material.manufacturer || null,
-      print_temp: material.printTemp !== undefined && material.printTemp !== '' ? Number(material.printTemp) : null,
-      bed_temp: material.bedTemp !== undefined && material.bedTemp !== '' ? Number(material.bedTemp) : null,
-      diameter: material.diameter !== undefined && material.diameter !== '' ? Number(material.diameter) : null
+      print_temp: material.printTemp !== undefined && (material.printTemp as any) !== '' ? Number(material.printTemp) : null,
+      bed_temp: material.bedTemp !== undefined && (material.bedTemp as any) !== '' ? Number(material.bedTemp) : null,
+      diameter: material.diameter !== undefined && (material.diameter as any) !== '' ? Number(material.diameter) : null
     };
     const { error } = await supabase.from('materials').insert([payload]);
     if (error) throw error;
@@ -111,9 +111,9 @@ export const StorageService = {
       spool_weight: material.spoolWeight,
       current_stock: material.currentStock,
       manufacturer: material.manufacturer || null,
-      print_temp: material.printTemp !== undefined && material.printTemp !== '' ? Number(material.printTemp) : null,
-      bed_temp: material.bedTemp !== undefined && material.bedTemp !== '' ? Number(material.bedTemp) : null,
-      diameter: material.diameter !== undefined && material.diameter !== '' ? Number(material.diameter) : null
+      print_temp: material.printTemp !== undefined && (material.printTemp as any) !== '' ? Number(material.printTemp) : null,
+      bed_temp: material.bedTemp !== undefined && (material.bedTemp as any) !== '' ? Number(material.bedTemp) : null,
+      diameter: material.diameter !== undefined && (material.diameter as any) !== '' ? Number(material.diameter) : null
     };
     const { error } = await supabase.from('materials').update(payload).eq('id', material.id);
     if (error) throw error;
@@ -236,7 +236,9 @@ export const StorageService = {
       id: f.id,
       name: f.name,
       createdAt: f.created_at,
-      status: (f.status || 'aguardando') as ProjectStatus
+      status: (f.status || 'aguardando') as ProjectStatus,
+      payments: f.payments || [],
+      notes: f.notes || ''
     }));
   },
 
@@ -252,8 +254,21 @@ export const StorageService = {
       id: data.id,
       name: data.name,
       createdAt: data.created_at,
-      status: (data.status || 'aguardando') as ProjectStatus
+      status: (data.status || 'aguardando') as ProjectStatus,
+      payments: data.payments || [],
+      notes: data.notes || ''
     };
+  },
+
+  updateFolder: async (id: string, folder: Partial<ProjectFolder>): Promise<void> => {
+    const payload: any = {};
+    if (folder.name !== undefined) payload.name = folder.name;
+    if (folder.status !== undefined) payload.status = folder.status;
+    if (folder.payments !== undefined) payload.payments = folder.payments;
+    if (folder.notes !== undefined) payload.notes = folder.notes;
+
+    const { error } = await supabase.from('project_folders').update(payload).eq('id', id);
+    if (error) throw error;
   },
 
   deleteFolder: async (id: string) => {

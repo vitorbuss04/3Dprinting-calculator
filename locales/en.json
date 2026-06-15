@@ -256,5 +256,21 @@
   "diameter_label": "DIAMETER (mm)",
   "print_temp_label": "NOZZLE TEMP (°C)",
   "bed_temp_label": "BED TEMP (°C)",
-  "technical_specs_section": "TECHNICAL SPECIFICATIONS"
+  "technical_specs_section": "TECHNICAL SPECIFICATIONS",
+  "folder_payments_title": "Payment Control",
+  "total_paid": "Total Paid",
+  "amount_remaining": "Remaining",
+  "add_payment": "Add Payment",
+  "payment_date": "Date",
+  "payment_amount": "Amount",
+  "payment_description": "Description / Name",
+  "general_notes": "General Notes",
+  "notes_placeholder": "Type general notes about the folder...",
+  "saving_notes": "Saving notes...",
+  "notes_saved": "Notes saved!",
+  "payment_added": "Payment added",
+  "payment_deleted": "Payment deleted",
+  "payment_updated": "Payment updated",
+  "open_folder": "Open Folder",
+  "back_to_folders": "Back to folders"
 }

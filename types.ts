@@ -74,11 +74,20 @@ export interface Project {
   folderId?: string | null;
 }
 
+export interface Payment {
+  id: string;
+  date: string;
+  amount: number;
+  description: string;
+}
+
 export interface ProjectFolder {
   id: string;
   name: string;
   createdAt: string;
   status: ProjectStatus;
+  payments?: Payment[];
+  notes?: string;
 }
 
 export type ProjectStatus = 'aguardando' | 'em_producao' | 'concluido' | 'cancelado';
