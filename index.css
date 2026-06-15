@@ -1,0 +1,118 @@
+/* ============================================================
+   Tailwind v4 — CSS-first configuration
+   Replaces the CDN <script> + inline tailwind.config from index.html
+   ============================================================ */
+@import "tailwindcss";
+
+/* ── Design Tokens ─────────────────────────────────────────── */
+@theme {
+  /* Font families */
+  --font-family-sans: 'Outfit', 'Roboto', sans-serif;
+  --font-family-mono: 'Roboto Mono', monospace;
+
+  /* Custom semantic color tokens — values come from CSS vars
+     so light/dark themes can swap them at runtime.           */
+  --color-primary:        var(--color-primary);
+  --color-primary-hover:  var(--color-primary-hover);
+  --color-primary-soft:   var(--color-primary-soft);
+
+  --color-canvas:         var(--color-canvas);
+  --color-red:            var(--color-red);
+  --color-yellow:         var(--color-yellow);
+  --color-green:          var(--color-green);
+  --color-ink:            var(--color-ink);
+  --color-body:           var(--color-body);
+  --color-muted:          var(--color-muted);
+  --color-muted-soft:     var(--color-muted-soft);
+  --color-hairline:       var(--color-hairline);
+  --color-hairline-soft:  var(--color-hairline-soft);
+  --color-border-strong:  var(--color-border-strong);
+  --color-on-primary:     var(--color-on-primary);
+
+  --color-surface-soft:     var(--color-surface-soft);
+  --color-surface-card:     var(--color-surface-card);
+  --color-surface-strong:   var(--color-surface-strong);
+  --color-surface-elevated: var(--color-surface-elevated);
+}
+
+/* ── Dark mode strategy: class-based (.dark on <html>) ──────── */
+@variant dark (&:where(.dark, .dark *));
+
+/* ── Runtime CSS Variables (light theme) ───────────────────── */
+:root {
+  --color-primary:        #1a73e8;
+  --color-primary-hover:  #1558b0;
+  --color-primary-soft:   #e8f0fe;
+  --color-red:            #ea4335;
+  --color-yellow:         #b06000; /* Darker amber for accessible contrast in light mode */
+  --color-green:          #34a853;
+  --color-ink:            #202124;
+  --color-body:           #3c4043;
+  --color-muted:          #5f6368;
+  --color-muted-soft:     #80868b;
+  --color-hairline:       #dadce0;
+  --color-hairline-soft:  #e8eaed;
+  --color-border-strong:  #c4c7c5;
+  --color-canvas:         #ffffff;
+  --color-surface-soft:   #f8f9fa;
+  --color-surface-card:   #ffffff;
+  --color-surface-strong: #f1f3f4;
+  --color-surface-elevated: #ffffff;
+  --color-on-primary:     #ffffff;
+}
+
+/* ── Runtime CSS Variables (dark theme) ─────────────────────── */
+.dark, html.dark {
+  --color-primary:        #8ab4f8;
+  --color-primary-hover:  #aecbfa;
+  --color-primary-soft:   #1a233a;
+  --color-red:            #f28b82;
+  --color-yellow:         #fdd663;
+  --color-green:          #81c995;
+  --color-ink:            #f1f3f4;
+  --color-body:           #e8eaed;
+  --color-muted:          #9aa0a6;
+  --color-muted-soft:     #80868b;
+  --color-hairline:       #303134;
+  --color-hairline-soft:  #202124;
+  --color-border-strong:  #4f5154;
+  --color-canvas:         #131314;
+  --color-surface-soft:   #1e1f20;
+  --color-surface-card:   #1e1f20;
+  --color-surface-strong: #2d2e30;
+  --color-surface-elevated: #2e3032;
+  --color-on-primary:     #131314;
+}
+
+/* ── Global base styles ─────────────────────────────────────── */
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-body);
+  font-family: 'Outfit', 'Roboto', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbars (Google style) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Focus ring — only on keyboard navigation, never on mouse clicks */
+*:focus {
+  outline: none;
+}
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
