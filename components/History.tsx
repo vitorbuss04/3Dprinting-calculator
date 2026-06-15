@@ -180,10 +180,10 @@ export const History: React.FC = () => {
           : (folderObj?.name || t('unknown_folder_name'));
         const folderProjects = (Reflect.get(groupedProjects, folderId) || []) as Project[];
 
-        const folderTotalCost = folderProjects.reduce((sum, p) => sum + p.result.finalPrice, 0);
-        const folderTotalProfit = folderProjects.reduce((sum, p) => sum + p.result.profit, 0);
-        const folderTotalProdCost = folderProjects.reduce((sum, p) => sum + p.result.totalProductionCost, 0);
-        const folderTotalTime = folderProjects.reduce((sum, p) => sum + (p.printTimeHours + p.printTimeMinutes / 60), 0);
+        const folderTotalCost = folderProjects.reduce((sum, p) => sum + (Number(p.result?.finalPrice) || 0), 0);
+        const folderTotalProfit = folderProjects.reduce((sum, p) => sum + (Number(p.result?.profit) || 0), 0);
+        const folderTotalProdCost = folderProjects.reduce((sum, p) => sum + (Number(p.result?.totalProductionCost) || 0), 0);
+        const folderTotalTime = folderProjects.reduce((sum, p) => sum + ((Number(p.printTimeHours) || 0) + (Number(p.printTimeMinutes) || 0) / 60), 0);
 
         if (folderProjects.length === 0 && isUncategorized) return null;
 
@@ -211,7 +211,7 @@ export const History: React.FC = () => {
                           value={folderObj?.status || 'aguardando'}
                           onChange={(e) => handleFolderStatusChange(folderId, e.target.value as ProjectStatus)}
                           disabled={updatingStatusId === folderId}
-                          className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-1.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-lg cursor-pointer disabled:opacity-50"
+                          className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-1.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-xl cursor-pointer disabled:opacity-50"
                         >
                           <option value="aguardando">⏳ {t('status_waiting')}</option>
                           <option value="em_producao">⚙️ {t('status_production')}</option>
@@ -405,21 +405,21 @@ const ProjectCard = ({
   handleMoveProject: (projectId: string, targetFolderId: string | null) => void;
 }) => {
   const { t } = useTranslation();
-  const [localFinalPrice, setLocalFinalPrice] = useState(Number(project.result.finalPrice).toFixed(2));
-  const [localProfit, setLocalProfit] = useState(Number(project.result.profit).toFixed(2));
-  const [localCost, setLocalCost] = useState(Number(project.result.totalProductionCost).toFixed(2));
+  const [localFinalPrice, setLocalFinalPrice] = useState((Number(project.result?.finalPrice) || 0).toFixed(2));
+  const [localProfit, setLocalProfit] = useState((Number(project.result?.profit) || 0).toFixed(2));
+  const [localCost, setLocalCost] = useState((Number(project.result?.totalProductionCost) || 0).toFixed(2));
 
   useEffect(() => {
-    if (Math.abs(parseFloat(localFinalPrice || "0") - project.result.finalPrice) > 0.01) {
-      setLocalFinalPrice(Number(project.result.finalPrice).toFixed(2));
+    if (Math.abs(parseFloat(localFinalPrice || "0") - (Number(project.result?.finalPrice) || 0)) > 0.01) {
+      setLocalFinalPrice((Number(project.result?.finalPrice) || 0).toFixed(2));
     }
-    if (Math.abs(parseFloat(localProfit || "0") - project.result.profit) > 0.01) {
-      setLocalProfit(Number(project.result.profit).toFixed(2));
+    if (Math.abs(parseFloat(localProfit || "0") - (Number(project.result?.profit) || 0)) > 0.01) {
+      setLocalProfit((Number(project.result?.profit) || 0).toFixed(2));
     }
-    if (Math.abs(parseFloat(localCost || "0") - project.result.totalProductionCost) > 0.01) {
-      setLocalCost(Number(project.result.totalProductionCost).toFixed(2));
+    if (Math.abs(parseFloat(localCost || "0") - (Number(project.result?.totalProductionCost) || 0)) > 0.01) {
+      setLocalCost((Number(project.result?.totalProductionCost) || 0).toFixed(2));
     }
-  }, [project.result.finalPrice, project.result.profit, project.result.totalProductionCost]);
+  }, [project.result?.finalPrice, project.result?.profit, project.result?.totalProductionCost]);
 
   const updateValues = (field: 'finalPrice' | 'profit' | 'totalProductionCost', val: string) => {
     const numVal = parseFloat(val);
@@ -561,7 +561,7 @@ const ProjectCard = ({
               <select
                 value={selectedFolderId || ''}
                 onChange={(e) => setSelectedFolderId(e.target.value || null)}
-                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-lg cursor-pointer"
+                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-xl cursor-pointer"
               >
                 <option value="">{t('uncategorized_folder_name')}</option>
                 {Object.values(folders).map((folder) => (

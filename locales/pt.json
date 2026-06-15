@@ -248,5 +248,12 @@
   "failure_rate_label": "TAXA DE FALHA",
   "labor_time_label": "TEMPO DE TRABALHO",
   "extra_components_label": "COMPONENTES EXTRAS",
-  "close_details_label": "FECHAR DETALHES DO PROJETO"
+  "close_details_label": "FECHAR DETALHES DO PROJETO",
+  "low_stock_badge": "ESTOQUE BAIXO",
+  "full_spool_btn": "Bobina Cheia",
+  "manufacturer_label": "FABRICANTE / MARCA",
+  "diameter_label": "DIÂMETRO (mm)",
+  "print_temp_label": "TEMP. BICO (°C)",
+  "bed_temp_label": "TEMP. MESA (°C)",
+  "technical_specs_section": "ESPECIFICAÇÕES TÉCNICAS"
 }

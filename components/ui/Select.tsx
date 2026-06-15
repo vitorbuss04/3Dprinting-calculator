@@ -6,6 +6,7 @@ interface SelectOption {
     value: string | number;
     label: string;
     disabled?: boolean;
+    color?: string; // Optional dot color (e.g. filament color)
 }
 
 interface SelectProps {
@@ -60,7 +61,7 @@ export const Select: React.FC<SelectProps> = ({
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
-                        "w-full bg-canvas border border-hairline rounded-lg px-4 py-2.5 flex items-center justify-between outline-none transition-all duration-150",
+                        "w-full bg-canvas border border-hairline rounded-xl px-4 py-2.5 flex items-center justify-between outline-none transition-all duration-150",
                         "font-sans text-sm text-ink",
                         "focus:border-primary focus:bg-canvas",
                         "hover:border-border-strong",
@@ -74,7 +75,13 @@ export const Select: React.FC<SelectProps> = ({
                             {icon}
                         </div>
                     )}
-                    <span className={cn("truncate font-sans text-sm", !selectedOption ? "text-muted-soft" : "text-ink")}>
+                    <span className={cn("truncate font-sans text-sm flex items-center gap-2", !selectedOption ? "text-muted-soft" : "text-ink")}>
+                        {selectedOption?.color && (
+                            <span
+                                className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/10"
+                                style={{ backgroundColor: selectedOption.color }}
+                            />
+                        )}
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
                     <ChevronDown
@@ -94,15 +101,23 @@ export const Select: React.FC<SelectProps> = ({
                                 onClick={() => handleSelect(opt)}
                                 className={cn(
                                     "px-4 py-2.5 text-sm font-sans cursor-pointer transition-all duration-100 flex items-center justify-between border-l-2",
-                                    opt.disabled 
-                                        ? "opacity-30 cursor-not-allowed border-l-transparent" 
+                                    opt.disabled
+                                        ? "opacity-30 cursor-not-allowed border-l-transparent"
                                         : "hover:bg-surface-soft hover:text-ink hover:border-l-primary border-l-transparent",
-                                    opt.value === value 
-                                        ? "bg-primary-soft text-primary font-medium border-l-primary" 
+                                    opt.value === value
+                                        ? "bg-primary-soft text-primary font-medium border-l-primary"
                                         : "text-body"
                                 )}
                             >
-                                <span className="truncate">{opt.label}</span>
+                                <span className="truncate flex items-center gap-2">
+                                    {opt.color && (
+                                        <span
+                                            className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/10"
+                                            style={{ backgroundColor: opt.color }}
+                                        />
+                                    )}
+                                    {opt.label}
+                                </span>
                                 {opt.value === value && <Check size={12} className="text-primary shrink-0" />}
                             </div>
                         ))}

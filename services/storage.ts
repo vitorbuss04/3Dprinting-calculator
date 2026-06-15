@@ -74,7 +74,11 @@ export const StorageService = {
       color: m.color || '', // Default to empty string if not present
       spoolPrice: m.spool_price,
       spoolWeight: m.spool_weight,
-      currentStock: m.current_stock
+      currentStock: m.current_stock,
+      manufacturer: m.manufacturer || '',
+      printTemp: m.print_temp || undefined,
+      bedTemp: m.bed_temp || undefined,
+      diameter: m.diameter || undefined
     }));
   },
 
@@ -88,7 +92,11 @@ export const StorageService = {
       color: material.color,
       spool_price: material.spoolPrice,
       spool_weight: material.spoolWeight,
-      current_stock: material.currentStock
+      current_stock: material.currentStock,
+      manufacturer: material.manufacturer || null,
+      print_temp: material.printTemp !== undefined && material.printTemp !== '' ? Number(material.printTemp) : null,
+      bed_temp: material.bedTemp !== undefined && material.bedTemp !== '' ? Number(material.bedTemp) : null,
+      diameter: material.diameter !== undefined && material.diameter !== '' ? Number(material.diameter) : null
     };
     const { error } = await supabase.from('materials').insert([payload]);
     if (error) throw error;
@@ -101,7 +109,11 @@ export const StorageService = {
       color: material.color,
       spool_price: material.spoolPrice,
       spool_weight: material.spoolWeight,
-      current_stock: material.currentStock
+      current_stock: material.currentStock,
+      manufacturer: material.manufacturer || null,
+      print_temp: material.printTemp !== undefined && material.printTemp !== '' ? Number(material.printTemp) : null,
+      bed_temp: material.bedTemp !== undefined && material.bedTemp !== '' ? Number(material.bedTemp) : null,
+      diameter: material.diameter !== undefined && material.diameter !== '' ? Number(material.diameter) : null
     };
     const { error } = await supabase.from('materials').update(payload).eq('id', material.id);
     if (error) throw error;

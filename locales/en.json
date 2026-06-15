@@ -248,5 +248,12 @@
   "failure_rate_label": "FAILURE RATE",
   "labor_time_label": "LABOR TIME",
   "extra_components_label": "EXTRA COMPONENTS",
-  "close_details_label": "CLOSE PROJECT DETAILS"
+  "close_details_label": "CLOSE PROJECT DETAILS",
+  "low_stock_badge": "LOW STOCK",
+  "full_spool_btn": "Full Spool",
+  "manufacturer_label": "MANUFACTURER / BRAND",
+  "diameter_label": "DIAMETER (mm)",
+  "print_temp_label": "NOZZLE TEMP (°C)",
+  "bed_temp_label": "BED TEMP (°C)",
+  "technical_specs_section": "TECHNICAL SPECIFICATIONS"
 }

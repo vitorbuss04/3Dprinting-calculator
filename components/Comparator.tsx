@@ -65,12 +65,20 @@ export const Comparator: React.FC = () => {
     const m = materials.find(x => x.id === materialId);
     if (!p) return { total: 0, depreciation: 0, energy: 0, maintenance: 0, material: 0 };
 
-    const depreciation = (p.acquisitionCost / p.lifespanHours) * h;
-    const energy = (p.powerConsumption / 1000) * settings.electricityCost * h;
-    const maintenance = p.maintenanceCostPerHour * h;
+    const pAcquisitionCost = Number(p.acquisitionCost) || 0;
+    const pLifespanHours = Number(p.lifespanHours) || 0;
+    const pPowerConsumption = Number(p.powerConsumption) || 0;
+    const pMaintenanceCostPerHour = Number(p.maintenanceCostPerHour) || 0;
+
+    const mSpoolPrice = m ? (Number(m.spoolPrice) || 0) : 0;
+    const mSpoolWeight = m ? (Number(m.spoolWeight) || 0) : 0;
+
+    const depreciation = pLifespanHours > 0 ? (pAcquisitionCost / pLifespanHours) * h : 0;
+    const energy = (pPowerConsumption / 1000) * settings.electricityCost * h;
+    const maintenance = pMaintenanceCostPerHour * h;
     let materialCost = 0;
-    if (m && m.spoolWeight > 0) {
-      materialCost = (m.spoolPrice / m.spoolWeight) * w;
+    if (m && mSpoolWeight > 0) {
+      materialCost = (mSpoolPrice / mSpoolWeight) * w;
     }
     const total = depreciation + energy + maintenance + materialCost;
     return { total, depreciation, energy, maintenance, material: materialCost };
@@ -133,7 +141,7 @@ export const Comparator: React.FC = () => {
               </div>
               <Select
                 label={t('material_label')}
-                options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})` }))}
+                options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})`, color: m.color || undefined }))}
                 value={materialAId}
                 onChange={(val) => setMaterialAId(val as string)}
               />
@@ -180,7 +188,7 @@ export const Comparator: React.FC = () => {
               </div>
               <Select
                 label={t('material_label')}
-                options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})` }))}
+                options={materials.map(m => ({ value: m.id, label: `${m.name} (${m.type})`, color: m.color || undefined }))}
                 value={materialBId}
                 onChange={(val) => setMaterialBId(val as string)}
               />

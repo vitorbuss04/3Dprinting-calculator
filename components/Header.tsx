@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell, Check, Sun, Moon, Activity, Wifi, ShieldCheck, Database, Languages } from 'lucide-react';
+import { Menu, Bell, Check, Sun, Moon, Database, Languages } from 'lucide-react';
 import { ViewState } from '../types';
 import { Session } from '@supabase/supabase-js';
 import { cn } from '../utils/cn';
@@ -60,8 +60,8 @@ export const Header: React.FC<HeaderProps> = ({
                         <h1 className="text-base font-sans font-medium text-ink tracking-wide leading-none">
                             {t(getHeaderTitle(currentView))}
                         </h1>
-                        <p className="text-xs font-sans text-muted mt-1.5 hidden sm:flex items-center gap-2">
-                             {t('active_session')} <span className="text-muted-soft">•</span> <span className="text-muted">{format(new Date(), "yyyy-MM-dd HH:mm")}</span> <span className="text-muted-soft">•</span> <span className="text-green font-medium">{t('system_stable')}</span>
+                        <p className="text-xs font-sans text-muted mt-1.5 hidden sm:block">
+                            {format(new Date(), "dd/MM/yyyy HH:mm")}
                         </p>
                     </div>
                 </div>
@@ -69,20 +69,6 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Right Section: System Actions */}
             <div className="flex items-center gap-2">
-                <div className="hidden lg:flex items-center gap-6 px-6 border-r border-hairline h-8 self-center">
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('network')}</span>
-                        <span className="text-xs font-sans font-medium text-green flex items-center gap-1.5">
-                            <Wifi size={12} /> {t('connected')}
-                        </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('security')}</span>
-                        <span className="text-xs font-sans font-medium text-primary flex items-center gap-1.5">
-                            <ShieldCheck size={12} /> {t('protected')}
-                        </span>
-                    </div>
-                </div>
 
                 {/* Language Switcher Button */}
                 <button
@@ -179,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
                                                         e.stopPropagation();
                                                         markAsRead(notification.id);
                                                     }}
-                                                    className="absolute top-4 right-4 p-1 text-slate-700 hover:text-primary opacity-0 group-hover:opacity-100 transition-all border border-slate-800"
+                                                    className="absolute top-4 right-4 p-1 text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-all border border-hairline rounded"
                                                 >
                                                     <Check size={10} />
                                                 </button>

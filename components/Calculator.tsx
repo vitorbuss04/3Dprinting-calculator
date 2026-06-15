@@ -165,16 +165,24 @@ export const Calculator: React.FC = () => {
     const totalPrintTimeHours = numPrintHours + (numPrintMinutes / 60);
     const totalLaborTimeHours = numLaborHours + (numLaborMinutes / 60);
 
-    const depreciationPerHour = printer.acquisitionCost / printer.lifespanHours;
+    const printerAcquisitionCost = Number(printer.acquisitionCost) || 0;
+    const printerLifespanHours = Number(printer.lifespanHours) || 0;
+    const printerPowerConsumption = Number(printer.powerConsumption) || 0;
+    const printerMaintenanceCostPerHour = Number(printer.maintenanceCostPerHour) || 0;
+
+    const materialSpoolPrice = Number(material.spoolPrice) || 0;
+    const materialSpoolWeight = Number(material.spoolWeight) || 0;
+
+    const depreciationPerHour = printerLifespanHours > 0 ? (printerAcquisitionCost / printerLifespanHours) : 0;
     const depreciationCost = depreciationPerHour * totalPrintTimeHours;
 
-    const energyCost = (printer.powerConsumption / 1000) * settings.electricityCost * totalPrintTimeHours;
+    const energyCost = (printerPowerConsumption / 1000) * settings.electricityCost * totalPrintTimeHours;
 
-    const costPerGram = material.spoolPrice / material.spoolWeight;
+    const costPerGram = materialSpoolWeight > 0 ? (materialSpoolPrice / materialSpoolWeight) : 0;
     const materialCostBase = numWeight * costPerGram;
     const materialCost = materialCostBase * (1 + (numFailureRate / 100));
 
-    const maintenanceCost = printer.maintenanceCostPerHour * totalPrintTimeHours;
+    const maintenanceCost = printerMaintenanceCostPerHour * totalPrintTimeHours;
     const laborCost = totalLaborTimeHours * numLaborRate;
 
     const additionalCost = additionalItems.reduce((acc, item) => {
@@ -305,7 +313,8 @@ export const Calculator: React.FC = () => {
   const materialOptions = materials.map(m => ({
     value: m.id,
     label: `${m.name} // ${t('g_rem_suffix', { count: Number((m.currentStock || 0).toFixed(0)) })}`,
-    disabled: (m.currentStock || 0) === 0
+    disabled: (m.currentStock || 0) === 0,
+    color: m.color || undefined,
   }));
 
   return (

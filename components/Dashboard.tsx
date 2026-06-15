@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { StorageService } from '../services/storage';
 import { Project, GlobalSettings, ViewState } from '../types';
 import { Card } from './ui/Card';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
-import { TrendingUp, DollarSign, Box, Loader2, Activity, Zap, Cpu, ChevronDown } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
+import { TrendingUp, DollarSign, Box, Loader2, Activity, ChevronDown, Clock, Scaling } from 'lucide-react';
 import { AssetsSummary } from './AssetsSummary';
 import { cn } from '../utils/cn';
 import { format } from 'date-fns';
@@ -45,9 +45,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const concludedFolderIds = folders.filter(f => f.status === 'concluido').map(f => f.id);
   const concludedProjects = projects.filter(p => p.folderId && concludedFolderIds.includes(p.folderId));
 
-  const totalRevenue = concludedProjects.reduce((acc, curr) => acc + curr.result.finalPrice, 0);
-  const totalProfit  = concludedProjects.reduce((acc, curr) => acc + curr.result.profit, 0);
+  const totalRevenue = concludedProjects.reduce((acc, curr) => acc + (Number(curr.result?.finalPrice) || 0), 0);
+  const totalProfit  = concludedProjects.reduce((acc, curr) => acc + (Number(curr.result?.profit) || 0), 0);
   const totalPrints  = concludedFolderIds.length;
+
+  // Operational metrics for concluded projects
+  const totalWeight = concludedProjects.reduce((acc, curr) => acc + (Number(curr.modelWeight) || 0), 0);
+  const totalPrintMinutesAcc = concludedProjects.reduce((acc, curr) => {
+    const hours = Number(curr.printTimeHours) || 0;
+    const mins = Number(curr.printTimeMinutes) || 0;
+    return acc + (hours * 60) + mins;
+  }, 0);
+
+  const totalPrintHours = Math.floor(totalPrintMinutesAcc / 60);
+  const totalPrintMinutes = Math.round(totalPrintMinutesAcc % 60);
 
   const gastoLabel = t('production_cost');
   const lucroLabel = t('net_profit');
@@ -58,9 +69,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     const folderProjects = projects.filter(p => p.folderId === f.id);
     return {
       name: f.name.length > 8 ? f.name.substring(0, 8) : f.name,
-      [gastoLabel]: folderProjects.reduce((acc, p) => acc + p.result.totalProductionCost, 0),
-      [lucroLabel]: folderProjects.reduce((acc, p) => acc + p.result.profit, 0),
-      [faturamentoLabel]: folderProjects.reduce((acc, p) => acc + p.result.finalPrice, 0),
+      [gastoLabel]: folderProjects.reduce((acc, p) => acc + (Number(p.result?.totalProductionCost) || 0), 0),
+      [lucroLabel]: folderProjects.reduce((acc, p) => acc + (Number(p.result?.profit) || 0), 0),
+      [faturamentoLabel]: folderProjects.reduce((acc, p) => acc + (Number(p.result?.finalPrice) || 0), 0),
     };
   }).reverse();
 
@@ -109,20 +120,75 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const last5Profit  = chartData.map(d => ({ val: d[lucroLabel] }));
   const last5Prints  = chartData.map((_, i) => ({ val: i + 1 }));
 
+  const last5Weight = concludedFolders.map(f => {
+    const folderProjects = projects.filter(p => p.folderId === f.id);
+    const w = folderProjects.reduce((acc, p) => acc + (Number(p.modelWeight) || 0), 0);
+    return { val: w };
+  }).reverse();
+
+  const last5Hours = concludedFolders.map(f => {
+    const folderProjects = projects.filter(p => p.folderId === f.id);
+    const mins = folderProjects.reduce((acc, p) => acc + (Number(p.printTimeHours) || 0) * 60 + (Number(p.printTimeMinutes) || 0), 0);
+    return { val: mins / 60 };
+  }).reverse();
+
+  // Custom Tooltip component for stacked BarChart
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const cost = payload.find((p: any) => p.dataKey === gastoLabel)?.value || 0;
+      const profit = payload.find((p: any) => p.dataKey === lucroLabel)?.value || 0;
+      const total = cost + profit;
+      
+      return (
+        <div className="bg-surface-elevated border border-hairline p-4 rounded-xl shadow-xl text-xs font-sans space-y-2">
+          <p className="font-semibold text-ink">{label}</p>
+          <div className="space-y-1">
+            <div className="flex justify-between gap-8 text-red">
+              <span>{gastoLabel}:</span>
+              <span className="font-medium">{settings.currencySymbol} {cost.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between gap-8 text-green">
+              <span>{lucroLabel}:</span>
+              <span className="font-medium">{settings.currencySymbol} {profit.toFixed(2)}</span>
+            </div>
+            <div className="border-t border-hairline my-1" />
+            <div className="flex justify-between gap-8 text-primary font-semibold">
+              <span>{faturamentoLabel}:</span>
+              <span>{settings.currencySymbol} {total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* System Status Banner */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-surface-soft border border-hairline text-xs font-sans text-muted rounded-xl">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5"><Zap size={12} className="text-primary" /> {t('system_ready')}</span>
-          <span className="flex items-center gap-1.5"><Cpu size={12} className="text-green" /> {t('synchronized')}</span>
-        </div>
-        <div className="flex items-center gap-2">
-            {t('operating_label')}<span className="text-ink font-semibold">00:42:15</span>
-        </div>
-      </div>
+      {/* Real Summary Bar */}
+      {folders.length > 0 && (() => {
+        const pending = folders.filter(f => f.status === 'aguardando').length;
+        const inProd  = folders.filter(f => f.status === 'em_producao').length;
+        const done    = folders.filter(f => f.status === 'concluido').length;
+        return (
+          <div className="flex items-center gap-6 px-4 py-2.5 bg-surface-soft border border-hairline text-xs font-sans text-muted rounded-xl">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-yellow shrink-0" />
+              <span>{pending} {t('status_waiting')}</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+              <span>{inProd} {t('status_production')}</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-green shrink-0" />
+              <span>{done} {t('status_completed')}</span>
+            </span>
+          </div>
+        );
+      })()}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatBlock
           title={t('revenue_title')}
           value={`${settings.currencySymbol}${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -143,6 +209,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           icon={Box}
           colorClass="text-muted"
           data={last5Prints}
+        />
+        <StatBlock
+          title={t('print_time_label')}
+          value={`${totalPrintHours}h ${totalPrintMinutes}m`}
+          icon={Clock}
+          colorClass="text-yellow"
+          data={last5Hours}
+        />
+        <StatBlock
+          title={t('model_weight_label')}
+          value={totalWeight >= 1000 ? `${(totalWeight / 1000).toFixed(2)} kg` : `${totalWeight.toFixed(0)} g`}
+          icon={Scaling}
+          colorClass="text-primary"
+          data={last5Weight}
         />
       </div>
 
@@ -166,7 +246,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           {projects.length > 0 ? (
             <div className="flex-1 w-full min-h-0">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={32}>
                   <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--color-hairline)" />
                   <XAxis
                     dataKey="name"
@@ -182,12 +262,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     axisLine={false}
                     tickLine={false}
                   />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--color-surface-elevated)', border: '1px solid var(--color-hairline)', borderRadius: '8px', fontSize: '12px', fontFamily: 'Outfit, Roboto, sans-serif', color: 'var(--color-ink)' }}
-                    itemStyle={{ padding: '0px', color: 'var(--color-ink)' }}
-                    cursor={{ stroke: 'var(--color-primary)', strokeWidth: 1 }}
-                    formatter={(value: number) => settings.currencySymbol + ' ' + value.toFixed(2)}
-                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-surface-soft)', opacity: 0.4 }} />
                   <Legend
                     verticalAlign="top"
                     align="right"
@@ -196,10 +271,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     wrapperStyle={{ paddingBottom: '30px', fontSize: '11px', fontFamily: 'Outfit, Roboto, sans-serif', textTransform: 'uppercase', color: 'var(--color-muted)' }}
                   />
 
-                  <Line type="stepAfter" dataKey={faturamentoLabel} stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, stroke: 'var(--color-primary)', strokeWidth: 2, fill: 'var(--color-canvas)' }} activeDot={{ r: 5 }} />
-                  <Line type="stepAfter" dataKey={lucroLabel} stroke="var(--color-green)" strokeWidth={2} dot={{ r: 3, stroke: 'var(--color-green)', strokeWidth: 2, fill: 'var(--color-canvas)' }} activeDot={{ r: 5 }} />
-                  <Line type="stepAfter" dataKey={gastoLabel} stroke="var(--color-red)" strokeWidth={2} dot={{ r: 3, stroke: 'var(--color-red)', strokeWidth: 2, fill: 'var(--color-canvas)' }} activeDot={{ r: 5 }} />
-                </LineChart>
+                  <Bar dataKey={gastoLabel} stackId="a" fill="var(--color-red)" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey={lucroLabel} stackId="a" fill="var(--color-green)" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
@@ -222,7 +296,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
-                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-lg cursor-pointer"
+                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-xl cursor-pointer"
               >
                 <option value="all">{t('all_status_option')}</option>
                 <option value="aguardando">{t('status_waiting_option')}</option>

@@ -49,7 +49,7 @@ export const Input: React.FC<InputProps> = ({
                 <input
                      id={id}
                      className={cn(
-                         "w-full bg-canvas border border-hairline rounded-lg px-4 py-2.5 outline-none transition-all duration-150",
+                         "w-full bg-canvas border border-hairline rounded-xl px-4 py-2.5 outline-none transition-all duration-150",
                          "font-sans text-sm text-ink",
                          "focus:border-primary focus:ring-1 focus:ring-primary focus:bg-canvas",
                          "placeholder:text-muted-soft",

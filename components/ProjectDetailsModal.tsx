@@ -47,7 +47,7 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                     <span className={cn("font-sans text-xs", isTotal ? 'font-semibold text-ink' : 'text-muted')}>{label}</span>
                 </div>
                 <span className={cn("font-sans font-semibold", isTotal ? 'text-primary text-base' : 'text-ink text-xs')}>
-                    {typeof value === 'number' ? `${currencySymbol} ${value.toFixed(2)}` : value}
+                    {typeof value === 'number' ? `${currencySymbol} ${(isNaN(value) ? 0 : value).toFixed(2)}` : value}
                 </span>
             </div>
         );
@@ -138,7 +138,7 @@ export const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ projec
                                         <PiggyBank size={16} className="text-green" />
                                         <span className="text-xs font-sans font-medium text-green uppercase tracking-wider">{t('projected_net_profit')}</span>
                                     </div>
-                                    <span className="font-sans font-semibold text-green text-lg">{currencySymbol} {project.result.profit.toFixed(2)}</span>
+                                    <span className="font-sans font-semibold text-green text-lg">{currencySymbol} {(Number(project.result.profit) || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>

@@ -43,6 +43,10 @@ CREATE TABLE IF NOT EXISTS materials (
     spool_price DECIMAL(12,4) DEFAULT 0.0000,
     spool_weight DECIMAL(12,4) DEFAULT 0.0000,
     current_stock DECIMAL(12,4) DEFAULT 0.0000,
+    manufacturer VARCHAR(255) DEFAULT NULL,
+    print_temp INT DEFAULT NULL,
+    bed_temp INT DEFAULT NULL,
+    diameter DECIMAL(6,3) DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, ArrowRightLeft, LogOut, ChevronLeft, Terminal, Cpu, Settings } from 'lucide-react';
+import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, ArrowRightLeft, LogOut, ChevronLeft, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ViewState } from '../types';
 import { cn } from '../utils/cn';
@@ -113,21 +113,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     })}
                 </nav>
 
-                {/* Footer Utility */}
+                {/* Footer: Quick Action + Logout */}
                 <div className="p-4 border-t border-hairline space-y-3">
                     {!isCollapsed && (
-                        <div className="p-3 border border-hairline bg-surface-soft rounded-xl space-y-2">
-                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('system_status')}</span>
-                                <div className="w-2.5 h-2.5 rounded-full bg-green/20 flex items-center justify-center">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green" />
-                                </div>
-                             </div>
-                             <div className="h-1.5 bg-surface-strong w-full rounded-full overflow-hidden">
-                                <div className="h-full bg-primary/20 w-[64%] rounded-full" />
-                             </div>
-                             <p className="text-[10px] font-sans text-muted leading-tight">{t('operations_count')}</p>
-                        </div>
+                        <button
+                            onClick={() => {
+                                onViewChange('calculator');
+                                onClose();
+                            }}
+                            className="w-full p-3 border border-primary/20 bg-primary-soft text-left rounded-xl space-y-1 hover:border-primary/40 transition-colors group"
+                        >
+                            <span className="text-[10px] font-sans font-semibold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                                <CalcIcon size={10} />
+                                {t('new_calculation', 'Nova Calculação')}
+                            </span>
+                            <p className="text-[10px] font-sans text-muted leading-tight group-hover:text-body transition-colors">
+                                {t('new_calculation_hint', 'Calcule o custo de uma nova peça agora')}
+                            </p>
+                        </button>
                     )}
 
                     <button

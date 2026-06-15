@@ -3,7 +3,6 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ViewState } from '../types';
 import { Session } from '@supabase/supabase-js';
-import { useTranslation } from 'react-i18next';
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -20,7 +19,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     session,
     onLogout
 }) => {
-    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     return (
@@ -45,18 +43,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 relative custom-scrollbar">
                     <div className="max-w-7xl mx-auto pb-10">
                         {children}
-                    </div>
-                </div>
-
-                {/* System Status Line at Footer */}
-                <div className="hidden lg:flex h-6 border-t border-hairline bg-surface-soft px-6 items-center justify-between text-[10px] font-sans font-medium text-muted z-10">
-                    <div className="flex items-center gap-4">
-                        <span>{t('secured_data')}</span>
-                        <span>{t('sync_active')}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-green/70">{t('server_online')}</span>
-                        <span className="text-primary/70">{t('system_stable')}</span>
                     </div>
                 </div>
             </main>

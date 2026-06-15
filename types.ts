@@ -19,11 +19,15 @@ export enum MaterialType {
 export interface Material {
   id: string;
   type: MaterialType;
-  name: string; // Marca/Nome
+  name: string; // Nome da cor
   color: string; // Cor do filamento
   spoolPrice: number; // R$
   spoolWeight: number; // gramas
   currentStock?: number; // gramas
+  manufacturer?: string; // Fabricante/Marca
+  printTemp?: number; // Temperatura de impressão (°C)
+  bedTemp?: number; // Temperatura da mesa (°C)
+  diameter?: number; // Diâmetro (mm)
 }
 
 export interface GlobalSettings {
