@@ -27,3 +27,4 @@ dist-ssr
 # Sensitive data dumps — NEVER commit these
 supabase_dump.json
 *_dump.json
+.vercel

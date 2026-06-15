@@ -82,9 +82,7 @@ export const Calculator: React.FC = () => {
         if (parsed.markup !== undefined) setMarkup(parsed.markup);
         if (parsed.additionalItems) setAdditionalItems(parsed.additionalItems);
         if (parsed.partName !== undefined) setPartName(parsed.partName);
-        
-        if (parsed.selectedFolderId) setSelectedFolderId(parsed.selectedFolderId);
-        else if (f.length > 0) setSelectedFolderId(f[0].id);
+        setSelectedFolderId('');
 
         if (parsed.selectedPrinterId && p.some(pr => pr.id === parsed.selectedPrinterId)) {
           setSelectedPrinterId(parsed.selectedPrinterId);
@@ -98,8 +96,8 @@ export const Calculator: React.FC = () => {
           else if (m.length > 0) setSelectedMaterialId(m[0].id);
         }
       } else {
+        setSelectedFolderId('');
         if (p.length > 0) setSelectedPrinterId(p[0].id);
-        if (f.length > 0) setSelectedFolderId(f[0].id);
 
         const firstInStockMaterial = m.find(mat => (mat.currentStock || 0) > 0);
         if (firstInStockMaterial) {
