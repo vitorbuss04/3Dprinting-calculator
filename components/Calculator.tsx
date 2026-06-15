@@ -27,7 +27,7 @@ export const Calculator: React.FC = () => {
 
   // Form State
   const [selectedFolderId, setSelectedFolderId] = useState<string | number>('');
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(true);
   const [newFolderName, setNewFolderName] = useState('');
   const [partName, setPartName] = useState('PEÇA_001');
   const [selectedPrinterId, setSelectedPrinterId] = useState<string | number>('');
