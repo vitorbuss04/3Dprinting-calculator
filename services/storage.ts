@@ -237,6 +237,8 @@ export const StorageService = {
       name: f.name,
       createdAt: f.created_at,
       status: (f.status || 'aguardando') as ProjectStatus,
+      discount: f.discount || 0,
+      shippingCost: f.shipping_cost || 0,
       payments: f.payments || [],
       notes: f.notes || ''
     }));
@@ -264,6 +266,8 @@ export const StorageService = {
     const payload: any = {};
     if (folder.name !== undefined) payload.name = folder.name;
     if (folder.status !== undefined) payload.status = folder.status;
+    if (folder.discount !== undefined) payload.discount = folder.discount;
+    if (folder.shippingCost !== undefined) payload.shipping_cost = folder.shippingCost;
     if (folder.payments !== undefined) payload.payments = folder.payments;
     if (folder.notes !== undefined) payload.notes = folder.notes;
 

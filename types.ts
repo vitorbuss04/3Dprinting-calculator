@@ -86,10 +86,12 @@ export interface ProjectFolder {
   name: string;
   createdAt: string;
   status: ProjectStatus;
+  discount?: number;
+  shippingCost?: number;
   payments?: Payment[];
   notes?: string;
 }
 
 export type ProjectStatus = 'aguardando' | 'em_producao' | 'concluido' | 'cancelado';
 
-export type ViewState = 'dashboard' | 'assets' | 'calculator' | 'history' | 'comparator' | 'profile';
+export type ViewState = 'dashboard' | 'assets' | 'calculator' | 'history' | 'profile' | 'comparator';

@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS project_folders (
     user_id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
     status VARCHAR(50) DEFAULT 'aguardando',
+    discount DECIMAL(12,4) DEFAULT 0.0000,
+    shipping_cost DECIMAL(12,4) DEFAULT 0.0000,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

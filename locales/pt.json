@@ -272,5 +272,12 @@
   "payment_deleted": "Pagamento removido",
   "payment_updated": "Pagamento atualizado",
   "open_folder": "Abrir Pasta",
-  "back_to_folders": "Voltar para as pastas"
+  "back_to_folders": "Voltar para as pastas",
+  "folder_settings": "Config. da Pasta",
+  "folder_name": "Nome da Pasta",
+  "discount_label": "Desconto",
+  "shipping_cost_label": "Frete",
+  "financial_summary": "Resumo Financeiro",
+  "projects_total": "Total dos Projetos",
+  "final_folder_total": "Total Final da Pasta"
 }

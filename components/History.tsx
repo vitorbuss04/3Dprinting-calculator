@@ -5,6 +5,7 @@ import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Trash2, Loader2, PackageOpen, Tag, Layers, Clock, FolderOpen, FolderInput, Info, ChevronDown, Trash, ShieldAlert, Plus, Calendar, FileText, History as HistoryIcon, DollarSign, ArrowLeft } from 'lucide-react';
 import { ProjectDetailsModal } from './ProjectDetailsModal';
+import { Select } from './ui/Select';
 import toast from 'react-hot-toast';
 import { cn } from '../utils/cn';
 import { useTranslation } from 'react-i18next';
@@ -55,16 +56,11 @@ export const History: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleUpdateProject = async (id: string, newResult: any) => {
-    const proj = projects.find(p => p.id === id);
-    if (!proj) return;
-    const updated = { ...proj, result: newResult };
-    setProjects(prev => prev.map(p => p.id === id ? updated : p));
-    StorageService.updateProject(id, updated).catch(() => {
-      // Rollback optimistic update on failure
-      setProjects(prev => prev.map(p => p.id === id ? proj : p));
-      toast.error(t('update_project_error'));
-    });
+  const handleUpdateProject = (updated: Project) => {
+    setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+    if (detailsProject?.id === updated.id) {
+      setDetailsProject(updated);
+    }
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -223,7 +219,7 @@ export const History: React.FC = () => {
                 className="p-6 cursor-pointer border border-hairline hover:border-primary/40 hover:shadow-md transition-all duration-300 group flex flex-col justify-between h-[230px]"
               >
                 <div>
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-wrap justify-between items-start mb-4 gap-2">
                     <div className="flex items-center gap-3">
                       <div className={cn("p-2.5 border rounded-xl transition-colors group-hover:border-primary/20 group-hover:bg-primary-soft text-muted group-hover:text-primary bg-surface-soft", !isUncategorized && "text-primary border-primary/10 bg-primary-soft/50")}>
                         {isUncategorized ? <PackageOpen size={20} /> : <FolderOpen size={20} />}
@@ -321,18 +317,16 @@ export const History: React.FC = () => {
               {!isUncategorized && (
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="w-40 relative">
-                    <select
+                    <Select
                       value={folderObj?.status || 'aguardando'}
-                      onChange={(e) => handleFolderStatusChange(folderId, e.target.value as ProjectStatus)}
-                      disabled={updatingStatusId === folderId}
-                      className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-xl cursor-pointer disabled:opacity-50"
-                    >
-                      <option value="aguardando">⏳ {t('status_waiting')}</option>
-                      <option value="em_producao">⚙️ {t('status_production')}</option>
-                      <option value="concluido">✅ {t('status_completed')}</option>
-                      <option value="cancelado">✖ {t('status_cancelled')}</option>
-                    </select>
-                    <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted" />
+                      onChange={(val) => handleFolderStatusChange(folderId, val as ProjectStatus)}
+                      options={[
+                        { value: 'aguardando', label: `⏳ ${t('status_waiting')}` },
+                        { value: 'em_producao', label: `⚙️ ${t('status_production')}` },
+                        { value: 'concluido', label: `✅ ${t('status_completed')}` },
+                        { value: 'cancelado', label: `✖ ${t('status_cancelled')}` }
+                      ]}
+                    />
                   </div>
                   <StatusBadge status={folderObj?.status || 'aguardando'} />
                   <button
@@ -388,9 +382,9 @@ export const History: React.FC = () => {
           )}
         </div>
 
-        {/* Folder Payment and Notes Control */}
+        {/* Folder Settings and Payment Control */}
         {!isUncategorized && folderObj && (
-          <FolderPaymentPanel
+          <FolderSettingsPanel
             folder={folderObj}
             folderTotalCost={folderTotalCost}
             currency={currency}
@@ -416,7 +410,6 @@ export const History: React.FC = () => {
                 setDetailsProject={setDetailsProject}
                 setDeletingId={setDeletingId}
                 handleDeleteProject={handleDeleteProject}
-                onUpdateProject={handleUpdateProject}
                 movingProjectId={movingProjectId}
                 setMovingProjectId={setMovingProjectId}
                 selectedFolderId={selectedFolderId}
@@ -433,9 +426,8 @@ export const History: React.FC = () => {
         project={detailsProject}
         isOpen={!!detailsProject}
         onClose={() => setDetailsProject(null)}
-        printerName={detailsProject ? (Reflect.get(printers, detailsProject.printerId) as string) : undefined}
-        materialName={detailsProject ? (Reflect.get(materials, detailsProject.materialId) as string) : undefined}
         folderStatus={detailsProject ? (Reflect.get(folders, detailsProject.folderId) as ProjectFolder)?.status : undefined}
+        onUpdateProject={handleUpdateProject}
       />
     </div>
   );
@@ -474,24 +466,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const EditableHistoryDetail = ({ icon, label, value, color, currency, onChange }: { icon: React.ReactNode; label: string; value: string; color?: string; currency: string; onChange: (val: string) => void }) => (
-  <div className="flex items-center justify-between p-2.5 border border-hairline bg-surface-soft rounded-lg">
-    <div className="flex items-center gap-2">
-      <div className="text-muted">{icon}</div>
-      <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{label}</span>
-    </div>
-    <div className="flex items-center justify-end">
-      <span className={cn("text-xs font-sans font-medium mr-1", color)}>{currency}</span>
-      <input 
-        type="number" 
-        value={value} 
-        onChange={(e) => onChange(e.target.value)} 
-        className={cn("bg-transparent border-b border-dashed border-hairline hover:border-muted p-0 text-right focus:outline-none focus:border-primary text-xs font-sans font-semibold w-20 transition-colors", color)}
-        step="any"
-      />
-    </div>
-  </div>
-);
+
 
 const ProjectCard = ({ 
   project, 
@@ -502,7 +477,6 @@ const ProjectCard = ({
   setDetailsProject, 
   setDeletingId, 
   handleDeleteProject,
-  onUpdateProject,
   movingProjectId,
   setMovingProjectId,
   selectedFolderId,
@@ -518,7 +492,6 @@ const ProjectCard = ({
   setDetailsProject: (p: Project) => void;
   setDeletingId: (id: string | null) => void;
   handleDeleteProject: (id: string) => void;
-  onUpdateProject: (id: string, newResult: any) => void;
   movingProjectId: string | null;
   setMovingProjectId: (id: string | null) => void;
   selectedFolderId: string | null;
@@ -527,54 +500,6 @@ const ProjectCard = ({
   handleMoveProject: (projectId: string, targetFolderId: string | null) => void;
 }) => {
   const { t } = useTranslation();
-  const [localFinalPrice, setLocalFinalPrice] = useState((Number(project.result?.finalPrice) || 0).toFixed(2));
-  const [localProfit, setLocalProfit] = useState((Number(project.result?.profit) || 0).toFixed(2));
-  const [localCost, setLocalCost] = useState((Number(project.result?.totalProductionCost) || 0).toFixed(2));
-
-  useEffect(() => {
-    if (Math.abs(parseFloat(localFinalPrice || "0") - (Number(project.result?.finalPrice) || 0)) > 0.01) {
-      setLocalFinalPrice((Number(project.result?.finalPrice) || 0).toFixed(2));
-    }
-    if (Math.abs(parseFloat(localProfit || "0") - (Number(project.result?.profit) || 0)) > 0.01) {
-      setLocalProfit((Number(project.result?.profit) || 0).toFixed(2));
-    }
-    if (Math.abs(parseFloat(localCost || "0") - (Number(project.result?.totalProductionCost) || 0)) > 0.01) {
-      setLocalCost((Number(project.result?.totalProductionCost) || 0).toFixed(2));
-    }
-  }, [project.result?.finalPrice, project.result?.profit, project.result?.totalProductionCost]);
-
-  const updateValues = (field: 'finalPrice' | 'profit' | 'totalProductionCost', val: string) => {
-    const numVal = parseFloat(val);
-    const safeNumVal = isNaN(numVal) ? 0 : numVal;
-    
-    let newFinalPrice = project.result.finalPrice;
-    let newProfit = project.result.profit;
-    let newCost = project.result.totalProductionCost;
-
-    if (field === 'finalPrice') {
-      setLocalFinalPrice(val);
-      newFinalPrice = safeNumVal;
-      newProfit = safeNumVal - newCost;
-      setLocalProfit(newProfit.toFixed(2));
-    } else if (field === 'profit') {
-      setLocalProfit(val);
-      newProfit = safeNumVal;
-      newFinalPrice = newCost + safeNumVal;
-      setLocalFinalPrice(newFinalPrice.toFixed(2));
-    } else if (field === 'totalProductionCost') {
-      setLocalCost(val);
-      newCost = safeNumVal;
-      newProfit = newFinalPrice - safeNumVal;
-      setLocalProfit(newProfit.toFixed(2));
-    }
-
-    onUpdateProject(project.id, {
-      ...project.result,
-      finalPrice: newFinalPrice,
-      profit: newProfit,
-      totalProductionCost: newCost
-    });
-  };
 
   return (
     <Card
@@ -600,13 +525,7 @@ const ProjectCard = ({
           <p className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider mb-1">{t('part_value')}</p>
           <div className="text-2xl font-sans font-semibold text-ink tracking-tight flex items-center">
               <span className="text-primary mr-1">{currency}</span>
-              <input
-                type="number"
-                value={localFinalPrice}
-                onChange={(e) => updateValues('finalPrice', e.target.value)}
-                className="bg-transparent border-b border-dashed border-hairline hover:border-muted focus:border-primary text-ink focus:outline-none w-32 transition-colors px-1"
-                step="any"
-              />
+              <span>{(Number(project.result?.finalPrice) || 0).toFixed(2)}</span>
           </div>
         </div>
 
@@ -617,26 +536,22 @@ const ProjectCard = ({
             <HistoryDetail icon={<Clock size={12} />} label={t('time_label')} value={`${Math.floor(project.printTimeHours)}h ${Math.round(project.printTimeMinutes)}m`} />
             <HistoryDetail icon={<Layers size={12} />} label={t('weight_label')} value={`${project.modelWeight}g`} />
           </div>
-          <EditableHistoryDetail 
+          <HistoryDetail 
             icon={<Clock size={12} />} 
             label={t('production_cost')} 
-            value={localCost} 
+            value={`${currency} ${(Number(project.result?.totalProductionCost) || 0).toFixed(2)}`} 
             color="text-muted" 
-            currency={currency}
-            onChange={(v) => updateValues('totalProductionCost', v)}
           />
-          <EditableHistoryDetail 
+          <HistoryDetail 
             icon={<Clock size={12} />} 
             label={t('profit_label')} 
-            value={localProfit} 
+            value={`${currency} ${(Number(project.result?.profit) || 0).toFixed(2)}`} 
             color="text-green" 
-            currency={currency}
-            onChange={(v) => updateValues('profit', v)}
           />
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 flex gap-1 bg-canvas border border-hairline rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="absolute top-4 right-4 flex gap-1 bg-canvas border border-hairline rounded-full p-1 shadow-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={() => {
             setMovingProjectId(project.id);
@@ -679,21 +594,14 @@ const ProjectCard = ({
           <FolderOpen className="text-primary mb-3" size={28} />
           <h4 className="font-sans font-semibold text-xs text-ink mb-3">{t('move_to_project')}</h4>
           <div className="w-full max-w-[200px] space-y-3">
-            <div className="relative">
-              <select
-                value={selectedFolderId || ''}
-                onChange={(e) => setSelectedFolderId(e.target.value || null)}
-                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-xl cursor-pointer"
-              >
-                <option value="">{t('uncategorized_folder_name')}</option>
-                {Object.values(folders).map((folder) => (
-                  <option key={folder.id} value={folder.id}>
-                    {folder.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted" />
-            </div>
+            <Select
+              value={selectedFolderId || ''}
+              onChange={(val) => setSelectedFolderId(val as string || null)}
+              options={[
+                { value: '', label: t('uncategorized_folder_name') },
+                ...Object.values(folders).map(folder => ({ value: folder.id, label: folder.name }))
+              ]}
+            />
             <div className="flex gap-2">
               <Button size="sm" variant="ghost" className="flex-1 h-8 text-xs font-sans" onClick={() => setMovingProjectId(null)}>{t('cancel')}</Button>
               <Button size="sm" className="flex-1 h-8 text-xs font-sans bg-primary hover:bg-primary-hover text-white border-none" onClick={() => handleMoveProject(project.id, selectedFolderId)}>{t('confirm')}</Button>
@@ -705,34 +613,45 @@ const ProjectCard = ({
   );
 };
 
-interface FolderPaymentPanelProps {
+interface FolderSettingsPanelProps {
   folder: ProjectFolder;
   folderTotalCost: number;
   currency: string;
   onUpdateFolder: (id: string, updatedFields: Partial<ProjectFolder>) => Promise<void>;
 }
 
-const FolderPaymentPanel: React.FC<FolderPaymentPanelProps> = ({
+const FolderSettingsPanel: React.FC<FolderSettingsPanelProps> = ({
   folder,
   folderTotalCost,
   currency,
   onUpdateFolder
 }) => {
   const { t } = useTranslation();
+  const [localName, setLocalName] = useState(folder.name || '');
+  const [localDiscount, setLocalDiscount] = useState((folder.discount || 0).toString());
+  const [localShippingCost, setLocalShippingCost] = useState((folder.shippingCost || 0).toString());
   const [localPayments, setLocalPayments] = useState<Payment[]>(folder.payments || []);
   const [localNotes, setLocalNotes] = useState(folder.notes || '');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
 
-  useEffect(() => {
-    setLocalPayments(folder.payments || []);
-  }, [folder.payments]);
+  useEffect(() => { setLocalName(folder.name || ''); }, [folder.name]);
+  useEffect(() => { setLocalDiscount((folder.discount || 0).toString()); }, [folder.discount]);
+  useEffect(() => { setLocalShippingCost((folder.shippingCost || 0).toString()); }, [folder.shippingCost]);
+  useEffect(() => { setLocalPayments(folder.payments || []); }, [folder.payments]);
+  useEffect(() => { setLocalNotes(folder.notes || ''); }, [folder.notes]);
 
-  useEffect(() => {
-    setLocalNotes(folder.notes || '');
-  }, [folder.notes]);
-
+  const netFolderCost = folderTotalCost + (Number(folder.shippingCost) || 0) - (Number(folder.discount) || 0);
   const totalPaid = localPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-  const remainingAmount = Math.max(0, folderTotalCost - totalPaid);
+  const remainingAmount = Math.max(0, netFolderCost - totalPaid);
+
+  const handleSaveFolderSettings = async (field: keyof ProjectFolder, value: any) => {
+    try {
+      await onUpdateFolder(folder.id, { [field]: value });
+      toast.success(t('toast_project_saved') || 'Salvo');
+    } catch {
+      toast.error(t('saving_changes_error'));
+    }
+  };
 
   const randomId = () => {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -796,33 +715,95 @@ const FolderPaymentPanel: React.FC<FolderPaymentPanelProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-surface-soft p-6 border border-hairline rounded-2xl animate-in fade-in duration-300">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-surface-soft p-6 border border-hairline rounded-2xl animate-in fade-in duration-300">
+      
+      {/* Configurações da Pasta */}
+      <div className="space-y-4">
+        <h3 className="font-sans font-semibold text-sm text-ink flex items-center gap-2">
+          <FolderOpen size={16} className="text-primary" />
+          {t('folder_settings') || 'Config. da Pasta'}
+        </h3>
+        <div className="space-y-3">
+          <div className="space-y-1">
+             <label className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('folder_name')}</label>
+             <input 
+               type="text"
+               value={localName}
+               onChange={e => setLocalName(e.target.value)}
+               onBlur={() => handleSaveFolderSettings('name', localName)}
+               className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2 rounded-xl focus:outline-none focus:border-primary"
+             />
+          </div>
+          <div className="space-y-1">
+             <label className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('discount_label')}</label>
+             <div className="relative">
+                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs">{currency}</span>
+                 <input 
+                   type="number"
+                   value={localDiscount}
+                   onChange={e => setLocalDiscount(e.target.value)}
+                   onBlur={() => handleSaveFolderSettings('discount', parseFloat(localDiscount) || 0)}
+                   className="w-full bg-canvas border border-hairline text-xs font-sans text-ink pl-8 pr-3 py-2 rounded-xl focus:outline-none focus:border-primary"
+                   step="any"
+                 />
+             </div>
+          </div>
+          <div className="space-y-1">
+             <label className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider">{t('shipping_cost_label')}</label>
+             <div className="relative">
+                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs">{currency}</span>
+                 <input 
+                   type="number"
+                   value={localShippingCost}
+                   onChange={e => setLocalShippingCost(e.target.value)}
+                   onBlur={() => handleSaveFolderSettings('shippingCost', parseFloat(localShippingCost) || 0)}
+                   className="w-full bg-canvas border border-hairline text-xs font-sans text-ink pl-8 pr-3 py-2 rounded-xl focus:outline-none focus:border-primary"
+                   step="any"
+                 />
+             </div>
+          </div>
+        </div>
+      </div>
+
       {/* Resumo Financeiro */}
       <div className="space-y-4">
         <h3 className="font-sans font-semibold text-sm text-ink flex items-center gap-2">
           <DollarSign size={16} className="text-primary" />
-          {t('folder_payments_title')}
+          {t('financial_summary') || 'Resumo Financeiro'}
         </h3>
         
         <div className="space-y-3">
-          <div className="flex justify-between items-center p-3 border border-hairline bg-canvas rounded-xl">
-            <span className="text-xs font-sans text-muted">{t('total_value')}</span>
-            <span className="text-sm font-sans font-semibold text-ink">{currency} {folderTotalCost.toFixed(2)}</span>
-          </div>
-          
-          <div className="flex justify-between items-center p-3 border border-hairline bg-canvas rounded-xl">
-            <span className="text-xs font-sans text-muted">{t('total_paid')}</span>
-            <span className="text-sm font-sans font-semibold text-green">{currency} {totalPaid.toFixed(2)}</span>
+          <div className="flex justify-between items-center p-2.5 border border-hairline bg-canvas rounded-xl">
+            <span className="text-[11px] font-sans text-muted">{t('projects_total') || 'Total Projetos'}</span>
+            <span className="text-xs font-sans font-semibold text-ink">{currency} {folderTotalCost.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between items-center p-3 border border-hairline bg-canvas rounded-xl">
-            <span className="text-xs font-sans text-muted">{t('amount_remaining')}</span>
-            <span className={cn(
-              "text-sm font-sans font-semibold",
-              remainingAmount > 0.01 ? "text-red" : "text-green"
-            )}>
-              {currency} {remainingAmount.toFixed(2)}
-            </span>
+          <div className="flex justify-between items-center p-2.5 border border-hairline bg-canvas rounded-xl">
+            <span className="text-[11px] font-sans text-muted">{t('discount_label')}</span>
+            <span className="text-xs font-sans font-semibold text-red">-{currency} {(Number(folder.discount) || 0).toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between items-center p-2.5 border border-hairline bg-canvas rounded-xl">
+            <span className="text-[11px] font-sans text-muted">{t('shipping_cost_label')}</span>
+            <span className="text-xs font-sans font-semibold text-ink">+{currency} {(Number(folder.shippingCost) || 0).toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between items-center p-3 border-t border-hairline bg-primary-soft/30 rounded-xl mt-2">
+            <span className="text-xs font-sans font-semibold text-ink">{t('final_folder_total') || 'Total da Pasta'}</span>
+            <span className="text-sm font-sans font-bold text-primary">{currency} {netFolderCost.toFixed(2)}</span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="flex flex-col p-2.5 border border-hairline bg-canvas rounded-xl text-center justify-center">
+              <span className="text-[10px] font-sans text-muted mb-0.5">{t('total_paid')}</span>
+              <span className="text-xs font-sans font-bold text-green">{currency} {totalPaid.toFixed(2)}</span>
+            </div>
+            <div className="flex flex-col p-2.5 border border-hairline bg-canvas rounded-xl text-center justify-center">
+              <span className="text-[10px] font-sans text-muted mb-0.5">{t('amount_remaining')}</span>
+              <span className={cn("text-xs font-sans font-bold", remainingAmount > 0.01 ? "text-red" : "text-green")}>
+                {currency} {remainingAmount.toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

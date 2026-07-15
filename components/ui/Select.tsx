@@ -94,13 +94,13 @@ export const Select: React.FC<SelectProps> = ({
                 </button>
 
                 {isOpen && (
-                    <div className="absolute top-full left-0 w-full mt-1.5 bg-surface-elevated border border-hairline rounded-xl shadow-lg shadow-black/5 z-50 overflow-hidden max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-full w-max mt-1.5 bg-surface-elevated border border-hairline rounded-xl shadow-lg shadow-black/5 z-50 overflow-hidden max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
                         {options.map((opt) => (
                             <div
                                 key={opt.value}
                                 onClick={() => handleSelect(opt)}
                                 className={cn(
-                                    "px-4 py-2.5 text-sm font-sans cursor-pointer transition-all duration-100 flex items-center justify-between border-l-2",
+                                    "px-4 py-2.5 text-sm font-sans cursor-pointer transition-all duration-100 flex items-center justify-between border-l-2 gap-4",
                                     opt.disabled
                                         ? "opacity-30 cursor-not-allowed border-l-transparent"
                                         : "hover:bg-surface-soft hover:text-ink hover:border-l-primary border-l-transparent",
@@ -109,7 +109,7 @@ export const Select: React.FC<SelectProps> = ({
                                         : "text-body"
                                 )}
                             >
-                                <span className="truncate flex items-center gap-2">
+                                <span className="whitespace-nowrap flex items-center gap-2">
                                     {opt.color && (
                                         <span
                                             className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/10"

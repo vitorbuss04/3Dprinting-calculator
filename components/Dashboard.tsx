@@ -6,6 +6,7 @@ import { Card } from './ui/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, AreaChart, Area } from 'recharts';
 import { TrendingUp, DollarSign, Box, Loader2, Activity, ChevronDown, Clock, Scaling } from 'lucide-react';
 import { AssetsSummary } from './AssetsSummary';
+import { Select } from './ui/Select';
 import { cn } from '../utils/cn';
 import { format } from 'date-fns';
 import { ProjectStatus, ProjectFolder } from '../types';
@@ -171,7 +172,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         const inProd  = folders.filter(f => f.status === 'em_producao').length;
         const done    = folders.filter(f => f.status === 'concluido').length;
         return (
-          <div className="flex items-center gap-6 px-4 py-2.5 bg-surface-soft border border-hairline text-xs font-sans text-muted rounded-xl">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 px-4 py-2.5 bg-surface-soft border border-hairline text-xs font-sans text-muted rounded-xl">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-yellow shrink-0" />
               <span>{pending} {t('status_waiting')}</span>
@@ -188,7 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         );
       })()}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatBlock
           title={t('revenue_title')}
           value={`${settings.currencySymbol}${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -292,20 +293,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <p className="text-xs font-sans text-muted mt-1">{t('filter_by_production_phase')}</p>
             </div>
             {/* Filter Dropdown */}
-            <div className="relative">
-              <select
+            <Select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
-                className="w-full bg-canvas border border-hairline text-xs font-sans text-ink px-3 py-2.5 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded-xl cursor-pointer"
-              >
-                <option value="all">{t('all_status_option')}</option>
-                <option value="aguardando">{t('status_waiting_option')}</option>
-                <option value="em_producao">{t('status_production_option')}</option>
-                <option value="concluido">{t('status_completed_option')}</option>
-                <option value="cancelado">{t('status_cancelled_option')}</option>
-              </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted" />
-            </div>
+                onChange={(val) => setStatusFilter(val as ProjectStatus | 'all')}
+                options={[
+                  { value: 'all', label: t('all_status_option') },
+                  { value: 'aguardando', label: t('status_waiting_option') },
+                  { value: 'em_producao', label: t('status_production_option') },
+                  { value: 'concluido', label: t('status_completed_option') },
+                  { value: 'cancelado', label: t('status_cancelled_option') }
+                ]}
+            />
           </div>
 
           {(() => {

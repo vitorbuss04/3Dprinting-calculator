@@ -4,7 +4,6 @@ import { ViewState } from './types';
 import { Dashboard } from './components/Dashboard';
 import { AssetsManager } from './components/AssetsManager';
 import { Calculator } from './components/Calculator';
-import { Comparator } from './components/Comparator';
 import { History } from './components/History';
 import { Auth } from './components/Auth';
 import { Profile } from './components/Profile';
@@ -87,7 +86,6 @@ const App: React.FC = () => {
       case 'dashboard': return <Dashboard onNavigate={handleNavigate} />;
       case 'assets': return <AssetsManager initialTab={assetsInitialTab} />;
       case 'calculator': return <Calculator />;
-      case 'comparator': return <Comparator />;
       case 'history': return <History />;
       case 'profile': return <Profile />;
       default: return <Dashboard onNavigate={handleNavigate} />;

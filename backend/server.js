@@ -307,7 +307,8 @@ app.get('/api/folders', authenticateToken, async (req, res) => {
       'SELECT * FROM project_folders WHERE user_id = ? ORDER BY created_at DESC',
       [req.user.id]
     );
-    res.json(rows);
+    const folders = rows.map(r => parseRowNumbers(r, ['discount', 'shipping_cost']));
+    res.json(folders);
   } catch (error) {
     console.error('Get folders error:', error);
     res.status(500).json({ error: 'Erro ao buscar pastas' });
@@ -331,12 +332,14 @@ app.post('/api/folders', authenticateToken, async (req, res) => {
 });
 
 app.put('/api/folders/:id', authenticateToken, async (req, res) => {
-  const { name, status } = req.body;
+  const { name, status, discount, shipping_cost } = req.body;
   try {
     const fields = [];
     const values = [];
     if (name !== undefined) { fields.push('name = ?'); values.push(name); }
     if (status !== undefined) { fields.push('status = ?'); values.push(status); }
+    if (discount !== undefined) { fields.push('discount = ?'); values.push(discount); }
+    if (shipping_cost !== undefined) { fields.push('shipping_cost = ?'); values.push(shipping_cost); }
 
     if (fields.length === 0) {
       return res.status(400).json({ error: 'Nenhum campo para atualizar' });

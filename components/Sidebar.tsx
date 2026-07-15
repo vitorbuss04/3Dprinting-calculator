@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, ArrowRightLeft, LogOut, ChevronLeft, Settings } from 'lucide-react';
+import { LayoutDashboard, Calculator as CalcIcon, Printer, History as HistoryIcon, LogOut, ChevronLeft, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ViewState } from '../types';
 import { cn } from '../utils/cn';
@@ -26,7 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'dashboard', label: t('title_dashboard'), icon: LayoutDashboard },
         { id: 'calculator', label: t('title_calculator'), icon: CalcIcon },
         { id: 'assets', label: t('title_assets'), icon: Printer },
-        { id: 'comparator', label: t('title_comparator'), icon: ArrowRightLeft },
         { id: 'history', label: t('title_history'), icon: HistoryIcon },
         { id: 'profile', label: t('title_profile'), icon: Settings },
     ];

@@ -272,5 +272,12 @@
   "payment_deleted": "Payment deleted",
   "payment_updated": "Payment updated",
   "open_folder": "Open Folder",
-  "back_to_folders": "Back to folders"
+  "back_to_folders": "Back to folders",
+  "folder_settings": "Folder Settings",
+  "folder_name": "Folder Name",
+  "discount_label": "Discount",
+  "shipping_cost_label": "Shipping Cost",
+  "financial_summary": "Financial Summary",
+  "projects_total": "Projects Total",
+  "final_folder_total": "Final Folder Total"
 }

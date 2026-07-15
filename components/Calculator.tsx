@@ -9,6 +9,7 @@ import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
 import { cn } from '../utils/cn';
+import { calculateProjectCost } from '../utils/calculatorEngine';
 
 interface UIAdditionalItem extends Omit<AdditionalItem, 'price' | 'quantity'> {
   price: string | number;
@@ -152,50 +153,20 @@ export const Calculator: React.FC = () => {
       return { depreciationCost: 0, energyCost: 0, materialCost: 0, additionalCost: 0, maintenanceCost: 0, laborCost: 0, machineTotalCost: 0, totalProductionCost: 0, finalPrice: 0, profit: 0 };
     }
 
-    const numPrintHours = parseFloat(printHours.toString().replace(',', '.')) || 0;
-    const numPrintMinutes = parseFloat(printMinutes.toString().replace(',', '.')) || 0;
-    const numWeight = parseFloat(weight.toString().replace(',', '.')) || 0;
-    const numFailureRate = parseFloat(failureRate.toString().replace(',', '.')) || 0;
-    const numLaborHours = parseFloat(laborHours.toString().replace(',', '.')) || 0;
-    const numLaborMinutes = parseFloat(laborMinutes.toString().replace(',', '.')) || 0;
-    const numLaborRate = parseFloat(laborRate.toString().replace(',', '.')) || 0;
-
-    const totalPrintTimeHours = numPrintHours + (numPrintMinutes / 60);
-    const totalLaborTimeHours = numLaborHours + (numLaborMinutes / 60);
-
-    const printerAcquisitionCost = Number(printer.acquisitionCost) || 0;
-    const printerLifespanHours = Number(printer.lifespanHours) || 0;
-    const printerPowerConsumption = Number(printer.powerConsumption) || 0;
-    const printerMaintenanceCostPerHour = Number(printer.maintenanceCostPerHour) || 0;
-
-    const materialSpoolPrice = Number(material.spoolPrice) || 0;
-    const materialSpoolWeight = Number(material.spoolWeight) || 0;
-
-    const depreciationPerHour = printerLifespanHours > 0 ? (printerAcquisitionCost / printerLifespanHours) : 0;
-    const depreciationCost = depreciationPerHour * totalPrintTimeHours;
-
-    const energyCost = (printerPowerConsumption / 1000) * settings.electricityCost * totalPrintTimeHours;
-
-    const costPerGram = materialSpoolWeight > 0 ? (materialSpoolPrice / materialSpoolWeight) : 0;
-    const materialCostBase = numWeight * costPerGram;
-    const materialCost = materialCostBase * (1 + (numFailureRate / 100));
-
-    const maintenanceCost = printerMaintenanceCostPerHour * totalPrintTimeHours;
-    const laborCost = totalLaborTimeHours * numLaborRate;
-
-    const additionalCost = additionalItems.reduce((acc, item) => {
-      const p = typeof item.price === 'string' ? parseFloat(item.price.replace(',', '.')) || 0 : item.price;
-      const q = typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity;
-      return acc + (p * q);
-    }, 0);
-
-    const machineTotalCost = depreciationCost + maintenanceCost + energyCost;
-    const totalProductionCost = machineTotalCost + materialCost + laborCost + additionalCost;
-
-    const finalPrice = totalProductionCost * (1 + (markup / 100));
-    const profit = finalPrice - totalProductionCost;
-
-    return { depreciationCost, energyCost, materialCost, additionalCost, maintenanceCost, laborCost, machineTotalCost, totalProductionCost, finalPrice, profit };
+    return calculateProjectCost({
+      printer,
+      material,
+      settings,
+      printHours,
+      printMinutes,
+      weight,
+      failureRate,
+      laborHours,
+      laborMinutes,
+      laborRate,
+      markup,
+      additionalItems: additionalItems as AdditionalItem[],
+    });
   }, [printers, materials, settings, selectedPrinterId, selectedMaterialId, printHours, printMinutes, weight, failureRate, laborHours, laborMinutes, laborRate, markup, additionalItems]);
 
   const saveProject = async () => {
@@ -379,7 +350,7 @@ export const Calculator: React.FC = () => {
               <Select label={t('material_label')} options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <Input label={t('hours_label')} type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center" />
               <Input label={t('minutes_label')} type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center" />
               <Input label={t('weight_g_label')} type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center" />
@@ -395,7 +366,7 @@ export const Calculator: React.FC = () => {
             <span className="font-sans font-medium text-sm text-ink">{t('labor_and_business')}</span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <Input label={t('labor_hours_label')} type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
             <Input label={t('labor_minutes_label')} type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
             <Input label={t('labor_rate_label')} type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
@@ -492,14 +463,14 @@ export const Calculator: React.FC = () => {
       </div>
 
       {/* Right Column: Results Cockpit */}
-      <div className="lg:col-span-5 flex flex-col gap-6 sticky top-0" style={{ maxHeight: 'calc(100vh - 10rem)', overflowY: 'auto' }}>
-        <Card variant="default" className="border-t-4 border-t-primary p-6 relative overflow-hidden shadow-md">
+      <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-24">
+        <Card variant="default" className="shrink-0 border-t-4 border-t-primary p-5 relative overflow-hidden shadow-md">
           <div className="relative z-10">
-            <h3 className="text-primary font-sans font-medium uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
+            <h3 className="text-primary font-sans font-medium uppercase tracking-wider text-xs mb-3 flex items-center gap-2">
                 <Activity size={14} /> {t('realtime_result')}
             </h3>
             
-            <div className="flex items-center text-5xl font-sans font-semibold mb-6 tracking-tight text-ink tabular-nums">
+            <div className="flex items-center text-4xl font-sans font-semibold mb-4 tracking-tight text-ink tabular-nums">
               <span className="mr-2 text-primary">{settings.currencySymbol}</span>
               <input 
                 type="text"
@@ -524,12 +495,12 @@ export const Calculator: React.FC = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-surface-soft border border-hairline rounded-xl">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-surface-soft border border-hairline rounded-xl">
                 <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">{t('production_cost')}</span>
                 <span className="font-sans text-base font-semibold text-ink tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
               </div>
-              <div className="p-4 bg-surface-soft border border-hairline rounded-xl">
+              <div className="p-3 bg-surface-soft border border-hairline rounded-xl">
                 <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">{t('net_profit')}</span>
                 <span className="font-sans text-base font-semibold text-green tabular-nums">{settings.currencySymbol}{result.profit.toFixed(2)}</span>
               </div>
@@ -537,8 +508,8 @@ export const Calculator: React.FC = () => {
           </div>
         </Card>
 
-        <Card variant="default" className="flex flex-col border border-hairline">
-          <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
+        <Card variant="default" className="shrink-0 flex flex-col border border-hairline p-5">
+          <div className="flex items-center gap-3 mb-4 border-b border-hairline pb-3">
             <BarChart3 className="text-primary" size={16} />
             <span className="font-sans font-medium text-sm text-ink">{t('cost_distribution')}</span>
           </div>
@@ -546,7 +517,7 @@ export const Calculator: React.FC = () => {
           {chartData.length > 0 ? (() => {
             const total = chartData.reduce((sum, item) => sum + item.value, 0);
             return (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {chartData.map(item => {
                   const pct = total > 0 ? (item.value / total) * 100 : 0;
                   return (
@@ -582,7 +553,7 @@ export const Calculator: React.FC = () => {
         <Button
           onClick={saveProject}
           variant="primary"
-          className="w-full py-3 h-11 text-sm font-sans font-medium"
+          className="shrink-0 w-full py-2.5 h-10 text-sm font-sans font-medium"
           disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
         >
           {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}

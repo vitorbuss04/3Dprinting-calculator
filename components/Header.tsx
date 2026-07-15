@@ -46,9 +46,9 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     return (
-        <header className="h-16 bg-canvas border-b border-hairline sticky top-0 z-50 px-6 flex items-center justify-between">
+        <header className="h-16 bg-canvas border-b border-hairline sticky top-0 z-50 px-4 sm:px-6 flex items-center justify-between">
             {/* Left Section: Command / View Title */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 sm:gap-6">
                 <button
                     className="md:hidden w-8 h-8 flex items-center justify-center border border-hairline rounded-lg text-muted hover:text-primary transition-colors"
                     onClick={onMenuClick}
