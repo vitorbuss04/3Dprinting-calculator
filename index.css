@@ -116,3 +116,64 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+/* ── Height-based media queries for responsive calculator cockpit ──────── */
+@media (max-height: 800px) and (min-width: 1024px) {
+  .cockpit-card {
+    padding: 1rem !important; /* 16px */
+    gap: 0.5rem !important;   /* 8px */
+  }
+  .cockpit-price {
+    font-size: 1.25rem !important; /* 20px */
+    width: 6.5rem !important;
+  }
+  .cockpit-price-currency {
+    font-size: 1.25rem !important;
+  }
+  .cockpit-slider-container {
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0px !important;
+  }
+  .cockpit-slider-container input[type="range"] {
+    height: 4px !important;
+  }
+  .cockpit-cost-container {
+    padding: 0.5rem 0.75rem !important;
+  }
+  .cockpit-cost-container span {
+    font-size: 0.875rem !important; /* text-sm */
+  }
+  .cockpit-grid-card {
+    padding: 0.375rem 0.5rem !important; /* compacto */
+  }
+  .cockpit-grid-title {
+    font-size: 8px !important;
+  }
+  .cockpit-grid-value {
+    font-size: 0.75rem !important; /* 12px */
+  }
+  .cockpit-grid-progress {
+    margin-top: 0.25rem !important;
+    height: 3px !important;
+  }
+  .cockpit-btn {
+    height: 2.25rem !important; /* 36px */
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 1024px) {
+  .cockpit-card {
+    padding: 0.75rem !important;
+    gap: 0.375rem !important;
+  }
+  .cockpit-slider-container {
+    padding: 0.375rem 0.5rem !important;
+  }
+  .cockpit-cost-container {
+    padding: 0.375rem 0.5rem !important;
+  }
+}
+
