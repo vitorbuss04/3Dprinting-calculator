@@ -288,12 +288,13 @@ export const Calculator: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-300">
+      {/* Coluna da Esquerda: Inputs */}
       <div className="lg:col-span-7 space-y-6">
         {/* Module: Project Identification */}
-        <Card variant="default" className="relative border border-hairline">
+        <Card variant="default" className="relative border border-hairline/75 shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
           <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
             <Settings2 className="text-primary" size={16} />
-            <span className="font-sans font-medium text-sm text-ink">{t('project_identification')}</span>
+            <span className="font-sans font-semibold text-sm text-ink">{t('project_identification')}</span>
           </div>
 
           <div className="space-y-6">
@@ -338,10 +339,10 @@ export const Calculator: React.FC = () => {
         </Card>
 
         {/* Module: Machine Parameters */}
-        <Card variant="default" className="border border-hairline">
+        <Card variant="default" className="border border-hairline/75 shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
           <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
             <Activity className="text-green" size={16} />
-            <span className="font-sans font-medium text-sm text-ink">{t('machine_config')}</span>
+            <span className="font-sans font-semibold text-sm text-ink">{t('machine_config')}</span>
           </div>
 
           <div className="space-y-6">
@@ -350,7 +351,7 @@ export const Calculator: React.FC = () => {
               <Select label={t('material_label')} options={materialOptions} value={selectedMaterialId} onChange={(val) => setSelectedMaterialId(val)} />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Input label={t('hours_label')} type="number" min="0" value={printHours} onChange={(e) => setPrintHours(e.target.value)} className="text-center" />
               <Input label={t('minutes_label')} type="number" min="0" max="59" value={printMinutes} onChange={(e) => setPrintMinutes(e.target.value)} className="text-center" />
               <Input label={t('weight_g_label')} type="number" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} className="text-center" />
@@ -360,47 +361,25 @@ export const Calculator: React.FC = () => {
         </Card>
 
         {/* Module: Human & Business Parameters */}
-        <Card variant="default" className="border border-hairline">
+        <Card variant="default" className="border border-hairline/75 shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
           <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
             <Info className="text-muted" size={16} />
-            <span className="font-sans font-medium text-sm text-ink">{t('labor_and_business')}</span>
+            <span className="font-sans font-semibold text-sm text-ink">{t('labor_and_business')}</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input label={t('labor_hours_label')} type="number" min="0" value={laborHours} onChange={(e) => setLaborHours(e.target.value)} />
             <Input label={t('labor_minutes_label')} type="number" min="0" max="59" value={laborMinutes} onChange={(e) => setLaborMinutes(e.target.value)} />
             <Input label={t('labor_rate_label')} type="number" min="0" value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
           </div>
-
-          <div className="p-4 bg-surface-soft border border-hairline rounded-2xl">
-            <div className="flex justify-between mb-4">
-              <label className="text-xs font-sans font-medium text-muted">
-                {t('profit_margin_label')} <span className="text-primary ml-2 font-semibold">[{Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%]</span>
-              </label>
-            </div>
-            <input 
-                type="range" 
-                min="0" 
-                max="500" 
-                step="any" 
-                value={markup} 
-                onChange={(e) => setMarkup(Number(e.target.value))} 
-                className="w-full h-1 bg-surface-strong rounded-full appearance-none cursor-pointer accent-primary" 
-            />
-            <div className="flex justify-between text-[10px] font-sans text-muted mt-2">
-              <span>{t('no_margin')}</span>
-              <span>{t('average_margin')}</span>
-              <span>{t('max_margin')}</span>
-            </div>
-          </div>
         </Card>
 
         {/* Additional Items Section */}
-        <Card variant="default" className="border border-hairline">
+        <Card variant="default" className="border border-hairline/75 shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
           <div className="flex items-center justify-between mb-6 border-b border-hairline pb-4">
             <div className="flex items-center gap-3">
               <Package className="text-muted" size={16} />
-              <span className="font-sans font-medium text-sm text-ink">{t('additional_items')}</span>
+              <span className="font-sans font-semibold text-sm text-ink">{t('additional_items')}</span>
             </div>
             <Button
               onClick={handleAddAdditionalItem}
@@ -453,8 +432,8 @@ export const Calculator: React.FC = () => {
               ))}
               <div className="flex justify-end pt-4 mt-6 border-t border-hairline">
                 <div className="bg-surface-soft px-4 py-2 border border-hairline rounded-xl flex items-center gap-6">
-                  <span className="text-xs font-sans font-medium text-muted uppercase tracking-wider">{t('additional_subtotal')}</span>
-                  <span className="font-sans font-semibold text-ink text-base">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span>
+                  <span className="text-xs font-sans font-semibold text-muted uppercase tracking-wider">{t('additional_subtotal')}</span>
+                  <span className="font-sans font-bold text-ink text-base">{settings.currencySymbol} {result.additionalCost.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -462,103 +441,195 @@ export const Calculator: React.FC = () => {
         </Card>
       </div>
 
-      {/* Right Column: Results Cockpit */}
-      <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-24">
-        <Card variant="default" className="shrink-0 border-t-4 border-t-primary p-5 relative overflow-hidden shadow-md">
-          <div className="relative z-10">
-            <h3 className="text-primary font-sans font-medium uppercase tracking-wider text-xs mb-3 flex items-center gap-2">
-                <Activity size={14} /> {t('realtime_result')}
-            </h3>
-            
-            <div className="flex items-center text-4xl font-sans font-semibold mb-4 tracking-tight text-ink tabular-nums">
-              <span className="mr-2 text-primary">{settings.currencySymbol}</span>
-              <input 
-                type="text"
-                value={isEditingPrice ? manualPrice : result.finalPrice.toFixed(2)}
-                onFocus={() => {
-                  setManualPrice(result.finalPrice.toFixed(2));
-                  setIsEditingPrice(true);
-                }}
-                onBlur={() => setIsEditingPrice(false)}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (/^[0-9.,]*$/.test(val)) {
-                    setManualPrice(val);
-                    const numVal = parseFloat(val.replace(',', '.'));
-                    if (!isNaN(numVal) && result.totalProductionCost > 0) {
-                      const newMarkup = ((numVal / result.totalProductionCost) - 1) * 100;
-                      setMarkup(Number(newMarkup.toFixed(2)));
-                    }
-                  }
-                }}
-                className="bg-transparent border-b border-dashed border-hairline hover:border-muted focus:border-primary outline-none w-full text-ink transition-colors"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-surface-soft border border-hairline rounded-xl">
-                <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">{t('production_cost')}</span>
-                <span className="font-sans text-base font-semibold text-ink tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
-              </div>
-              <div className="p-3 bg-surface-soft border border-hairline rounded-xl">
-                <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">{t('net_profit')}</span>
-                <span className="font-sans text-base font-semibold text-green tabular-nums">{settings.currencySymbol}{result.profit.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card variant="default" className="shrink-0 flex flex-col border border-hairline p-5">
-          <div className="flex items-center gap-3 mb-4 border-b border-hairline pb-3">
-            <BarChart3 className="text-primary" size={16} />
-            <span className="font-sans font-medium text-sm text-ink">{t('cost_distribution')}</span>
-          </div>
+      {/* Coluna da Direita: Resultados (Sticky Cockpit) */}
+      <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-20 z-20">
+        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
           
-          {chartData.length > 0 ? (() => {
-            const total = chartData.reduce((sum, item) => sum + item.value, 0);
-            return (
-              <div className="space-y-3">
-                {chartData.map(item => {
-                  const pct = total > 0 ? (item.value / total) * 100 : 0;
-                  return (
-                    <div key={item.name}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-sans font-medium text-muted flex items-center gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                          {item.name}
-                        </span>
-                        <span className="font-sans font-semibold text-ink text-xs tabular-nums">
-                          {settings.currencySymbol}{item.value.toFixed(2)}
-                          <span className="text-muted ml-1.5 text-[10px] font-medium">{pct.toFixed(0)}%</span>
-                        </span>
-                      </div>
-                      <div className="w-full bg-surface-strong h-[4px] rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%`, backgroundColor: item.color }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* Resultados Comercial / Topo */}
+          <div className="flex justify-between items-start pb-4 border-b border-hairline/60">
+            <div>
+              <h3 className="text-muted font-sans font-medium uppercase tracking-wider text-[10px] mb-1">
+                {t('realtime_result')}
+              </h3>
+              <div className="flex items-center text-3xl font-sans font-extrabold tracking-tight text-ink tabular-nums">
+                <span className="mr-1.5 text-primary">{settings.currencySymbol}</span>
+                <input 
+                  type="text"
+                  value={isEditingPrice ? manualPrice : result.finalPrice.toFixed(2)}
+                  onFocus={() => {
+                    setManualPrice(result.finalPrice.toFixed(2));
+                    setIsEditingPrice(true);
+                  }}
+                  onBlur={() => setIsEditingPrice(false)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^[0-9.,]*$/.test(val)) {
+                      setManualPrice(val);
+                      const numVal = parseFloat(val.replace(',', '.'));
+                      if (!isNaN(numVal) && result.totalProductionCost > 0) {
+                        const newMarkup = ((numVal / result.totalProductionCost) - 1) * 100;
+                        setMarkup(Number(newMarkup.toFixed(2)));
+                      }
+                    }
+                  }}
+                  className="bg-transparent border-b border-dashed border-hairline hover:border-muted focus:border-primary outline-none w-32 text-ink transition-colors font-extrabold font-sans"
+                />
               </div>
-            );
-          })() : (
-            <div className="h-32 flex items-center justify-center text-muted">
-              <span className="text-xs font-sans italic">{t('awaiting_data')}</span>
             </div>
-          )}
-        </Card>
+            <div className="text-right">
+              <span className="text-[10px] font-sans font-medium text-muted uppercase tracking-wider block mb-1">
+                {t('net_profit')}
+              </span>
+              <span className={cn(
+                "inline-flex items-center px-3 py-1 text-sm font-sans font-bold rounded-full border shadow-sm shrink-0",
+                result.profit > 0 
+                  ? "border-green/20 text-green bg-green/5" 
+                  : "border-red/20 text-red bg-red/5"
+              )}>
+                {settings.currencySymbol}{result.profit.toFixed(2)}
+              </span>
+            </div>
+          </div>
 
-        <Button
-          onClick={saveProject}
-          variant="primary"
-          className="shrink-0 w-full py-2.5 h-10 text-sm font-sans font-medium"
-          disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
-        >
-          {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
-          <span>{isSaving ? t('saving') : t('save_project')}</span>
-        </Button>
+          {/* Slider de Margem Integrado */}
+          <div className="p-4 bg-surface-soft/50 border border-hairline/65 rounded-xl">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-sans font-semibold text-muted flex items-center gap-1.5">
+                <Info size={12} className="text-primary" />
+                {t('profit_margin_label')}
+              </span>
+              <span className="text-xs font-sans font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-lg">
+                {Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%
+              </span>
+            </div>
+            <input 
+              type="range" 
+              min="0" 
+              max="500" 
+              step="any" 
+              value={markup} 
+              onChange={(e) => setMarkup(Number(e.target.value))} 
+              className="w-full h-1.5 bg-surface-strong rounded-full appearance-none cursor-pointer accent-primary" 
+            />
+            <div className="flex justify-between text-[9px] font-sans text-muted mt-2 uppercase tracking-wider font-semibold">
+              <span>{t('no_margin')}</span>
+              <span>{t('average_margin')}</span>
+              <span>{t('max_margin')}</span>
+            </div>
+          </div>
+
+          {/* Resumo de Custo Geral */}
+          <div className="p-4 bg-surface-soft/30 border border-hairline/45 rounded-xl flex items-center justify-between">
+            <span className="text-xs font-sans font-bold text-muted uppercase tracking-wider">{t('production_cost')}</span>
+            <span className="font-sans text-xl font-bold text-ink tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
+          </div>
+
+          {/* Distribuição de Custos (Grid 2x2) */}
+          <div className="space-y-4">
+            <span className="text-xs font-sans font-semibold text-muted uppercase tracking-wider block">{t('cost_distribution')}</span>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Material */}
+              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    {t('material_chart')}
+                  </span>
+                  <span className="text-[9px] font-sans font-bold text-primary">
+                    {result.totalProductionCost > 0 ? ((result.materialCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                  </span>
+                </div>
+                <div>
+                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.materialCost.toFixed(2)}</span>
+                  <div className="w-full bg-surface-strong h-1 rounded-full overflow-hidden mt-1.5">
+                    <div 
+                      className="h-full rounded-full bg-primary transition-all duration-500" 
+                      style={{ width: `${result.totalProductionCost > 0 ? (result.materialCost / result.totalProductionCost) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Máquina */}
+              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted" />
+                    {t('machine_chart')}
+                  </span>
+                  <span className="text-[9px] font-sans font-bold text-muted">
+                    {result.totalProductionCost > 0 ? ((result.machineTotalCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                  </span>
+                </div>
+                <div>
+                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.machineTotalCost.toFixed(2)}</span>
+                  <div className="w-full bg-surface-strong h-1 rounded-full overflow-hidden mt-1.5">
+                    <div 
+                      className="h-full rounded-full bg-muted transition-all duration-500" 
+                      style={{ width: `${result.totalProductionCost > 0 ? (result.machineTotalCost / result.totalProductionCost) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Mão de Obra */}
+              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green" />
+                    {t('labor_chart')}
+                  </span>
+                  <span className="text-[9px] font-sans font-bold text-green">
+                    {result.totalProductionCost > 0 ? ((result.laborCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                  </span>
+                </div>
+                <div>
+                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.laborCost.toFixed(2)}</span>
+                  <div className="w-full bg-surface-strong h-1 rounded-full overflow-hidden mt-1.5">
+                    <div 
+                      className="h-full rounded-full bg-green transition-all duration-500" 
+                      style={{ width: `${result.totalProductionCost > 0 ? (result.laborCost / result.totalProductionCost) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Extras */}
+              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow" />
+                    {t('additional_chart')}
+                  </span>
+                  <span className="text-[9px] font-sans font-bold text-yellow">
+                    {result.totalProductionCost > 0 ? ((result.additionalCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                  </span>
+                </div>
+                <div>
+                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.additionalCost.toFixed(2)}</span>
+                  <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden mt-1.5">
+                    <div 
+                      className="h-full rounded-full bg-yellow transition-all duration-500" 
+                      style={{ width: `${result.totalProductionCost > 0 ? (result.additionalCost / result.totalProductionCost) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Botão de Ação Salvar */}
+          <Button
+            onClick={saveProject}
+            variant="primary"
+            className="shrink-0 w-full py-3 h-12 text-sm font-sans font-semibold transition-all duration-300 shadow-md hover:shadow-lg active:scale-98"
+            disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
+          >
+            {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
+            <span>{isSaving ? t('saving') : t('save_project')}</span>
+          </Button>
+
+        </div>
       </div>
     </div>
   );
