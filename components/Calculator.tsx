@@ -287,9 +287,9 @@ export const Calculator: React.FC = () => {
   }));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-300">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch lg:h-[calc(100vh-128px)] lg:overflow-hidden animate-in fade-in duration-300">
       {/* Coluna da Esquerda: Inputs */}
-      <div className="lg:col-span-7 space-y-6">
+      <div className="lg:col-span-7 lg:h-full lg:overflow-y-auto pr-2 space-y-6 pb-6 lg:pb-0 custom-scrollbar">
         {/* Module: Project Identification */}
         <Card variant="default" className="relative border border-hairline/75 shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
           <div className="flex items-center gap-3 mb-6 border-b border-hairline pb-4">
@@ -441,9 +441,9 @@ export const Calculator: React.FC = () => {
         </Card>
       </div>
 
-      {/* Coluna da Direita: Resultados (Sticky Cockpit) */}
-      <div className="lg:col-span-5 lg:sticky lg:top-20 z-20 lg:h-[calc(100vh-100px)] flex flex-col gap-4">
-        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between h-full gap-4">
+      {/* Coluna da Direita: Resultados (Cockpit Estático) */}
+      <div className="lg:col-span-5 lg:h-full lg:overflow-hidden flex flex-col gap-4">
+        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-full gap-3 sm:gap-4">
           
           {/* Resultados Comercial / Topo */}
           <div className="flex justify-between items-start pb-4 border-b border-hairline/60">
