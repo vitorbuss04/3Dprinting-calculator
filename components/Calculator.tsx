@@ -287,7 +287,7 @@ export const Calculator: React.FC = () => {
   }));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch lg:h-[calc(100vh-128px)] lg:overflow-hidden animate-in fade-in duration-300">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch lg:h-[calc(100vh-170px)] lg:overflow-hidden animate-in fade-in duration-300">
       {/* Coluna da Esquerda: Inputs */}
       <div className="lg:col-span-7 lg:h-full lg:overflow-y-auto pr-2 space-y-6 pb-6 lg:pb-0 custom-scrollbar">
         {/* Module: Project Identification */}
@@ -443,10 +443,10 @@ export const Calculator: React.FC = () => {
 
       {/* Coluna da Direita: Resultados (Cockpit Estático) */}
       <div className="lg:col-span-5 lg:h-full lg:overflow-hidden flex flex-col gap-4">
-        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-full gap-3 sm:gap-4">
+        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between h-full gap-4">
           
-          {/* Resultados Comercial / Topo */}
-          <div className="flex justify-between items-start pb-4 border-b border-hairline/60">
+          {/* Resultados Comercial / Topo (Fixo) */}
+          <div className="shrink-0 flex justify-between items-start pb-4 border-b border-hairline/60">
             <div>
               <h3 className="text-muted font-sans font-medium uppercase tracking-wider text-[10px] mb-1">
                 {t('realtime_result')}
@@ -491,143 +491,148 @@ export const Calculator: React.FC = () => {
             </div>
           </div>
 
-          {/* Slider de Margem Integrado */}
-          <div className="p-4 bg-surface-soft/50 border border-hairline/65 rounded-xl">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-sans font-semibold text-muted flex items-center gap-1.5">
-                <Info size={12} className="text-primary" />
-                {t('profit_margin_label')}
-              </span>
-              <span className="text-xs font-sans font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-lg">
-                {Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%
-              </span>
+          {/* Configurações e Custos Detalhados (Rolável) */}
+          <div className="flex-1 overflow-y-auto pr-1 py-1 space-y-4 custom-scrollbar min-h-0">
+            {/* Slider de Margem Integrado */}
+            <div className="p-4 bg-surface-soft/50 border border-hairline/65 rounded-xl">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs font-sans font-semibold text-muted flex items-center gap-1.5">
+                  <Info size={12} className="text-primary" />
+                  {t('profit_margin_label')}
+                </span>
+                <span className="text-xs font-sans font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-lg">
+                  {Number(markup).toLocaleString(undefined, { maximumFractionDigits: 1 })}%
+                </span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="500" 
+                step="any" 
+                value={markup} 
+                onChange={(e) => setMarkup(Number(e.target.value))} 
+                className="w-full h-1.5 bg-surface-strong rounded-full appearance-none cursor-pointer accent-primary" 
+              />
+              <div className="flex justify-between text-[9px] font-sans text-muted mt-2 uppercase tracking-wider font-semibold">
+                <span>{t('no_margin')}</span>
+                <span>{t('average_margin')}</span>
+                <span>{t('max_margin')}</span>
+              </div>
             </div>
-            <input 
-              type="range" 
-              min="0" 
-              max="500" 
-              step="any" 
-              value={markup} 
-              onChange={(e) => setMarkup(Number(e.target.value))} 
-              className="w-full h-1.5 bg-surface-strong rounded-full appearance-none cursor-pointer accent-primary" 
-            />
-            <div className="flex justify-between text-[9px] font-sans text-muted mt-2 uppercase tracking-wider font-semibold">
-              <span>{t('no_margin')}</span>
-              <span>{t('average_margin')}</span>
-              <span>{t('max_margin')}</span>
+
+            {/* Resumo de Custo Geral */}
+            <div className="p-4 bg-surface-soft/30 border border-hairline/45 rounded-xl flex items-center justify-between">
+              <span className="text-xs font-sans font-bold text-muted uppercase tracking-wider">{t('production_cost')}</span>
+              <span className="font-sans text-xl font-bold text-ink tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
+            </div>
+
+            {/* Distribuição de Custos (Grid 2x2) */}
+            <div className="space-y-4">
+              <span className="text-xs font-sans font-semibold text-muted uppercase tracking-wider block">{t('cost_distribution')}</span>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Material */}
+                <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      {t('material_chart')}
+                    </span>
+                    <span className="text-[9px] font-sans font-bold text-primary">
+                      {result.totalProductionCost > 0 ? ((result.materialCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.materialCost.toFixed(2)}</span>
+                    <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden mt-1.5">
+                      <div 
+                        className="h-full rounded-full bg-primary transition-all duration-500" 
+                        style={{ width: `${result.totalProductionCost > 0 ? (result.materialCost / result.totalProductionCost) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Máquina */}
+                <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted" />
+                      {t('machine_chart')}
+                    </span>
+                    <span className="text-[9px] font-sans font-bold text-muted">
+                      {result.totalProductionCost > 0 ? ((result.machineTotalCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.machineTotalCost.toFixed(2)}</span>
+                    <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden mt-1.5">
+                      <div 
+                        className="h-full rounded-full bg-muted transition-all duration-500" 
+                        style={{ width: `${result.totalProductionCost > 0 ? (result.machineTotalCost / result.totalProductionCost) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mão de Obra */}
+                <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green" />
+                      {t('labor_chart')}
+                    </span>
+                    <span className="text-[9px] font-sans font-bold text-green">
+                      {result.totalProductionCost > 0 ? ((result.laborCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.laborCost.toFixed(2)}</span>
+                    <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden mt-1.5">
+                      <div 
+                        className="h-full rounded-full bg-green transition-all duration-500" 
+                        style={{ width: `${result.totalProductionCost > 0 ? (result.laborCost / result.totalProductionCost) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Extras */}
+                <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow" />
+                      {t('additional_chart')}
+                    </span>
+                    <span className="text-[9px] font-sans font-bold text-yellow">
+                      {result.totalProductionCost > 0 ? ((result.additionalCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.additionalCost.toFixed(2)}</span>
+                    <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden mt-1.5">
+                      <div 
+                        className="h-full rounded-full bg-yellow transition-all duration-500" 
+                        style={{ width: `${result.totalProductionCost > 0 ? (result.additionalCost / result.totalProductionCost) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Resumo de Custo Geral */}
-          <div className="p-4 bg-surface-soft/30 border border-hairline/45 rounded-xl flex items-center justify-between">
-            <span className="text-xs font-sans font-bold text-muted uppercase tracking-wider">{t('production_cost')}</span>
-            <span className="font-sans text-xl font-bold text-ink tabular-nums">{settings.currencySymbol}{result.totalProductionCost.toFixed(2)}</span>
+          {/* Botão de Ação Salvar (Fixo) */}
+          <div className="shrink-0 pt-4 border-t border-hairline/60">
+            <Button
+              onClick={saveProject}
+              variant="primary"
+              className="w-full py-3 h-12 text-sm font-sans font-semibold transition-all duration-300 shadow-md hover:shadow-lg active:scale-98"
+              disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
+            >
+              {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
+              <span>{isSaving ? t('saving') : t('save_project')}</span>
+            </Button>
           </div>
-
-          {/* Distribuição de Custos (Grid 2x2) */}
-          <div className="space-y-4">
-            <span className="text-xs font-sans font-semibold text-muted uppercase tracking-wider block">{t('cost_distribution')}</span>
-            <div className="grid grid-cols-2 gap-3">
-              {/* Material */}
-              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    {t('material_chart')}
-                  </span>
-                  <span className="text-[9px] font-sans font-bold text-primary">
-                    {result.totalProductionCost > 0 ? ((result.materialCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-                <div>
-                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.materialCost.toFixed(2)}</span>
-                  <div className="w-full bg-surface-strong h-1 rounded-full overflow-hidden mt-1.5">
-                    <div 
-                      className="h-full rounded-full bg-primary transition-all duration-500" 
-                      style={{ width: `${result.totalProductionCost > 0 ? (result.materialCost / result.totalProductionCost) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Máquina */}
-              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted" />
-                    {t('machine_chart')}
-                  </span>
-                  <span className="text-[9px] font-sans font-bold text-muted">
-                    {result.totalProductionCost > 0 ? ((result.machineTotalCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-                <div>
-                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.machineTotalCost.toFixed(2)}</span>
-                  <div className="w-full bg-surface-strong h-1 rounded-full overflow-hidden mt-1.5">
-                    <div 
-                      className="h-full rounded-full bg-muted transition-all duration-500" 
-                      style={{ width: `${result.totalProductionCost > 0 ? (result.machineTotalCost / result.totalProductionCost) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Mão de Obra */}
-              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green" />
-                    {t('labor_chart')}
-                  </span>
-                  <span className="text-[9px] font-sans font-bold text-green">
-                    {result.totalProductionCost > 0 ? ((result.laborCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-                <div>
-                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.laborCost.toFixed(2)}</span>
-                  <div className="w-full bg-surface-strong h-1 rounded-full overflow-hidden mt-1.5">
-                    <div 
-                      className="h-full rounded-full bg-green transition-all duration-500" 
-                      style={{ width: `${result.totalProductionCost > 0 ? (result.laborCost / result.totalProductionCost) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Extras */}
-              <div className="bg-surface-soft/40 border border-hairline/60 rounded-xl p-3 flex flex-col justify-between shadow-sm relative overflow-hidden">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-sans font-semibold text-muted flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-yellow" />
-                    {t('additional_chart')}
-                  </span>
-                  <span className="text-[9px] font-sans font-bold text-yellow">
-                    {result.totalProductionCost > 0 ? ((result.additionalCost / result.totalProductionCost) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-                <div>
-                  <span className="font-sans text-sm font-bold text-ink block">{settings.currencySymbol}{result.additionalCost.toFixed(2)}</span>
-                  <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden mt-1.5">
-                    <div 
-                      className="h-full rounded-full bg-yellow transition-all duration-500" 
-                      style={{ width: `${result.totalProductionCost > 0 ? (result.additionalCost / result.totalProductionCost) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Botão de Ação Salvar */}
-          <Button
-            onClick={saveProject}
-            variant="primary"
-            className="shrink-0 w-full py-3 h-12 text-sm font-sans font-semibold transition-all duration-300 shadow-md hover:shadow-lg active:scale-98"
-            disabled={isSaving || (materials.find(m => m.id === selectedMaterialId)?.currentStock || 0) < (parseFloat(weight) || 0)}
-          >
-            {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
-            <span>{isSaving ? t('saving') : t('save_project')}</span>
-          </Button>
 
         </div>
       </div>
