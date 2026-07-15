@@ -442,8 +442,8 @@ export const Calculator: React.FC = () => {
       </div>
 
       {/* Coluna da Direita: Resultados (Sticky Cockpit) */}
-      <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-20 z-20">
-        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-6 relative overflow-hidden flex flex-col gap-6">
+      <div className="lg:col-span-5 lg:sticky lg:top-20 z-20 lg:h-[calc(100vh-100px)] flex flex-col gap-4">
+        <div className="bg-surface-card/65 backdrop-blur-lg border border-hairline/80 shadow-xl rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between h-full gap-4">
           
           {/* Resultados Comercial / Topo */}
           <div className="flex justify-between items-start pb-4 border-b border-hairline/60">
